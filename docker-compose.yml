@@ -1,0 +1,154 @@
+version: "3.8"
+
+services:
+  user-service:
+    build:
+      context: ./services/user-management
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-postgres
+      - DB_NAME=user_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=5432
+      - JWT_SECRET=your_jwt_secret
+    depends_on:
+      - db-postgres
+
+  expense-service:
+    build:
+      context: ./services/expense-management
+    ports:
+      - "3003:3003"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-postgres
+      - DB_NAME=expense_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=5432
+    depends_on:
+      - db-postgres
+
+  goal-service:
+    build:
+      context: ./services/goal-management
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-postgres
+      - DB_NAME=goal_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=5432
+    depends_on:
+      - db-postgres
+
+  chat-service:
+    build:
+      context: ./services/chat-service
+    ports:
+      - "3004:3004"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-mongo
+      - DB_NAME=chat_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=27017
+    depends_on:
+      - db-mongo
+
+  bill-splitting-service:
+    build:
+      context: ./services/bill-splitting
+    ports:
+      - "3005:3005"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-postgres
+      - DB_NAME=bill_splitting_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=5432
+    depends_on:
+      - db-postgres
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    ports:
+      - "3002:3002"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-postgres
+      - DB_NAME=notification_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=5432
+    depends_on:
+      - db-postgres
+
+  ai-insights-service:
+    build:
+      context: ./services/ml-insights
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-mongo
+      - DB_NAME=ai_insights_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=27017
+    depends_on:
+      - db-mongo
+
+  friends-service:
+    build:
+      context: ./services/friends-management
+    ports:
+      - "3001:3001"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-mongo
+      - DB_NAME=friends_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=27017
+    depends_on:
+      - db-mongo
+
+  group-goals-chat-service:
+    build:
+      context: ./services/group-goals-chat
+    ports:
+      - "3006:3006"
+    environment:
+      - DB_USER=your_db_user
+      - DB_HOST=db-mongo
+      - DB_NAME=group_goals_chat_db
+      - DB_PASSWORD=your_db_password
+      - DB_PORT=27017
+    depends_on:
+      - db-mongo
+
+  db-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: your_db_user
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: user_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  db-mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: your_db_user
+      MONGO_INITDB_ROOT_PASSWORD: your_db_password
+    volumes:
+      - mongodbdata:/data/db
+
+volumes:
+  pgdata:
+  mongodbdata:
