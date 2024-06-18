@@ -12,7 +12,7 @@ const register = async (req, res) => {
 		console.log(user);
 		const verificationLink = `${isProd ? "https" : "http"}://${
 			isProd ? process.env.PROD_DOMAIN : `localhost:${process.env.PORT}`
-		}/verify-email?token=${verificationToken}`;
+		}/api/users/verify-email?token=${verificationToken}`;
 
 		await sendEmail({
 			from: `"Expensio" <${process.env.EMAIL_FOR_SMTP}>`,
