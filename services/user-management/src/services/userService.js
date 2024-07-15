@@ -5,7 +5,7 @@ import * as userModel from "../models/userModel.js";
 
 export const registerUser = async (userData) => {
 	const { username, email, password, firstName, lastName } = userData;
-	// console.log(userData);
+	console.log(userData);
 	const passwordHash = await bcrypt.hash(password, 10);
 	const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
 		expiresIn: "30d",

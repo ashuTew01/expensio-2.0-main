@@ -7,6 +7,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 const register = async (req, res) => {
 	try {
+		console.log("hello")
 		const user = await userService.registerUser(req.body);
 		const verificationToken = user.verification_token;
 		console.log(user);
