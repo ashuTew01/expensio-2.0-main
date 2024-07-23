@@ -1,68 +1,64 @@
 // User Controller
 import * as userService from "../services/userService.js";
-import { sendEmail } from "../services/emailService.js";
+import * as otpService from "../services/otpService.js";
+import { sendVerificationEmailService } from "../services/emailService.js";
 import jwt from "jsonwebtoken";
 
-const isProd = process.env.NODE_ENV === "production";
+//prefix /api/users
 
-const register = async (req, res) => {
+// POST @ /send-otp PUBLIC
+const sendOTPController = async (req, res) => {
+	const { phone } = req.body;
 	try {
-		console.log("hello")
-		const user = await userService.registerUser(req.body);
-		const verificationToken = user.verification_token;
-		console.log(user);
-		const verificationLink = `${isProd ? "https" : "http"}://${
-			isProd ? process.env.PROD_DOMAIN : `localhost:${process.env.PORT}`
-		}/api/users/verify-email?token=${verificationToken}`;
-
-		await sendEmail({
-			from: `"Expensio" <${process.env.EMAIL_FOR_SMTP}>`,
-			to: user.email,
-			subject: "Please verify your email",
-			html: `
-        <h1>Welcome to Expensio!</h1>
-        <p>Please click on the link below to verify your email address:</p>
-        <a href="${verificationLink}">Verify Email</a>
-      `,
-		});
-
-		res.status(201).json({
-			message:
-				"User registered. Please check your email to verify your account.",
-		});
+		const { message, userExists } =
+			await otpService.handleSendOTPService(phone);
+		res.status(200).json({ message, userExists });
 	} catch (error) {
-		console.log(error);
-		res.status(500).json({ error: error.message });
+		res.status(400).json({ error: error.message });
 	}
 };
-
-const login = async (req, res) => {
+// POST @ /verify-otp PUBLIC
+const verifyOTPController = async (req, res) => {
+	const { phone, otp, userData, haveToCreateUser } = req.body;
 	try {
-		const { email, password } = req.body;
-		const user = await userService.authenticateUser(email, password);
-		if (user) {
-			const token = jwt.sign(
-				{ id: user.id, email: user.email },
-				process.env.JWT_SECRET,
-				{ expiresIn: "30d" }
-			);
-			res.status(200).json({ token });
+		const result = await otpService.handleVerifyOTPService(
+			phone,
+			otp,
+			userData,
+			haveToCreateUser
+		);
+		if (result.token) {
+			res.status(200).json(result);
 		} else {
-			res.status(401).json({ error: "Invalid email or password" });
+			res.status(401).json({
+				message: "OTP verification failed or registration required",
+				details: result,
+			});
 		}
 	} catch (error) {
-		console.log(error);
-		res.status(500).json({
-			error: "We're having trouble logging you in! Please try again.",
+		res.status(400).json({ error: error.message });
+	}
+};
+// GET @ /send-verification-email PRIVATE
+const sendVerificationEmailController = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		await sendVerificationEmailService(userId);
+		res.status(200).send({ message: "Verification email sent successfully." });
+	} catch (error) {
+		console.error("Error sending verification email: ", error);
+		res.status(500).send({
+			message: "An error occurred while sending the verification email.",
 		});
 	}
 };
 
-const verifyEmail = async (req, res) => {
+// GET @ /verify-email PUBLIC
+const verifyEmailController = async (req, res) => {
 	try {
 		const { token } = req.query;
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		await userService.verifyUserEmail(decoded.email);
+		await userService.verifyUserEmailService(decoded.email);
 		res.status(200).json({ message: "Email verified successfully" });
 	} catch (error) {
 		console.log(error);
@@ -70,68 +66,46 @@ const verifyEmail = async (req, res) => {
 	}
 };
 
-const requestPasswordReset = async (req, res) => {
-	try {
-		const { email } = req.body;
-		const token = await userService.createPasswordResetToken(email);
-		const passwordResetLink = `${isProd ? "https" : "http"}://${
-			isProd ? process.env.PROD_DOMAIN : `localhost:${process.env.PORT}`
-		}/reset-password?token=${token}`;
-
-		await sendEmail({
-			from: `"Expensio" <${process.env.EMAIL_FOR_SMTP}>`,
-			to: email,
-			subject: "Reset Password Request",
-			html: `
-        <h1>Welcome to Expensio!</h1>
-        <p>Please click on the link below to reset your password:</p>
-        <a href="${passwordResetLink}">Reset Password</a>
-      `,
-		});
-
-		res
-			.status(200)
-			.json({ message: "Password reset token sent to the user email." });
-	} catch (error) {
-		res.status(400).json({ error: error.message });
-	}
-};
-
-const resetPasswordController = async (req, res) => {
-	try {
-		const { token, newPassword } = req.body;
-		await userService.resetPasswordService(token, newPassword);
-		res.json({ message: "Password successfully reset." });
-	} catch (error) {
-		res.status(400).json({ error: error.message });
-	}
-};
-
-const updateProfile = async (req, res) => {
+// PUT @ /user PRIVATE
+const updateProfileController = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const updatedUser = await userService.updateUserProfile(userId, req.body);
+		const {
+			username,
+			email,
+			first_name,
+			last_name,
+			profile_picture_url,
+			bio,
+			date_of_birth,
+		} = req.body;
+		const updates = {
+			username,
+			email,
+			first_name,
+			last_name,
+			profile_picture_url,
+			bio,
+			date_of_birth,
+		};
+
+		const updatedUser = await userService.updateUserProfileService(
+			userId,
+			updates
+		);
 		res.status(200).json(updatedUser);
 	} catch (error) {
-		res.status(400).json({ error: error.message });
+		console.error(error);
+		res.status(500).json({ error: error.message });
 	}
 };
 
-const getUserByEmailController = async (req, res) => {
-	try {
-		const { email } = req.user;
-		const user = await userService.getUserByEmail(email);
-		res.status(200).json(user);
-	} catch (error) {
-		console.log(error);
-		res.status(400).json({ error: "Something went wrong!" });
-	}
-};
-
+// DELETE @ /user PRIVATE
 const deleteUserController = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const rowsDeleted = await userService.deleteUserService(userId);
+		const userPhone = req.user.phone;
+		const rowsDeleted = await userService.deleteUserService(userId, userPhone);
 		if (rowsDeleted > 0) {
 			res.status(200).send({ message: "User deleted successfully." });
 		} else {
@@ -146,12 +120,10 @@ const deleteUserController = async (req, res) => {
 };
 
 export {
-	register,
-	login,
-	verifyEmail,
-	requestPasswordReset,
-	resetPasswordController,
-	updateProfile,
-	getUserByEmailController,
+	sendOTPController,
+	verifyOTPController,
+	sendVerificationEmailController,
+	verifyEmailController,
+	updateProfileController,
 	deleteUserController,
 };

@@ -6,7 +6,6 @@ import errorHandler from "./middlewares/errorHandler.js";
 import userRoutes from "./routes/userRoutes.js";
 import pool from "./config/db.js";
 import { sendEmail } from "./services/emailService.js";
-
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

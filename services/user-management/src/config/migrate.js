@@ -2,8 +2,11 @@ import fs from "fs";
 import path from "path";
 import pool from "./db.js";
 
-const migrate = async () => {
-	const migrationsDir = path.join(path.resolve(), "src/migrations");
+const migrate = async (direction) => {
+	const migrationsDir = path.join(
+		path.resolve(),
+		`src/migrations/${direction}`
+	);
 	const files = fs.readdirSync(migrationsDir);
 
 	for (const file of files) {
@@ -16,7 +19,14 @@ const migrate = async () => {
 	pool.end();
 };
 
-migrate().catch((err) => {
-	console.error(err);
+const direction = process.argv[2];
+
+if (!["up", "down"].includes(direction)) {
+	console.error('Invalid migration direction. Please specify "up" or "down".');
+	process.exit(1);
+}
+
+migrate(direction).catch((err) => {
+	console.error("Migration error:", err);
 	process.exit(1);
 });

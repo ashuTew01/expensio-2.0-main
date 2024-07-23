@@ -132,3 +132,6 @@ dist
 
 #setup file
 setup.sh
+
+#pem files
+**/*.pem
