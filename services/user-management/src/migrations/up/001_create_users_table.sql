@@ -12,7 +12,7 @@ CREATE TABLE users (
     email_verification_token TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    phone VARCHAR(15) UNIQUE, 
+    phone VARCHAR(15) UNIQUE NOT NULL, 
     blocked_until TIMESTAMP,  
     created_by INT REFERENCES users(id),
     updated_by INT REFERENCES users(id)

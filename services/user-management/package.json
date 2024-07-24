@@ -19,7 +19,8 @@
 		"jsonwebtoken": "^9.0.2",
 		"nodemailer": "^6.9.13",
 		"pg": "^8.11.5",
-		"twilio": "^5.2.2"
+		"twilio": "^5.2.2",
+		"winston": "^3.13.1"
 	},
 	"devDependencies": {
 		"jest": "^29.7.0",

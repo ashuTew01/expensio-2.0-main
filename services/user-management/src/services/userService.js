@@ -2,10 +2,18 @@ import * as userModel from "../models/userModel.js";
 import * as otpModel from "../models/otpModel.js";
 import pool from "../config/db.js";
 import { sendVerificationEmailService } from "../services/emailService.js";
+import NotFoundError from "../errors/NotFoundError.js";
+import InternalServerError from "../errors/InternalServerError.js";
 
 export const createUserService = async (userData) => {
-	const user = await userModel.createUserModel(userData);
-	// verifying email
+	let user;
+	try {
+		user = await userModel.createUserModel(userData);
+	} catch (error) {
+		throw new InternalServerError("Failed to create user.");
+	}
+
+	// Verifying email
 	if (user.email) {
 		try {
 			await sendVerificationEmailService(user.id);
@@ -18,25 +26,26 @@ export const createUserService = async (userData) => {
 };
 
 export const findUserByPhoneService = async (phone) => {
-	return await userModel.findUserByPhoneModel(phone);
+	try {
+		return await userModel.findUserByPhoneModel(phone);
+	} catch (error) {
+		throw new NotFoundError("User not found by phone.");
+	}
 };
 
 export const updateUserProfileService = async (userId, updates) => {
 	try {
-		const updatedUser = await userModel.updateUserProfileModel(userId, updates);
-		return updatedUser;
+		return await userModel.updateUserProfileModel(userId, updates);
 	} catch (error) {
-		console.error("Error updating user profile:", error);
-		throw new Error("Failed to update user profile.");
+		throw new InternalServerError("Failed to update user profile.");
 	}
 };
 
 export const verifyUserEmailService = async (email) => {
 	try {
-		const user = await userModel.verifyUserEmailModel(email);
-		return user;
+		await userModel.verifyUserEmailModel(email);
 	} catch (error) {
-		throw new Error("Error finding user.");
+		throw new InternalServerError("Failed to verify user email.");
 	}
 };
 
@@ -48,12 +57,15 @@ export const deleteUserService = async (userId, userPhone) => {
 		await otpModel.deleteOtpRequestsByPhoneModel(userPhone, client);
 		const rowsDeleted = await userModel.deleteUserModel(userId, client);
 
+		if (rowsDeleted === 0) {
+			throw new NotFoundError("User not found for deletion.");
+		}
+
 		await client.query("COMMIT");
 		return rowsDeleted;
 	} catch (error) {
 		await client.query("ROLLBACK");
-		console.error("Error deleting user and OTP requests:", error);
-		throw new Error("Failed to delete user and OTP requests.");
+		throw new InternalServerError("Failed to delete user and OTP requests.");
 	} finally {
 		client.release();
 	}
