@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "node src/app.js",
 		"dev": "nodemon src/app.js",
-		"test": "jest",
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
 		"migrate:up": "node src/config/migrate.js up",
 		"migrate:down": "node src/config/migrate.js down"
 	},
@@ -25,5 +25,8 @@
 	"devDependencies": {
 		"jest": "^29.7.0",
 		"supertest": "^7.0.0"
+	},
+	"jest": {
+		"transform": {}
 	}
 }

@@ -49,6 +49,7 @@ export const handleSendOTPService = async (phone) => {
 		otp_expiry: otpExpiry,
 		request_count: otpRequest ? otpRequest.request_count + 1 : 1,
 	});
+
 	const environment = process.env.NODE_ENV;
 	if (environment !== "development") {
 		// Send OTP via SMS using Twilio
