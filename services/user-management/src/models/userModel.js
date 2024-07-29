@@ -1,7 +1,6 @@
 import pool from "../config/db.js";
 import jwt from "jsonwebtoken";
-import DatabaseError from "../errors/DatabaseError.js";
-import NotFoundError from "../errors/NotFoundError.js";
+import { DatabaseError, NotFoundError } from "@expensio/sharedlib";
 
 export const createUserModel = async (userData, client = pool) => {
 	const {

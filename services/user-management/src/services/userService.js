@@ -2,8 +2,8 @@ import * as userModel from "../models/userModel.js";
 import * as otpModel from "../models/otpModel.js";
 import pool from "../config/db.js";
 import { sendVerificationEmailService } from "../services/emailService.js";
-import NotFoundError from "../errors/NotFoundError.js";
-import InternalServerError from "../errors/InternalServerError.js";
+
+import { NotFoundError, InternalServerError } from "@expensio/sharedlib";
 
 export const createUserService = async (userData) => {
 	let user;

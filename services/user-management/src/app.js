@@ -35,7 +35,7 @@ const checkEnvVariables = () => {
 checkEnvVariables();
 
 import bodyParser from "body-parser";
-import errorHandlingMiddleware from "./middlewares/errorHandlingMiddleware.js";
+import { errorHandlingMiddleware } from "@expensio/sharedlib";
 import userRoutes from "./routes/userRoutes.js";
 import pool from "./config/db.js";
 const app = express();

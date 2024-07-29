@@ -5,11 +5,12 @@ import crypto from "crypto";
 import generateToken from "../utils/generateToken.js";
 import pool from "../config/db.js";
 
-import RateLimitError from "../errors/otp/RateLimitError.js";
-import OtpSendingError from "../errors/otp/OtpSendingError.js";
-
-import ValidationError from "../errors/ValidationError.js";
-import InternalServerError from "../errors/InternalServerError.js";
+import {
+	RateLimitError,
+	OtpSendingError,
+	ValidationError,
+	InternalServerError,
+} from "@expensio/sharedlib";
 
 const generateOTP = () => {
 	return crypto.randomInt(100000, 999999).toString(); // 6 digit otp

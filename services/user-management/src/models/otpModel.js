@@ -1,6 +1,5 @@
 import pool from "../config/db.js";
-import DatabaseError from "../errors/DatabaseError.js";
-import NotFoundError from "../errors/NotFoundError.js";
+import { DatabaseError, NotFoundError } from "@expensio/sharedlib";
 
 export const findOtpRequestByPhoneModel = async (phone, client = pool) => {
 	const query = `SELECT * FROM otp_requests WHERE phone = $1;`;

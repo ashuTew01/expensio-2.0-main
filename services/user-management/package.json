@@ -1,5 +1,5 @@
 {
-	"name": "user-management",
+	"name": "user",
 	"version": "1.0.0",
 	"main": "src/app.js",
 	"type": "module",
@@ -11,6 +11,7 @@
 		"migrate:down": "node src/config/migrate.js down"
 	},
 	"dependencies": {
+		"@expensio/sharedlib": "^1.0.1",
 		"bcryptjs": "^2.4.3",
 		"body-parser": "^1.20.2",
 		"dotenv": "^16.4.5",
