@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./scenes/login";
+// import Login from "./scenes/login";
 // import Register from "./scenes/register";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
@@ -17,6 +17,7 @@ import HomeScreen from "./scenes/homescreen";
 import Dashboard from "./scenes/dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./scenes/layout";
+import PhoneNumberPage from "./scenes/phoneNumberPage";
 // import AddExpenseScreen from "scenes/expense/add";
 // import AddGoalScreen from "scenes/addGoal";
 // import ExpenseListScreen from "scenes/expense/list";
@@ -56,7 +57,7 @@ function App() {
           <Route>
             <Route index path="/" element={<HomeScreen />} />
 
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<PhoneNumberPage />} />
             {/* <Route path="/register" element={<Register />} /> */}
           </Route>
         </Routes>

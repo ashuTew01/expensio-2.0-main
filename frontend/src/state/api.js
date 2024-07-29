@@ -139,6 +139,13 @@ export const api = createApi({
         headers: DEFAULT_HEADERS,
       }),
     }),
+    sendOtp: build.mutation({
+      query: (phone) => ({
+        url: `send-otp`,
+        method: 'POST',
+        body: { phone },
+      })
+    })
   }),
 });
 
@@ -161,4 +168,6 @@ export const {
   useSaveExpensesThroughTextMutation,
   useTranscribeAudioMutation,
   useGetAllCategoriesQuery,
+
+  useSendOtpMutation
 } = api;
