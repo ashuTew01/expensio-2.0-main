@@ -2,109 +2,81 @@
 import * as userService from "../services/userService.js";
 import * as otpService from "../services/otpService.js";
 import { sendVerificationEmailService } from "../services/emailService.js";
-import jwt from "jsonwebtoken";
 
 //prefix /api/users
 
 // POST @ /send-otp PUBLIC
-const sendOTPController = async (req, res) => {
+const sendOTPController = async (req, res, next) => {
 	const { phone } = req.body;
 	try {
-		const { message, userExists } =
+		const { message, userExists, otp } =
 			await otpService.handleSendOTPService(phone);
-		res.status(200).json({ message, userExists });
+		res.status(200).json({ message, userExists, otp });
 	} catch (error) {
-		res.status(400).json({ error: error.message });
+		// res.status(error.statusCode || 400).json({ error: error.message });
+		next(error);
 	}
 };
+
 // POST @ /verify-otp PUBLIC
-const verifyOTPController = async (req, res) => {
-	const { phone, otp, userData, haveToCreateUser } = req.body;
+const verifyOTPController = async (req, res, next) => {
+	const { phone, otp, userData } = req.body;
 	try {
 		const result = await otpService.handleVerifyOTPService(
 			phone,
 			otp,
-			userData,
-			haveToCreateUser
+			userData
 		);
-		if (result.token) {
-			res.status(200).json(result);
-		} else {
-			res.status(401).json({
-				message: "OTP verification failed or registration required",
-				details: result,
-			});
-		}
+		res.status(200).json(result);
 	} catch (error) {
-		res.status(400).json({ error: error.message });
+		next(error);
 	}
 };
+
 // GET @ /send-verification-email PRIVATE
-const sendVerificationEmailController = async (req, res) => {
+const sendVerificationEmailController = async (req, res, next) => {
 	try {
 		const userId = req.user.id;
 		await sendVerificationEmailService(userId);
 		res.status(200).send({ message: "Verification email sent successfully." });
 	} catch (error) {
-		console.error("Error sending verification email: ", error);
-		res.status(500).send({
-			message: "An error occurred while sending the verification email.",
-		});
+		next(error);
 	}
 };
 
 // GET @ /verify-email PUBLIC
-const verifyEmailController = async (req, res) => {
+const verifyEmailController = async (req, res, next) => {
 	try {
 		const { token } = req.query;
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		await userService.verifyUserEmailService(decoded.email);
 		res.status(200).json({ message: "Email verified successfully" });
 	} catch (error) {
-		console.log(error);
-		res.status(400).json({ error: "Invalid or expired token" });
+		next(error);
 	}
 };
 
 // PUT @ /user PRIVATE
-const updateProfileController = async (req, res) => {
+const updateProfileController = async (req, res, next) => {
 	try {
 		const userId = req.user.id;
-		const {
-			username,
-			email,
-			first_name,
-			last_name,
-			profile_picture_url,
-			bio,
-			date_of_birth,
-		} = req.body;
-		const updates = {
-			username,
-			email,
-			first_name,
-			last_name,
-			profile_picture_url,
-			bio,
-			date_of_birth,
-		};
-
+		const updates = req.body;
 		const updatedUser = await userService.updateUserProfileService(
 			userId,
 			updates
 		);
 		res.status(200).json(updatedUser);
 	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: error.message });
+		next(error);
 	}
 };
 
 // DELETE @ /user PRIVATE
-const deleteUserController = async (req, res) => {
+const deleteUserController = async (req, res, next) => {
 	try {
 		const userId = req.user.id;
 		const userPhone = req.user.phone;
+
 		const rowsDeleted = await userService.deleteUserService(userId, userPhone);
 		if (rowsDeleted > 0) {
 			res.status(200).send({ message: "User deleted successfully." });
@@ -112,10 +84,7 @@ const deleteUserController = async (req, res) => {
 			res.status(404).send({ message: "User not found." });
 		}
 	} catch (error) {
-		console.error("Error deleting user: ", error);
-		res
-			.status(500)
-			.send({ message: "An error occurred while processing your request." });
+		next(error);
 	}
 };
 

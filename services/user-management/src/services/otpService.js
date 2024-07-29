@@ -5,6 +5,12 @@ import crypto from "crypto";
 import generateToken from "../utils/generateToken.js";
 import pool from "../config/db.js";
 
+import RateLimitError from "../errors/otp/RateLimitError.js";
+import OtpSendingError from "../errors/otp/OtpSendingError.js";
+
+import ValidationError from "../errors/ValidationError.js";
+import InternalServerError from "../errors/InternalServerError.js";
+
 const generateOTP = () => {
 	return crypto.randomInt(100000, 999999).toString(); // 6 digit otp
 };
@@ -15,7 +21,7 @@ export const handleSendOTPService = async (phone) => {
 	if (otpRequest) {
 		const now = new Date();
 		if (otpRequest.is_blocked_until > now) {
-			throw new Error(
+			throw new RateLimitError(
 				`User is blocked from receiving OTPs. Try again after ${otpRequest.is_blocked_until}`
 			);
 		}
@@ -25,18 +31,13 @@ export const handleSendOTPService = async (phone) => {
 				is_blocked_until: new Date(now.getTime() + 60 * 60 * 1000), // Block for 1 hour
 				request_count: 0, // to avoid permanent blocking
 			});
-			throw new Error("Too many OTP requests. Please try after 1 hour.");
+			throw new RateLimitError(
+				"Too many OTP requests. Please try after 1 hour."
+			);
 		}
 	}
 
 	const otp = generateOTP();
-
-	// Send OTP via SMS using Twilio
-	await twilioClient.messages.create({
-		to: phone,
-		from: process.env.TWILIO_PHONE_NUMBER,
-		body: `Your OTP is: ${otp}`,
-	});
 
 	const otpExpiry = new Date(new Date().getTime() + 30 * 60 * 1000); // OTP expire time (currently set to 30 minutes)
 
@@ -49,15 +50,28 @@ export const handleSendOTPService = async (phone) => {
 		request_count: otpRequest ? otpRequest.request_count + 1 : 1,
 	});
 
-	return { message: "OTP sent successfully.", userExists: result.user_exists };
+	const environment = process.env.NODE_ENV;
+	if (environment !== "development") {
+		// Send OTP via SMS using Twilio
+		try {
+			await twilioClient.messages.create({
+				to: phone,
+				from: process.env.TWILIO_PHONE_NUMBER,
+				body: `Your OTP is: ${otp}`,
+			});
+		} catch (error) {
+			throw new OtpSendingError("Failed to send OTP via SMS");
+		}
+	}
+
+	return {
+		message: "OTP sent successfully.",
+		userExists: result.user_exists,
+		otp: environment === "development" ? otp : null,
+	};
 };
 
-export const handleVerifyOTPService = async (
-	phone,
-	otp,
-	userData,
-	haveToCreateUser
-) => {
+export const handleVerifyOTPService = async (phone, otp, userData) => {
 	const client = await pool.connect();
 	try {
 		await client.query("BEGIN");
@@ -68,39 +82,41 @@ export const handleVerifyOTPService = async (
 			otpRequest.otp !== otp ||
 			otpRequest.otp_expiry < new Date()
 		) {
-			throw new Error("OTP is invalid or has expired.");
+			throw new ValidationError("OTP is invalid or has expired.");
 		}
-
-		if (haveToCreateUser && !otpRequest.user_exists) {
-			const newUser = await userService.createUserService(userData, client);
+		const userExists = otpRequest.user_exists;
+		let user;
+		if (!userExists) {
+			// check for required userData fields only when user creation necessary
+			if (
+				!userData ||
+				!userData.firstName ||
+				!userData.username ||
+				!userData.phone
+			) {
+				throw new ValidationError(
+					"Missing required user data fields: firstName, username, and phone are required."
+				);
+			}
+			user = await userService.createUserService(userData, client);
 			await otpModel.markUserExistsModel(phone, client);
-			const token = generateToken({ id: newUser.id, phone: newUser.phone });
-
-			await otpModel.resetOtpRequestModel(phone, client);
-
-			await client.query("COMMIT");
-			return {
-				user: newUser,
-				token,
-				message: "User registered and logged in successfully.",
-			};
+		} else {
+			user = await userService.findUserByPhoneService(phone, client);
 		}
+		const token = generateToken({ id: user.id, phone: user.phone });
+		await otpModel.resetOtpRequestModel(phone, client);
+		await client.query("COMMIT");
 
-		if (!haveToCreateUser && otpRequest.user_exists) {
-			const user = await userService.findUserByPhoneService(phone, client);
-			const token = generateToken({ id: user.id, phone: user.phone });
-
-			await otpModel.resetOtpRequestModel(phone, client);
-
-			await client.query("COMMIT");
-			return { user, token, message: "User logged in successfully." };
-		}
-
-		throw new Error("Invalid operation.");
+		const message = userExists
+			? "User logged in successfully."
+			: "User registered and logged in successfully.";
+		return { user, token, message };
 	} catch (error) {
 		await client.query("ROLLBACK");
 		console.error("Error handling OTP verification:", error);
-		throw new Error("Failed to verify OTP and handle user registration/login.");
+		throw new InternalServerError(
+			"Failed to verify OTP and handle user registration/login."
+		);
 	} finally {
 		client.release();
 	}

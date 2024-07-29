@@ -1,9 +1,9 @@
 // Configuration Loader
-import development from './env/development.js';
+import development from "./env/development.js";
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || "development";
 const config = {
-  development,
+	development,
 };
 
 export default config[env];

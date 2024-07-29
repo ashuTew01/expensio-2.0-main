@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "node src/app.js",
 		"dev": "nodemon src/app.js",
-		"test": "jest",
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
 		"migrate:up": "node src/config/migrate.js up",
 		"migrate:down": "node src/config/migrate.js down"
 	},
@@ -19,10 +19,14 @@
 		"jsonwebtoken": "^9.0.2",
 		"nodemailer": "^6.9.13",
 		"pg": "^8.11.5",
-		"twilio": "^5.2.2"
+		"twilio": "^5.2.2",
+		"winston": "^3.13.1"
 	},
 	"devDependencies": {
 		"jest": "^29.7.0",
 		"supertest": "^7.0.0"
+	},
+	"jest": {
+		"transform": {}
 	}
 }

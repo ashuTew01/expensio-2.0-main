@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 import * as userModel from "../models/userModel.js";
+import NotFoundError from "../errors/NotFoundError.js";
+import ValidationError from "../errors/ValidationError.js";
+import OtpSendingError from "../errors/otp/OtpSendingError.js";
 
 const transporter = nodemailer.createTransport({
 	host: "smtp.zoho.in",
@@ -21,7 +24,7 @@ const sendEmail = async ({ from, to, subject, html }) => {
 		});
 		console.log("Email sent: %s", info.messageId);
 	} catch (error) {
-		console.error("Error sending email: ", error);
+		throw new OtpSendingError("Error sending email.");
 	}
 };
 
@@ -29,14 +32,14 @@ const sendVerificationEmailService = async (userId) => {
 	const user = await userModel.findUserByIdModel(userId);
 
 	if (!user) {
-		throw new Error("User not found.");
+		throw new NotFoundError("User not found.");
 	}
 
 	if (!user.email) {
-		throw new Error("User does not have an email address.");
+		throw new ValidationError("User does not have an email address.");
 	}
 	if (user.is_email_verified === true) {
-		throw new Error("User's email is already verified.");
+		throw new ValidationError("User's email is already verified.");
 	}
 
 	const isProd = process.env.NODE_ENV === "production";
@@ -48,10 +51,10 @@ const sendVerificationEmailService = async (userId) => {
 		to: user.email,
 		subject: "Please verify your email",
 		html: `
-					<h1>Welcome to Expensio!</h1>
-					<p>Please click on the link below to verify your email address:</p>
-					<a href="${emailVerificationLink}">Verify Email</a>
-			`,
+            <h1>Welcome to Expensio!</h1>
+            <p>Please click on the link below to verify your email address:</p>
+            <a href="${emailVerificationLink}">Verify Email</a>
+        `,
 	});
 };
 
