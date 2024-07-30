@@ -25,7 +25,7 @@ export const handleSendOTPService = async (phone) => {
 				`User is blocked from receiving OTPs. Try again after ${otpRequest.is_blocked_until}`
 			);
 		}
-		if (otpRequest.request_count >= 3) {
+		if (otpRequest.request_count >= 50) {
 			// reset request_count to avoid permanent block
 			await otpModel.updateOtpRequestModel(phone, {
 				is_blocked_until: new Date(now.getTime() + 60 * 60 * 1000), // Block for 1 hour

@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from 'cors';
 dotenv.config();
 
 const requiredEnvVars = [
@@ -39,6 +40,8 @@ import errorHandlingMiddleware from "./middlewares/errorHandlingMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import pool from "./config/db.js";
 const app = express();
+
+app.use(cors())
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
