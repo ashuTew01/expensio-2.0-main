@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { importMeta } from "vite";
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
@@ -140,10 +139,19 @@ export const api = createApi({
       }),
     }),
     sendOtp: build.mutation({
-      query: (phone) => ({
-        url: `send-otp`,
+      query: (data) => ({
+        url: `users/send-otp`,
         method: 'POST',
-        body: { phone },
+        body: data,
+        headers: DEFAULT_HEADERS
+      })
+    }),
+    verifyOtp: build.mutation({
+      query: (data) => ({
+        url: `users/verify-otp`,
+        method: 'POST',
+        body: data,
+        headers: DEFAULT_HEADERS
       })
     })
   }),
@@ -169,5 +177,6 @@ export const {
   useTranscribeAudioMutation,
   useGetAllCategoriesQuery,
 
-  useSendOtpMutation
+  useSendOtpMutation,
+  useVerifyOtpMutation
 } = api;

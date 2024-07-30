@@ -4,24 +4,33 @@ const initialState = {
   userInfo: localStorage.getItem("userInfoExpensio")
     ? JSON.parse(localStorage.getItem("userInfoExpensio"))
     : null,
+  token: localStorage.getItem("tokenExpensio") ? JSON.parse(localStorage.getItem("tokenExpensio")) : null,
+  userExists: null
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setCredentials: (state, action) => {
+    setUserInfo: (state, action) => {
       state.userInfo = action.payload;
-      localStorage.setItem("userInfoExpensio", JSON.stringify(action.payload));
+      localStorage.setItem("userInfo", action.payload);
+    },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      localStorage.setItem("tokenExpensio", JSON.stringify(action.payload));
+    },
+    setIfUserExist: (state, action) => {
+      console.log(action.payload)
+      state.userExists = action.payload;
     },
     removeCredentials: (state, action) => {
       state.userInfo = null;
-      localStorage.removeItem("userInfoExpensio");
-      // localStorage.removeItem("tokenExpensio");
+      localStorage.removeItem("tokenExpensio");
     },
   },
 });
 
-export const { setCredentials, removeCredentials } = authSlice.actions;
+export const { setUserInfo, setToken, removeCredentials, setIfUserExist } = authSlice.actions;
 
 export default authSlice.reducer;

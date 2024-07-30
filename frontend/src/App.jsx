@@ -18,6 +18,8 @@ import Dashboard from "./scenes/dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./scenes/layout";
 import PhoneNumberPage from "./scenes/phoneNumberPage";
+import OtpPage from "./scenes/otpPage";
+import UserDataForm from "./scenes/userDataFormPage";
 // import AddExpenseScreen from "scenes/expense/add";
 // import AddGoalScreen from "scenes/addGoal";
 // import ExpenseListScreen from "scenes/expense/list";
@@ -58,6 +60,8 @@ function App() {
             <Route index path="/" element={<HomeScreen />} />
 
             <Route path="/login" element={<PhoneNumberPage />} />
+            <Route path="/otp" element={<OtpPage />} />
+            <Route path="/user-data-form" element={<UserDataForm/>} />
             {/* <Route path="/register" element={<Register />} /> */}
           </Route>
         </Routes>

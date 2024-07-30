@@ -2,7 +2,7 @@
 import * as userService from "../services/userService.js";
 import * as otpService from "../services/otpService.js";
 import { sendVerificationEmailService } from "../services/emailService.js";
-import ValidationError from "../errors/ValidationError.js";
+import {ValidationError} from "@expensio/sharedlib";
 
 //prefix /api/users
 

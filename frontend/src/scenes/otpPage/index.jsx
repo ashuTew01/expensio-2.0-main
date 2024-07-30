@@ -1,37 +1,20 @@
 import * as React from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import OtpInput from "react-otp-input";
+import Paper from "@mui/material/Paper";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
-import 'react-phone-number-input/style.css';
-import PhoneInput from 'react-phone-number-input';
-import { TextField } from "@mui/material";
-import { useSendOtpMutation } from "../../state/api";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useDispatch } from "react-redux";
-import { setIfUserExist } from "../../state/authSlice";
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {"Copyright © "}
-      <Link color="inherit" href="#">
-        Expensio
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Grid from "@mui/material/Grid";
+import { useVerifyOtpMutation } from "../../state/api";
+import { useDispatch, useSelector } from "react-redux";
+import { setToken, setUserInfo } from "../../state/authSlice";
 
 const useStyles = makeStyles(theme => ({
   grid: {
@@ -50,51 +33,63 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center"
-  },
-  phoneInputContainer: {
-    width: '100%',
-  },
-  // phoneInput: {
-  //   width: '100%',
-  //   padding: '10px',
-  //   fontSize: '16px',
-  //   border: '1px solid #ccc',
-  //   borderRadius: '4px',
-  //   outline: 'none',
-  //   transition: 'border-color 0.3s',
-  //   '&:focus': {
-  //     borderColor: '#3f51b5',
-  //     boxShadow: '0 0 0 1px #3f51b5',
-  //   },
-  // },
+  }
 }));
 
-
-export default function PhoneNumberPage() {
+export default function OtpPage() {
+  const theme = useTheme();
   const classes = useStyles();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [sendOtp, {isLoading, error}] = useSendOtpMutation();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
+  const userExists = useSelector((state) => state.auth.userExists);
+  const [verifyOtp, { isLoading, error }] = useVerifyOtpMutation(); 
+
+  const [otp, setOtp] = useState("");
+  const [phoneNumber] = useState(location.state?.phoneNumber || "");
+
   const onClickHandler = async () => {
-    // console.log(phoneNumber);
     try {
-      const response = await sendOtp({ phone: phoneNumber }).unwrap();
-      toast.success(response.message);
-      dispatch(setIfUserExist(response.userExists));
-      
-      if (response?.otp) {
-        console.log(response?.otp);
-        navigate("/otp", { state: { phoneNumber, otp: response.otp } });
+      if (otp.length === 6) { // Assuming OTP length is 6
+        if(!userExists){
+          navigate("/user-data-form", { state: { phoneNumber, otp } });
+        }
+        else{
+          const response = await verifyOtp({ phone: phoneNumber, otp }).unwrap();
+
+          if (response.token) {
+            dispatch(setUserInfo(response.user));
+            dispatch(setToken(response.token));
+            toast.success(response.message);
+            navigate("/home"); // Redirect to home or another page
+          } else {
+            toast.error(response.message || "Failed to verify OTP");
+          }
+        }
       } else {
-        navigate("/otp", { state: { phoneNumber } });
+        toast.error("Please enter a valid 6-digit OTP");
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.data?.error || "Failed to send OTP");
+      toast.error("Failed to handle OTP");
     }
   };
+
+  const renderInput = (props) => (
+    <input
+      {...props}
+      style={{
+        width: '3rem',
+        height: '3rem',
+        margin: '0 1rem',
+        fontSize: '2rem',
+        borderRadius: 4,
+        border: '1px solid rgba(0,0,0,0.3)',
+        textAlign: 'center',
+      }}
+    />
+  );
 
   return (
     <Container component="main" maxWidth="sm">
@@ -116,7 +111,7 @@ export default function PhoneNumberPage() {
               </Grid>
               <Grid item>
                 <Typography component="h1" variant="h5">
-                  Phone Number
+                  Verification Code
                 </Typography>
               </Grid>
             </Grid>
@@ -124,7 +119,7 @@ export default function PhoneNumberPage() {
           <Grid item xs={12} textAlign="center">
             <Paper elevation={0}>
               <Typography variant="h6">
-                Please enter your phone number to receive a verification code
+                Please enter the verification code sent to your mobile
               </Typography>
             </Paper>
           </Grid>
@@ -137,14 +132,17 @@ export default function PhoneNumberPage() {
             direction="column"
           >
             <Grid container item spacing={3} justify="center">
-              <div className={classes.phoneInputContainer}>
-                <PhoneInput
-                  placeholder="Enter phone number"
-                  value={phoneNumber}
-                  onChange={setPhoneNumber}
-                  defaultCountry="IN"
-                />
-              </div>
+              <OtpInput
+                value={otp}
+                onChange={(otp) => setOtp(otp)}
+                numInputs={6}
+                renderInput={renderInput}
+                separator={
+                  <span>
+                    <strong>.</strong>
+                  </span>
+                }
+              />
             </Grid>
             <Grid item>
               <Button
@@ -155,13 +153,12 @@ export default function PhoneNumberPage() {
                 className={classes.submit}
                 onClick={onClickHandler}
               >
-                Send OTP
+                Next
               </Button>
             </Grid>
           </Grid>
         </Grid>
       </div>
-      <ToastContainer />
     </Container>
   );
 }

@@ -2,7 +2,6 @@ import { Button } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { setCredentials } from "../../state/authSlice";
 // import { useExpenseTestQuery } from "../../state/api";
 
 const HomeScreen = () => {
@@ -38,7 +37,7 @@ const HomeScreen = () => {
 
           if (response.ok) {
             const userData = await response.json();
-            dispatch(setCredentials(userData));
+            // dispatch(setCredentials(userData));
           } else {
             throw new Error("Failed to fetch user data");
           }
