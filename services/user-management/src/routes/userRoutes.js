@@ -8,7 +8,7 @@ import {
 	sendVerificationEmailController,
 	updateProfileController,
 } from "../controllers/userController.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import { authMiddleware } from "@expensio/sharedlib";
 const router = express.Router();
 //prefix /api/users
 

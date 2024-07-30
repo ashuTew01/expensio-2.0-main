@@ -1,9 +1,10 @@
 import nodemailer from "nodemailer";
 import * as userModel from "../models/userModel.js";
-import NotFoundError from "../errors/NotFoundError.js";
-import ValidationError from "../errors/ValidationError.js";
-import OtpSendingError from "../errors/otp/OtpSendingError.js";
-
+import {
+	NotFoundError,
+	ValidationError,
+	OtpSendingError,
+} from "@expensio/sharedlib";
 const transporter = nodemailer.createTransport({
 	host: "smtp.zoho.in",
 	port: 587,
