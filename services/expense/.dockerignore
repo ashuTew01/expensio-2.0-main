@@ -133,8 +133,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-#setup file
+# Setup file
 setup.sh
 
-#pem files
+# PEM files
 **/*.pem
