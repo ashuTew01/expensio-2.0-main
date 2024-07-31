@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: ashuz057/expensio-user
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: NODE_ENV
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: JWT_SECRET
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: PORT
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: EMAIL_PASSWORD
+            - name: EMAIL_FOR_SMTP
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: EMAIL_FOR_SMTP
+            - name: PROD_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: PROD_DOMAIN
+            - name: TWILIO_ACCOUNT_SID
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: TWILIO_ACCOUNT_SID
+            - name: TWILIO_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: TWILIO_AUTH_TOKEN
+            - name: TWILIO_PHONE_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: TWILIO_PHONE_NUMBER
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_PASSWORD
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_NAME
+            - name: DB_AIVEN_POSTGRES_CERT
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: DB_AIVEN_POSTGRES_CERT
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-srv
+spec:
+  selector:
+    app: user
+  ports:
+    - name: user
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
