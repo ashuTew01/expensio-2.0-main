@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from 'cors';
+import cors from "cors";
 dotenv.config();
 
 const requiredEnvVars = [
@@ -36,16 +36,25 @@ const checkEnvVariables = () => {
 checkEnvVariables();
 
 import bodyParser from "body-parser";
-import { errorHandlingMiddleware } from "@expensio/sharedlib";
+import { errorHandlingMiddleware, initLogger } from "@expensio/sharedlib";
 import userRoutes from "./routes/userRoutes.js";
 import pool from "./config/db.js";
 const app = express();
 
-app.use(cors())
+//log setup
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const logDirectory = path.join(__dirname, "..", "logs");
+initLogger(logDirectory);
+
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/api/users", userRoutes);
+
 app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT || 3000;

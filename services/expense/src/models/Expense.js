@@ -71,7 +71,9 @@ const expenseSchema = new mongoose.Schema(
 			required: true,
 			default: "neutral",
 		},
+		eventId: { type: mongoose.Schema.Types.ObjectId },
 	},
+
 	{ timestamps: true }
 );
 

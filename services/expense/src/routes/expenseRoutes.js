@@ -1,12 +1,18 @@
-import express from 'express';
-import { getExpenses, createExpense } from '../controllers/expenseController.js';
+import express from "express";
+import {
+	addExpenseController,
+	deleteExpensesController,
+	getExpensesController,
+} from "../controllers/expenseController.js";
+import { authMiddleware } from "@expensio/sharedlib";
 
 const router = express.Router();
 
-// Get all expenses
-router.get('/', getExpenses);
+//@public
 
-// Create a new expense
-router.post('/', createExpense);
+//@private
+router.get("/", authMiddleware, getExpensesController);
+router.post("/", authMiddleware, addExpenseController);
+router.delete("/", authMiddleware, deleteExpensesController);
 
 export default router;
