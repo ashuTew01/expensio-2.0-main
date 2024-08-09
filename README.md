@@ -3,12 +3,9 @@
 Expensio is an advanced finance management application that helps users gain deep insights into their financial behaviors and expenditure patterns. Initially developed as a monolithic application, it has been transitioned to a microservices architecture for better scalability and maintainability. The user service is complete, and work is ongoing on the expense service.
 
 This is an ongoing project.
-1. User Service: Node.js, Express, PostgreSQL
-     Completed with rate limited OTP Authentication.
-2. Expense Service: Node.js, Express, MongoDB
-     Ongoing with CRUD operations in place
-3. Kubernetes:
-     In the infra/k8s directory, deployments for user and expense there along with other important details.
+1. User Service: Node.js, Express, PostgreSQL: Completed with rate limited OTP Authentication.
+2. Expense Service: Node.js, Express, MongoDB: Ongoing with CRUD operations in place
+3. Kubernetes: In the infra/k8s directory, deployments for user and expense there along with other important details.
 
 Currently, adding rabbitMQ for asynchronous communication support.
 
