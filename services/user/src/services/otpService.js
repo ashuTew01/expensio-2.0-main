@@ -11,6 +11,10 @@ import {
 	ValidationError,
 	InternalServerError,
 } from "@expensio/sharedlib";
+import {
+	deleteUserByPhoneModel,
+	findIfUserExistsByPhoneModel,
+} from "../models/userModel.js";
 
 const generateOTP = () => {
 	return crypto.randomInt(100000, 999999).toString(); // 6 digit otp
@@ -85,10 +89,28 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 		) {
 			throw new ValidationError("OTP is invalid or has expired.");
 		}
-		const userExists = otpRequest.user_exists;
+
+		const userExistsInOtpRequestTable = otpRequest.user_exists;
 		let user;
-		if (!userExists) {
-			// check for required userData fields only when user creation necessary
+
+		if (!userExistsInOtpRequestTable) {
+			// Check if the user exists in the users table (including soft-deleted users)
+			const userExistsInUserTable = await findIfUserExistsByPhoneModel(
+				phone,
+				client
+			);
+
+			// If the user exists in the users table, delete the entry to prepare for re-creation
+			if (userExistsInUserTable) {
+				await deleteUserByPhoneModel(phone, client);
+
+				// NOTE::::: Commit the transaction after deletion to release locks
+				await client.query("COMMIT");
+
+				// Start a new transaction for user creation
+				await client.query("BEGIN");
+			}
+
 			if (
 				!userData ||
 				!userData.firstName ||
@@ -99,22 +121,30 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 					"Missing required user data fields: firstName, username, and phone are required."
 				);
 			}
+
+			// Create a new user and mark them as existing in the otp_requests table
 			user = await userService.createUserService(userData, client);
+
 			await otpModel.markUserExistsModel(phone, client);
 		} else {
+			// If the user exists in the otp_requests table, find the user in the users table
 			user = await userService.findUserByPhoneService(phone, client);
 		}
+
 		const token = generateToken({ id: user.id, phone: user.phone });
+
+		// Reset the OTP request to avoid reuse
 		await otpModel.resetOtpRequestModel(phone, client);
+
 		await client.query("COMMIT");
 
-		const message = userExists
+		// Prepare a success message
+		const message = userExistsInOtpRequestTable
 			? "User logged in successfully."
 			: "User registered and logged in successfully.";
 		return { user, token, message };
 	} catch (error) {
 		await client.query("ROLLBACK");
-		console.error("Error handling OTP verification:", error);
 		throw new InternalServerError(
 			"Failed to verify OTP and handle user registration/login."
 		);

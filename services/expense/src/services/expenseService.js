@@ -1,7 +1,9 @@
 import Expense from "../models/Expense.js";
+import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import CognitiveTrigger from "../models/CognitiveTrigger.js";
 import { ValidationError } from "@expensio/sharedlib";
+import { logInfo, logWarning, logError } from "@expensio/sharedlib";
 
 export const getExpensesService = async (queryParameters, userId) => {
 	const {
@@ -9,19 +11,19 @@ export const getExpensesService = async (queryParameters, userId) => {
 		end_date,
 		search,
 		categoryId,
-		cognitiveTriggerId,
+		cognitiveTriggerIds,
 		mood,
 		eventId,
 		page = 1,
 		pageSize = 20,
-		id, //id supersedes everything else
+		id, // id supersedes everything else
 	} = queryParameters;
 
 	let query = { userId };
 
 	if (id) {
 		const expense = await Expense.findOne({ _id: id, userId }).populate(
-			"categoryId cognitiveTriggerId"
+			"categoryId cognitiveTriggerIds"
 		);
 		if (!expense) {
 			throw new ValidationError("Expense not found.");
@@ -46,6 +48,7 @@ export const getExpensesService = async (queryParameters, userId) => {
 			{ notes: { $regex: search, $options: "i" } },
 		];
 	}
+
 	if (eventId) {
 		query.eventId = eventId;
 	}
@@ -54,8 +57,8 @@ export const getExpensesService = async (queryParameters, userId) => {
 		query.categoryId = categoryId;
 	}
 
-	if (cognitiveTriggerId) {
-		query.cognitiveTriggerId = cognitiveTriggerId;
+	if (cognitiveTriggerIds && cognitiveTriggerIds.length > 0) {
+		query.cognitiveTriggerIds = { $in: cognitiveTriggerIds };
 	}
 
 	if (mood) {
@@ -66,7 +69,7 @@ export const getExpensesService = async (queryParameters, userId) => {
 	const skip = (parseInt(page) - 1) * limit;
 
 	const expenses = await Expense.find(query)
-		.populate("categoryId cognitiveTriggerId")
+		.populate("categoryId cognitiveTriggerIds")
 		.sort({ createdAt: -1 })
 		.skip(skip)
 		.limit(limit);
@@ -81,57 +84,65 @@ export const getExpensesService = async (queryParameters, userId) => {
 	};
 };
 
-export const createExpenseService = async (expenseData, userId) => {
-	const {
-		title,
-		amount,
-		categoryCode,
-		expenseType,
-		isRecurring,
-		description,
-		notes,
-		image,
-		paymentMethod,
-		mood,
-		eventId,
-		cognitiveTriggerCode,
-	} = expenseData;
+export const addExpensesService = async (expensesData, userId) => {
+	const createdExpenses = [];
 
-	const category = await Category.findOne({ code: categoryCode });
-	if (!category) {
-		throw new ValidationError("Invalid category code.");
-	}
+	for (const expenseData of expensesData) {
+		const {
+			title,
+			amount,
+			categoryCode,
+			expenseType,
+			isRecurring,
+			description,
+			notes,
+			image,
+			paymentMethod,
+			mood,
+			eventId,
+			cognitiveTriggerCodes,
+		} = expenseData;
 
-	let cognitiveTriggerId = null;
-	if (cognitiveTriggerCode) {
-		const cognitiveTrigger = await CognitiveTrigger.findOne({
-			code: cognitiveTriggerCode,
-		});
-		if (!cognitiveTrigger) {
-			throw new ValidationError("Invalid cognitive trigger code.");
+		const category = await Category.findOne({ code: categoryCode });
+		if (!category) {
+			throw new ValidationError("Invalid category code.");
 		}
-		cognitiveTriggerId = cognitiveTrigger._id;
+
+		let cognitiveTriggerIds = [];
+		if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
+			const cognitiveTriggers = await CognitiveTrigger.find({
+				code: { $in: cognitiveTriggerCodes },
+			});
+			if (cognitiveTriggers.length !== cognitiveTriggerCodes.length) {
+				throw new ValidationError(
+					"One or more cognitive trigger codes are invalid."
+				);
+			}
+			cognitiveTriggerIds = cognitiveTriggers.map((trigger) => trigger._id);
+		}
+
+		const newExpense = new Expense({
+			userId,
+			title,
+			amount,
+			categoryId: category._id,
+			expenseType,
+			isRecurring,
+			description: description || null,
+			notes,
+			image,
+			paymentMethod,
+			mood: mood || "neutral",
+			eventId: eventId || null,
+			cognitiveTriggerIds:
+				cognitiveTriggerIds.length > 0 ? cognitiveTriggerIds : null,
+		});
+
+		await newExpense.save();
+		createdExpenses.push(newExpense);
 	}
 
-	const newExpense = new Expense({
-		userId,
-		title,
-		amount,
-		categoryId: category._id,
-		expenseType,
-		isRecurring,
-		description: description || null,
-		notes,
-		image,
-		paymentMethod,
-		mood: mood || "neutral",
-		eventId: eventId || null,
-		cognitiveTriggerId: cognitiveTriggerId || null,
-	});
-
-	await newExpense.save();
-
-	return newExpense;
+	return createdExpenses;
 };
 
 export const deleteExpensesByIdsService = async (expenseIds, userId) => {
@@ -155,6 +166,116 @@ export const deleteExpensesByIdsService = async (expenseIds, userId) => {
 		throw new ValidationError(
 			"No expenses found for the given IDs or you do not have permission to delete them."
 		);
+	}
+
+	return result;
+};
+
+export const deleteExpensesByUserId = async (userId, retries = 3) => {
+	if (!mongoose.Types.ObjectId.isValid(userId)) {
+		throw new ValidationError("Invalid user ID provided.");
+	}
+
+	try {
+		const result = await Expense.deleteMany({ userId: userId }); // Intentional typo
+
+		// if (result.deletedCount === 0) {
+		//     throw new ValidationError(
+		//         "No expenses found for the given user ID or you do not have permission to delete them."
+		//     );
+		// }
+
+		logInfo(`Expenses for user with id '${userId}' deleted successfully.`);
+		return result;
+	} catch (error) {
+		if (retries > 0) {
+			logWarning(
+				`Failed to delete expenses for user ${userId}, retrying... (${retries} retries left)`
+			);
+			await new Promise((res) => setTimeout(res, 1000)); // Wait 1 second before retrying
+			return deleteExpensesByUserId(userId, retries - 1);
+		} else {
+			logError(
+				`Failed to delete expenses for user ${userId} after multiple attempts.`
+			);
+			throw error; // Propagate the error after all retries are exhausted
+		}
+	}
+};
+
+export const addCognitiveTriggersService = async (cognitiveTriggersData) => {
+	const createdCognitiveTriggers = [];
+
+	for (const triggerData of cognitiveTriggersData) {
+		const { name, code, description } = triggerData;
+
+		const existingTrigger = await CognitiveTrigger.findOne({ code });
+		if (existingTrigger) {
+			throw new ValidationError(
+				`Cognitive Trigger with code ${code} already exists.`
+			);
+		}
+
+		const newCognitiveTrigger = new CognitiveTrigger({
+			name,
+			code,
+			description: description || null,
+		});
+
+		await newCognitiveTrigger.save();
+		createdCognitiveTriggers.push(newCognitiveTrigger);
+	}
+
+	return createdCognitiveTriggers;
+};
+
+export const removeCognitiveTriggersService = async (cognitiveTriggerCodes) => {
+	const result = await CognitiveTrigger.deleteMany({
+		code: { $in: cognitiveTriggerCodes },
+	});
+
+	if (result.deletedCount === 0) {
+		throw new ValidationError(
+			"No Cognitive Triggers found with the provided codes."
+		);
+	}
+
+	return result;
+};
+
+export const addCategoriesService = async (categoriesData, userId = null) => {
+	const createdCategories = [];
+
+	for (const categoryData of categoriesData) {
+		const { name, code, description, color, image, isOriginal } = categoryData;
+
+		const existingCategory = await Category.findOne({ code });
+		if (existingCategory) {
+			throw new ValidationError(`Category with code ${code} already exists.`);
+		}
+
+		const newCategory = new Category({
+			name,
+			code,
+			description: description || null,
+			color: color || "blue",
+			image: image || "categoryImages/default.png",
+			isOriginal,
+			addedBy: userId || null,
+		});
+
+		await newCategory.save();
+		createdCategories.push(newCategory);
+	}
+
+	return createdCategories;
+};
+
+export const removeCategoriesService = async (categoryCodes) => {
+	const result = await Category.deleteMany({ code: { $in: categoryCodes } });
+
+	if (result.deletedCount === 0) {
+		throw new ValidationError("No Categories found with the provided codes.");
 	}
 
 	return result;

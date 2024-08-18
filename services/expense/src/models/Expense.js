@@ -51,10 +51,12 @@ const expenseSchema = new mongoose.Schema(
 			ref: "Category",
 			required: true,
 		},
-		cognitiveTriggerId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "CognitiveTrigger",
-		},
+		cognitiveTriggerIds: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "CognitiveTrigger",
+			},
+		],
 		image: {
 			type: String,
 			maxlength: 300,

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management # Latest version with management UI
+          ports:
+            - containerPort: 5672 # AMQP port
+            - containerPort: 15672 # Management UI port
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: "guest" # Change this in a production environment
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "guest" # Change this in a production environment
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  type: NodePort # For testing, expose via NodePort
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp-port
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+      nodePort: 30002 # Port to access RabbitMQ AMQP from outside
+    - name: management-port
+      protocol: TCP
+      port: 15672
+      targetPort: 15672
+      nodePort: 30003 # Port to access RabbitMQ Management UI from outside

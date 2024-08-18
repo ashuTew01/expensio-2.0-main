@@ -1,15 +1,19 @@
 import Joi from "joi";
 import {
-	createExpenseService,
+	addCategoriesService,
+	addCognitiveTriggersService,
+	addExpensesService,
 	deleteExpensesByIdsService,
 	getExpensesService,
+	removeCategoriesService,
+	removeCognitiveTriggersService,
 } from "../services/expenseService.js";
 import { ValidationError } from "@expensio/sharedlib";
 
 // @desc    Get user's single/multiple expense(s) based on query
 // @route   GET
 // @access  Private
-export const getExpensesController = async (req, res) => {
+export const getExpensesController = async (req, res, next) => {
 	const querySchema = Joi.object({
 		start_date: Joi.date().iso().optional(),
 		end_date: Joi.date().iso().optional(),
@@ -20,9 +24,9 @@ export const getExpensesController = async (req, res) => {
 		categoryId: Joi.string()
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
-		cognitiveTriggerId: Joi.string()
-			.optional()
-			.pattern(/^[0-9a-fA-F]{24}$/),
+		cognitiveTriggerIds: Joi.array()
+			.items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/))
+			.optional(),
 		mood: Joi.string().valid("happy", "neutral", "regretful").optional(),
 		page: Joi.number().integer().min(1).optional(),
 		pageSize: Joi.number().integer().min(1).optional(),
@@ -30,6 +34,7 @@ export const getExpensesController = async (req, res) => {
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
 	});
+
 	try {
 		const userId = req.user.id;
 
@@ -49,7 +54,7 @@ export const getExpensesController = async (req, res) => {
 // @desc    Create a new expense
 // @route   POST
 // @access  Private
-export const addExpenseController = async (req, res, next) => {
+export const addExpensesController = async (req, res, next) => {
 	const expenseSchema = Joi.object({
 		title: Joi.string().max(200).required(),
 		description: Joi.string().max(1000).optional(),
@@ -60,7 +65,9 @@ export const addExpenseController = async (req, res, next) => {
 		notes: Joi.array().items(Joi.string().max(300)).max(10).optional(),
 		amount: Joi.number().positive().required(),
 		categoryCode: Joi.string().required(),
-		cognitiveTriggerCode: Joi.string().optional(),
+		cognitiveTriggerCodes: Joi.array()
+			.items(Joi.string().optional())
+			.optional(),
 		image: Joi.string().max(300).optional(),
 		paymentMethod: Joi.string()
 			.valid("cash", "credit_card", "debit_card", "online_payment", "unknown")
@@ -70,19 +77,22 @@ export const addExpenseController = async (req, res, next) => {
 			.pattern(/^[0-9a-fA-F]{24}$/)
 			.optional(),
 	});
+
+	const requestSchema = Joi.array().items(expenseSchema).min(1).required();
+
 	try {
 		const userId = req.user.id;
 
-		const { error, value } = expenseSchema.validate(req.body);
+		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
 			throw new ValidationError(error.details[0].message);
 		}
-
-		const newExpense = await createExpenseService(value, userId);
+		// console.log(value);
+		const newExpenses = await addExpensesService(value, userId);
 
 		res.status(201).json({
-			message: "Expense added successfully!",
-			expense: newExpense,
+			message: "Expenses added successfully!",
+			expenses: newExpenses,
 		});
 	} catch (error) {
 		next(error);
@@ -111,6 +121,124 @@ export const deleteExpensesController = async (req, res, next) => {
 
 		res.status(200).json({
 			message: `${result.deletedCount} expense(s) deleted successfully!`,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// @desc    Adds cognitive Triggers
+// @route   POST
+// @access  Private
+export const addCognitiveTriggersController = async (req, res, next) => {
+	const cognitiveTriggerSchema = Joi.object({
+		name: Joi.string().max(50).required(),
+		code: Joi.string().max(80).regex(/^\S+$/).required(),
+		description: Joi.string().max(1000).optional(),
+	});
+
+	const requestSchema = Joi.array()
+		.items(cognitiveTriggerSchema)
+		.min(1)
+		.required();
+
+	try {
+		const { error, value } = requestSchema.validate(req.body);
+		if (error) {
+			throw new ValidationError(error.details[0]);
+		}
+
+		const newCognitiveTriggers = await addCognitiveTriggersService(value);
+
+		res.status(201).json({
+			message: "Cognitive Triggers added successfully!",
+			cognitiveTriggers: newCognitiveTriggers,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// @desc    Removes cognitive Triggers, receives array (codes) of cognitiveTriggerCodes
+// @route   POST
+// @access  Private
+export const removeCognitiveTriggersController = async (req, res, next) => {
+	const requestSchema = Joi.object({
+		codes: Joi.array()
+			.items(Joi.string().max(80).regex(/^\S+$/))
+			.min(1)
+			.required(),
+	});
+
+	try {
+		const { error, value } = requestSchema.validate(req.body);
+		if (error) {
+			throw new ValidationError(error.details[0].message);
+		}
+
+		await removeCognitiveTriggersService(value.codes);
+
+		res.status(200).json({
+			message: "Cognitive Triggers removed successfully!",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// @desc    Adds Categories
+// @route   POST
+// @access  Private
+export const addCategoriesController = async (req, res, next) => {
+	const categorySchema = Joi.object({
+		name: Joi.string().max(50).required(),
+		code: Joi.string().max(30).regex(/^\S+$/).required(),
+		description: Joi.string().max(1000).optional(),
+		color: Joi.string().max(50).optional(),
+		image: Joi.string().max(200).optional(),
+		isOriginal: Joi.boolean().required(),
+	});
+
+	const requestSchema = Joi.array().items(categorySchema).min(1).required();
+
+	try {
+		const { error, value } = requestSchema.validate(req.body);
+		if (error) {
+			throw new Error(error.details[0].message);
+		}
+
+		const newCategories = await addCategoriesService(value, req.user?.id);
+
+		res.status(201).json({
+			message: "Categories added successfully!",
+			categories: newCategories,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// @desc    Removes Categories
+// @route   POST
+// @access  Private
+export const removeCategoriesController = async (req, res, next) => {
+	const requestSchema = Joi.object({
+		codes: Joi.array()
+			.items(Joi.string().max(30).regex(/^\S+$/))
+			.min(1)
+			.required(),
+	});
+
+	try {
+		const { error, value } = requestSchema.validate(req.body);
+		if (error) {
+			throw new ValidationError(error.details[0].message);
+		}
+
+		await removeCategoriesService(value.codes);
+
+		res.status(200).json({
+			message: "Categories removed successfully!",
 		});
 	} catch (error) {
 		next(error);

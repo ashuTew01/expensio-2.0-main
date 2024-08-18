@@ -1,11 +1,12 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE,
     email VARCHAR(100) UNIQUE,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50),
     profile_picture_url TEXT,
-    bio varchar(300),
+    bio VARCHAR(300),
     date_of_birth DATE,
     is_active BOOLEAN DEFAULT TRUE,
     is_email_verified BOOLEAN DEFAULT FALSE,
@@ -13,9 +14,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     phone VARCHAR(15) UNIQUE NOT NULL, 
-    blocked_until TIMESTAMP,  
-    created_by INT REFERENCES users(id),
-    updated_by INT REFERENCES users(id)
+    blocked_until TIMESTAMP  
 );
 
 -- Indexes for quick lookup
@@ -37,10 +36,6 @@ ALTER TABLE users ALTER COLUMN is_active SET DEFAULT TRUE;
 ALTER TABLE users ALTER COLUMN is_email_verified SET DEFAULT FALSE;
 ALTER TABLE users ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE users ALTER COLUMN updated_at SET DEFAULT CURRENT_TIMESTAMP;
-
--- Foreign Keys
-ALTER TABLE users ADD CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users(id);
-ALTER TABLE users ADD CONSTRAINT fk_updated_by FOREIGN KEY (updated_by) REFERENCES users(id);
 
 -- Triggers
 CREATE OR REPLACE FUNCTION update_updated_at_column()

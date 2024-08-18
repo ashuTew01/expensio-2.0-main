@@ -57,6 +57,18 @@ export const findUserByPhoneModel = async (phone, client = pool) => {
 	}
 };
 
+export const findIfUserExistsByPhoneModel = async (phone, client = pool) => {
+	const query = `
+        SELECT id FROM users WHERE phone = $1;
+    `;
+	try {
+		const { rows } = await client.query(query, [phone]);
+		return rows.length !== 0;
+	} catch (error) {
+		throw new DatabaseError("Failed to find user by phone.");
+	}
+};
+
 export const findUserByIdModel = async (userId, client = pool) => {
 	const query =
 		"SELECT id, phone, first_name, last_name,  username,  email, profile_picture_url, bio, date_of_birth FROM users WHERE id = $1";
@@ -97,6 +109,41 @@ export const deleteUserModel = async (userId, client = pool) => {
 	}
 };
 
+export const deleteUserByPhoneModel = async (phone, client = pool) => {
+	const query = "DELETE FROM users WHERE phone = $1";
+	try {
+		await client.query(query, [phone]);
+	} catch (error) {
+		throw new DatabaseError("Failed to delete user.");
+	}
+};
+
+export const softDeleteUserModel = async (userId, client = pool) => {
+	const query = "UPDATE users SET deleted = TRUE WHERE id = $1;";
+	try {
+		const result = await client.query(query, [userId]);
+		if (result.rowCount === 0) {
+			throw new NotFoundError("User not found.");
+		}
+		return result.rowCount;
+	} catch (error) {
+		throw new DatabaseError("Failed to delete user.");
+	}
+};
+
+export const undoSoftDeleteUserModel = async (userId, client = pool) => {
+	const query = "UPDATE users SET deleted = FALSE WHERE id = $1;";
+	try {
+		const result = await client.query(query, [userId]);
+		if (result.rowCount === 0) {
+			throw new NotFoundError("User not found.");
+		}
+		return result.rowCount;
+	} catch (error) {
+		throw new DatabaseError("Failed to delete user.");
+	}
+};
+
 export const updateUserProfileModel = async (
 	userId,
 	updates,
@@ -124,7 +171,7 @@ export const updateUserProfileModel = async (
             date_of_birth = COALESCE($8, date_of_birth),
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
-        RETURNING *;
+        RETURNING username, email, first_name, last_name, profile_picture_url, bio, date_of_birth;
     `;
 	const values = [
 		userId,

@@ -1,3 +1,11 @@
+//log setup
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const logDirectory = path.join(__dirname, "..", "logs");
+initLogger(logDirectory);
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -26,9 +34,7 @@ const checkEnvVariables = () => {
 		(envVar) => typeof process.env[envVar] === "undefined"
 	);
 	if (unsetEnv.length > 0) {
-		console.error(
-			`Required ENV variables are not set: [${unsetEnv.join(", ")}]`
-		);
+		logError(`Required ENV variables are not set: [${unsetEnv.join(", ")}]`);
 		process.exit(1);
 	}
 };
@@ -36,18 +42,28 @@ const checkEnvVariables = () => {
 checkEnvVariables();
 
 import bodyParser from "body-parser";
-import { errorHandlingMiddleware, initLogger } from "@expensio/sharedlib";
+import {
+	errorHandlingMiddleware,
+	EVENTS,
+	initLogger,
+	logError,
+	logInfo,
+} from "@expensio/sharedlib";
 import userRoutes from "./routes/userRoutes.js";
 import pool from "./config/db.js";
 const app = express();
 
-//log setup
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const logDirectory = path.join(__dirname, "..", "logs");
-initLogger(logDirectory);
+//start RabbitMQ
+import startRabbitMQ from "./config/startRabbitMQ.js";
+const startServices = async () => {
+	try {
+		await startRabbitMQ();
+	} catch (error) {
+		logError("Failed to start services:", error);
+		process.exit(1);
+	}
+};
+startServices();
 
 app.use(cors());
 
@@ -60,7 +76,8 @@ app.use(errorHandlingMiddleware);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-	console.log(`User Management Service is running on port ${PORT}`);
+	// console.log(EVENTS);
+	logInfo(`User Service is running on port ${PORT}`);
 
 	// sendEmail({
 	// 	from: `"Test Server" <${process.env.EMAIL_FOR_SMTP}>`, // Replace with your actual email
@@ -72,6 +89,6 @@ app.listen(PORT, () => {
 
 process.on("SIGINT", () => {
 	pool.end(() => {
-		console.log("Pool has ended");
+		logInfo("PostgreSQL pool has ended");
 	});
 });
