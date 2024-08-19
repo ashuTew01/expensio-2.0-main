@@ -2,8 +2,9 @@ import Expense from "../models/Expense.js";
 import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import CognitiveTrigger from "../models/CognitiveTrigger.js";
-import { ValidationError } from "@expensio/sharedlib";
+import { ValidationError, publishEvent, EVENTS } from "@expensio/sharedlib";
 import { logInfo, logWarning, logError } from "@expensio/sharedlib";
+import connectRabbitMQ from "../config/rabbitmq.js";
 
 export const getExpensesService = async (queryParameters, userId) => {
 	const {
@@ -140,6 +141,17 @@ export const addExpensesService = async (expensesData, userId) => {
 
 		await newExpense.save();
 		createdExpenses.push(newExpense);
+
+		// Publish the event after successfully saving the expense
+		const channel = await connectRabbitMQ();
+		await publishEvent(
+			EVENTS.EXPENSE_CREATED,
+			{
+				...newExpense.toObject(),
+				createdAt: newExpense.createdAt,
+			},
+			channel
+		);
 	}
 
 	return createdExpenses;

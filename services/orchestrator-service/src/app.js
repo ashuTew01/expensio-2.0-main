@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import expenseRoutes from "./routes/expenseRoutes.js";
+import { initiateUserDeletion } from "./controllers/orchestratorController.js";
 import {
 	errorHandlingMiddleware,
 	initLogger,
@@ -15,12 +15,12 @@ import startRabbitMQ from "./config/startRabbitMQ.js";
 // Load environment variables from .env file
 dotenv.config();
 
-//log setup
+// log setup
 import path from "path";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const logDirectory = path.join(__dirname, "..", "logs");
+const logDirectory = path.join(__dirname, "..", "..", "logs");
 initLogger(logDirectory);
 
 const app = express();
@@ -31,10 +31,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(errorHandlingMiddleware);
 app.use(cors());
 
-// Use routes
-app.use("/api", expenseRoutes);
+// Routes
+app.post("/api/saga/user-deletion", initiateUserDeletion);
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3004;
 
 const startServices = async () => {
 	try {
@@ -49,11 +49,5 @@ const startServices = async () => {
 startServices();
 
 app.listen(PORT, () => {
-	logInfo("Expense service is running on port " + PORT);
-
-	/* Add data insertion functions below */
-	/* WARNING: Comment them and move them out of app.listen after one time insertion.*/
+	logInfo("Orchestrator service is running on port " + PORT);
 });
-
-// addPsychologicalTypes();
-// addCategories();
