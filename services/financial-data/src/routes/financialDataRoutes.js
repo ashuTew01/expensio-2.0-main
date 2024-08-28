@@ -1,8 +1,9 @@
 import express from "express";
-import { fetchFinancialData } from "../controllers/financialDataController.js";
+import { getFinancialDataController } from "../controllers/financialDataController.js";
+import { authMiddleware } from "@expensio/sharedlib";
 
 const router = express.Router();
 
-router.get("/financial-data/:userId", fetchFinancialData);
+router.get("/", authMiddleware, getFinancialDataController);
 
 export default router;

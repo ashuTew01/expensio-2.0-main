@@ -2,6 +2,7 @@ import connectRabbitMQ from "./rabbitmq.js";
 import { subscribeToUserDeleted } from "../../../expense/src/events/subscribers/subscribeToUserDeleted.js";
 import { logError, logInfo } from "@expensio/sharedlib";
 import { subscribeToExpenseCreated } from "../events/subscribers/subscribeToExpenseCreated.js";
+import { subscribeToExpensesDeleted } from "../events/subscribers/subscribeToExpenseDeleted.js";
 
 let channel;
 
@@ -12,6 +13,7 @@ const startRabbitMQ = async () => {
 		// Initialize event subscribers
 		// await subscribeToUserDeleted(channel);
 		await subscribeToExpenseCreated(channel);
+		await subscribeToExpensesDeleted(channel);
 		// can initialize more event subscribers here
 
 		logInfo("RabbitMQ setup completed successfully.");

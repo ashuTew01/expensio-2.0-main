@@ -1,14 +1,14 @@
 import { logError, EVENTS, subscribeEvent } from "@expensio/sharedlib";
-import { addFinancialDataService } from "../../services/financialDataService.js";
+import { removeFinancialDataService } from "../../services/financialDataService.js";
 
-export const subscribeToExpenseCreated = async (channel) => {
-	const eventName = EVENTS.EXPENSE_CREATED;
+export const subscribeToExpensesDeleted = async (channel) => {
+	const eventName = EVENTS.EXPENSE_DELETED;
 	try {
 		await subscribeEvent(
 			eventName,
-			"financial-data-service-expense-created",
+			"financial-data-service-expenses-deleted",
 			async ({ data, headers }) => {
-				await addFinancialDataService(data);
+				await removeFinancialDataService(data);
 			},
 			channel
 		);

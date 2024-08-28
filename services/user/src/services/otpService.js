@@ -115,10 +115,11 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 				!userData ||
 				!userData.firstName ||
 				!userData.username ||
-				!userData.phone
+				!userData.phone ||
+				userData.phone !== phone
 			) {
 				throw new ValidationError(
-					"Missing required user data fields: firstName, username, and phone are required."
+					"Missing/invalid required user data fields: firstName, username, and phone are required."
 				);
 			}
 

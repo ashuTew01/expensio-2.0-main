@@ -162,6 +162,7 @@ export const deleteExpensesByIdsService = async (expenseIds, userId) => {
 		throw new ValidationError("Expense IDs must be a non-empty array.");
 	}
 
+	// Validate the expense IDs
 	const invalidIds = expenseIds.filter(
 		(id) => !mongoose.Types.ObjectId.isValid(id)
 	);
@@ -169,14 +170,30 @@ export const deleteExpensesByIdsService = async (expenseIds, userId) => {
 		throw new ValidationError("Invalid expense ID(s) provided.");
 	}
 
+	// Find and delete the expenses
+	const expensesToDelete = await Expense.find({
+		_id: { $in: expenseIds },
+		userId: userId,
+	});
+
+	// if (expensesToDelete.length === 0) {
+	//     throw new ValidationError(
+	//         "No expenses found for the given IDs or you do not have permission to delete them."
+	//     );
+	// }
+
 	const result = await Expense.deleteMany({
 		_id: { $in: expenseIds },
 		userId: userId,
 	});
 
-	if (result.deletedCount === 0) {
-		throw new ValidationError(
-			"No expenses found for the given IDs or you do not have permission to delete them."
+	// If the deletion was successful, publish the EXPENSES_DELETED event
+	if (result.deletedCount > 0) {
+		const channel = await connectRabbitMQ();
+		await publishEvent(
+			EVENTS.EXPENSE_DELETED,
+			expensesToDelete, // Sending the array of deleted expenses
+			channel
 		);
 	}
 
