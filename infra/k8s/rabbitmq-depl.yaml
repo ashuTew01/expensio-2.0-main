@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq-depl
+  namespace: expensio-dev
 spec:
   replicas: 1
   selector:
@@ -20,17 +21,24 @@ spec:
             - containerPort: 15672 # Management UI port
           env:
             - name: RABBITMQ_DEFAULT_USER
-              value: "guest" # Change this in a production environment
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_USER
             - name: RABBITMQ_DEFAULT_PASS
-              value: "guest" # Change this in a production environment
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_PASSWORD
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rabbitmq-service
+  name: rabbitmq-srv
+  namespace: expensio-dev
 spec:
-  type: NodePort # For testing, expose via NodePort
+  type: ClusterIP
   selector:
     app: rabbitmq
   ports:
@@ -38,9 +46,7 @@ spec:
       protocol: TCP
       port: 5672
       targetPort: 5672
-      nodePort: 30002 # Port to access RabbitMQ AMQP from outside
     - name: management-port
       protocol: TCP
       port: 15672
       targetPort: 15672
-      nodePort: 30003 # Port to access RabbitMQ Management UI from outside

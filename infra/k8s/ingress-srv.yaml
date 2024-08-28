@@ -2,12 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-srv
+  namespace: expensio-dev
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: localhost
+    - host: expensio.com
       http:
         paths:
           - path: /api/user

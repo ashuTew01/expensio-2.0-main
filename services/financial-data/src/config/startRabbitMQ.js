@@ -1,5 +1,4 @@
 import connectRabbitMQ from "./rabbitmq.js";
-import { subscribeToUserDeleted } from "../../../expense/src/events/subscribers/subscribeToUserDeleted.js";
 import { logError, logInfo } from "@expensio/sharedlib";
 import { subscribeToExpenseCreated } from "../events/subscribers/subscribeToExpenseCreated.js";
 import { subscribeToExpensesDeleted } from "../events/subscribers/subscribeToExpenseDeleted.js";
