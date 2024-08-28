@@ -32,7 +32,7 @@ app.use(errorHandlingMiddleware);
 app.use(cors());
 
 // Routes
-app.post("/saga/user-deletion", initiateUserDeletion);
+app.post("api/orchestrator/saga/user-deletion", initiateUserDeletion);
 
 const PORT = process.env.PORT || 3004;
 
