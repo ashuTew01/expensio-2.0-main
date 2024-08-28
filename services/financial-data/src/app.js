@@ -33,7 +33,7 @@ app.use(errorHandlingMiddleware);
 app.use(cors());
 
 // Use routes
-app.use("/api", financialDataRoutes);
+app.use("/", financialDataRoutes);
 
 const PORT = process.env.PORT || 3003;
 

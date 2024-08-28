@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use("/api", healthCheckRoute);
+app.use("/", healthCheckRoute);
 
 let channel;
 

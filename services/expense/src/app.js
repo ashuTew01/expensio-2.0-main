@@ -32,7 +32,7 @@ app.use(errorHandlingMiddleware);
 app.use(cors());
 
 // Use routes
-app.use("/api", expenseRoutes);
+app.use("/", expenseRoutes);
 
 const PORT = process.env.PORT || 3002;
 
