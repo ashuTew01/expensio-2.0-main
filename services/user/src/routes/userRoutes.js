@@ -10,7 +10,7 @@ import {
 } from "../controllers/userController.js";
 import { authMiddleware } from "@expensio/sharedlib";
 const router = express.Router();
-//prefix /api/users
+//prefix /api/user
 
 router.post("/send-otp", sendOTPController);
 router.post("/verify-otp", verifyOTPController);

@@ -26,7 +26,11 @@ echo "Deploying Financial Data Service..."
 kubectl apply -f ./k8s/financial-data-depl.yaml
 echo "Financial Data Service deployed."
 
-echo "Deploying Ingress..."
+echo "Installing Ingress-Nginx from web..."
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/cloud/deploy.yaml
+echo "Ingress-ngnix installed."
+
+echo "Deploying Ingress Service File..."
 kubectl apply -f ./k8s/ingress-srv.yaml
 echo "Ingress deployed."
 

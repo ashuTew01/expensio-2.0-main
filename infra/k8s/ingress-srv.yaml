@@ -32,3 +32,10 @@ spec:
                 name: financial-data-srv
                 port:
                   number: 3003
+          - path: /api/income
+            pathType: Prefix
+            backend:
+              service:
+                name: income-srv
+                port:
+                  number: 3004

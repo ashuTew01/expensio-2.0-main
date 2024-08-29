@@ -1,5 +1,5 @@
 import { logError, EVENTS, subscribeEvent } from "@expensio/sharedlib";
-import { removeFinancialDataService } from "../../services/financialDataService.js";
+import { removeExpenseFinancialDataService } from "../../services/financialDataService.js";
 
 export const subscribeToExpensesDeleted = async (channel) => {
 	const eventName = EVENTS.EXPENSE_DELETED;
@@ -8,7 +8,7 @@ export const subscribeToExpensesDeleted = async (channel) => {
 			eventName,
 			"financial-data-service-expenses-deleted",
 			async ({ data, headers }) => {
-				await removeFinancialDataService(data);
+				await removeExpenseFinancialDataService(data);
 			},
 			channel
 		);

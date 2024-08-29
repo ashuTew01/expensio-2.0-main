@@ -1,7 +1,8 @@
 import { logInfo, logError } from "@expensio/sharedlib";
-import MonthlyFinancialData from "../models/MonthlyFinancialData.js";
+import MonthlyExpenseFinancialData from "../models/MonthlyExpenseFinancialData.js";
+import MonthlyIncomeFinancialData from "../models/MonthlyIncomeFinancialData.js";
 
-export const addFinancialDataService = async (data) => {
+export const addExpenseFinancialDataService = async (data) => {
 	const {
 		title,
 		userId,
@@ -16,13 +17,13 @@ export const addFinancialDataService = async (data) => {
 		const year = date.getFullYear();
 		const month = date.getMonth() + 1; // Months are 0-indexed in JS
 		// Find or create the monthly financial data document for this user and month
-		let financialData = await MonthlyFinancialData.findOne({
+		let financialData = await MonthlyExpenseFinancialData.findOne({
 			userId,
 			year,
 			month,
 		});
 		if (!financialData) {
-			financialData = new MonthlyFinancialData({
+			financialData = new MonthlyExpenseFinancialData({
 				userId,
 				year,
 				month,
@@ -91,12 +92,15 @@ export const addFinancialDataService = async (data) => {
 };
 
 /**
- * Get financial data for a user based on the provided month and year pairs.
- * @param {number} userId - The ID of the user whose financial data is being requested.
+ * Get Expense financial data for a user based on the provided month and year pairs.
+ * @param {number} userId - The ID of the user whose expense financial data is being requested.
  * @param {Array<{month: number, year: number}>} monthYearPairs - An array of objects containing the month and year pairs for which data is required.
- * @returns {Promise<Array>} - Returns an array of financial data objects for the requested months.
+ * @returns {Promise<Array>} - Returns an array of expense financial data objects for the requested months.
  */
-export const getFinancialDataService = async (userId, monthYearPairs) => {
+export const getExpenseFinancialDataService = async (
+	userId,
+	monthYearPairs
+) => {
 	try {
 		// Create the query conditions based on the monthYearPairs array
 		const conditions = monthYearPairs.map(({ month, year }) => ({
@@ -105,8 +109,8 @@ export const getFinancialDataService = async (userId, monthYearPairs) => {
 			year,
 		}));
 
-		// Query the MonthlyFinancialData collection
-		const financialData = await MonthlyFinancialData.find({
+		// Query the MonthlyExpenseFinancialData collection
+		const financialData = await MonthlyExpenseFinancialData.find({
 			$or: conditions,
 		}).lean(); // Using lean() to get plain JavaScript objects instead of Mongoose documents
 
@@ -128,12 +132,12 @@ export const getFinancialDataService = async (userId, monthYearPairs) => {
 };
 
 /**
- * Remove financial data related to deleted expenses for a user.
+ * Remove expense financial data related to deleted expenses for a user.
  * @param {Array<Object>} deletedExpenses - An array of deleted expense objects, each containing details such as userId, amount, categoryId, cognitiveTriggerIds, mood, and createdAt.
  * @returns {Promise<void>} - Returns a promise that resolves when the financial data has been successfully updated or rejects with an error.
  * @throws {Error} - Throws an error if the financial data update fails.
  */
-export const removeFinancialDataService = async (deletedExpenses) => {
+export const removeExpenseFinancialDataService = async (deletedExpenses) => {
 	try {
 		for (const expense of deletedExpenses) {
 			const {
@@ -150,8 +154,8 @@ export const removeFinancialDataService = async (deletedExpenses) => {
 			const year = date.getFullYear();
 			const month = date.getMonth() + 1; // Months are 0-indexed in JS
 
-			// Find the corresponding MonthlyFinancialData record
-			const financialData = await MonthlyFinancialData.findOne({
+			// Find the corresponding MonthlyExpenseFinancialData record
+			const financialData = await MonthlyExpenseFinancialData.findOne({
 				userId,
 				year,
 				month,
@@ -214,6 +218,146 @@ export const removeFinancialDataService = async (deletedExpenses) => {
 		}
 	} catch (error) {
 		logError(`Failed to remove financial data: ${error.message}`);
+		throw error;
+	}
+};
+
+export const addIncomeFinancialDataService = async (data) => {
+	const { title, userId, amount, categoryId, createdAt } = data;
+	try {
+		const date = new Date(createdAt);
+		const year = date.getFullYear();
+		const month = date.getMonth() + 1; // Months are 0-indexed in JS
+		// Find or create the monthly financial data document for this user and month
+		let financialData = await MonthlyIncomeFinancialData.findOne({
+			userId,
+			year,
+			month,
+		});
+		if (!financialData) {
+			financialData = new MonthlyIncomeFinancialData({
+				userId,
+				year,
+				month,
+				categories: [],
+				totalMoneyEarned: 0,
+				totalIncomes: 0,
+			});
+		}
+		// Update the total money earned and total number of Incomes
+		financialData.totalMoneyEarned += amount;
+		financialData.totalIncomes += 1;
+		// Update the category information
+		const category = financialData.categories.find((c) =>
+			c.categoryId.equals(categoryId)
+		);
+		if (category) {
+			category.numIncomes += 1;
+			category.totalAmountEarned += amount;
+		} else {
+			financialData.categories.push({
+				categoryId,
+				numIncomes: 1,
+				totalAmountEarned: amount,
+			});
+		}
+		// Save the updated income financial data
+		await financialData.save();
+		const monthName = date.toLocaleString("en-US", { month: "long" });
+		logInfo(
+			`Income '${title}' added to income financial data of user with id '${userId}', for '${monthName} ${year}'.`
+		);
+	} catch (error) {
+		logError(`Failed to process Income. Created event: ${error.message}`);
+		throw error; // Ensure the message is sent to DLX in case of error
+	}
+};
+
+/**
+ * Get income financial data for a user based on the provided month and year pairs.
+ * @param {number} userId - The ID of the user whose income financial data is being requested.
+ * @param {Array<{month: number, year: number}>} monthYearPairs - An array of objects containing the month and year pairs for which data is required.
+ * @returns {Promise<Array>} - Returns an array of income financial data objects for the requested months.
+ */
+export const getIncomeFinancialDataService = async (userId, monthYearPairs) => {
+	try {
+		// Create the query conditions based on the monthYearPairs array
+		const conditions = monthYearPairs.map(({ month, year }) => ({
+			userId,
+			month,
+			year,
+		}));
+
+		const financialData = await MonthlyIncomeFinancialData.find({
+			$or: conditions,
+		}).lean(); // Using lean() to get plain JavaScript objects instead of Mongoose documents
+
+		// Return the structured response
+		return financialData.map((data) => ({
+			userId: data.userId,
+			year: data.year,
+			month: data.month,
+			totalMoneyEarned: data.totalMoneyEarned,
+			totalIncomes: data.totalIncomes,
+			categories: data.categories,
+		}));
+	} catch (error) {
+		logError(`Failed to retrieve income financial data: ${error.message}`);
+		throw error;
+	}
+};
+
+/**
+ * Remove income financial data related to deleted incomes for a user.
+ * @param {Array<Object>} deletedIncomes - An array of deleted income objects, each containing details such as userId, amount, categoryId, cognitiveTriggerIds, mood, and createdAt.
+ * @returns {Promise<void>} - Returns a promise that resolves when the financial data has been successfully updated or rejects with an error.
+ * @throws {Error} - Throws an error if the financial data update fails.
+ */
+export const removeIncomeFinancialDataService = async (deletedIncomes) => {
+	try {
+		for (const income of deletedIncomes) {
+			const { userId, title, amount, categoryId, createdAt } = income;
+
+			const date = new Date(createdAt);
+			const year = date.getFullYear();
+			const month = date.getMonth() + 1; // Months are 0-indexed in JS
+
+			// Find the corresponding MonthlyIncomeFinancialData record
+			const financialData = await MonthlyIncomeFinancialData.findOne({
+				userId,
+				year,
+				month,
+			});
+
+			if (financialData) {
+				// Update the total money spent and total number of incomes
+				financialData.totalMoneyEarned -= amount;
+				financialData.totalIncomes -= 1;
+
+				// Update the category information
+				const category = financialData.categories.find((c) =>
+					c.categoryId.equals(categoryId)
+				);
+				if (category) {
+					category.numIncomes -= 1;
+					category.totalAmountEarned -= amount;
+
+					// Remove the category if it has no incomes left
+					if (category.numIncomes <= 0) {
+						financialData.categories.pull({ _id: category._id });
+					}
+				}
+
+				// Save the updated financial data
+				await financialData.save();
+				const monthName = date.toLocaleString("en-US", { month: "long" });
+				logInfo(
+					`Income '${title}' for ₹${amount} deleted from Income Financial Data of User '${userId}', for ${monthName} ${year}`
+				);
+			}
+		}
+	} catch (error) {
+		logError(`Failed to remove income financial data: ${error.message}`);
 		throw error;
 	}
 };

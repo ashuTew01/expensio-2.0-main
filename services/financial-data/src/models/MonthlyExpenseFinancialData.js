@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const financialDataSchema = new mongoose.Schema({
+const monthlyExpensefinancialDataSchema = new mongoose.Schema({
 	userId: {
 		type: Number,
 		required: true,
@@ -43,8 +43,8 @@ const financialDataSchema = new mongoose.Schema({
 	totalExpenses: { type: Number, default: 0 },
 });
 
-const MonthlyFinancialData = mongoose.model(
-	"MonthlyFinancialData",
-	financialDataSchema
+const MonthlyExpenseFinancialData = mongoose.model(
+	"MonthlyExpenseFinancialData",
+	monthlyExpensefinancialDataSchema
 );
-export default MonthlyFinancialData;
+export default MonthlyExpenseFinancialData;
