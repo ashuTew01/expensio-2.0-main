@@ -37,7 +37,7 @@ function App() {
         <ToastContainer />
 
         <Routes>
-          {/* <Route path="" element={<PrivateRoute />}> */}
+          <Route path="" element={<PrivateRoute />}>
             <Route element={<Layout />}>
               {" "}
               {/* will exist on every page. Eg, navbar and sidebar. */}
@@ -54,7 +54,7 @@ function App() {
               {/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
               {/* <Route path="/user/summary" element={<SummaryScreen />} /> */}
             </Route>
-          {/* </Route> */}
+          </Route>
 
           <Route>
             <Route index path="/" element={<HomeScreen />} />

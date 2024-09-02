@@ -89,13 +89,8 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 		) {
 			throw new ValidationError("OTP is invalid or has expired.");
 		}
-<<<<<<< HEAD
-		const userExists = otpRequest.user_exists;
-		console.log(userData)
-=======
 
 		const userExistsInOtpRequestTable = otpRequest.user_exists;
->>>>>>> 54165ac34f073a967acd0c3fd8fd3b8330946977
 		let user;
 
 		if (!userExistsInOtpRequestTable) {

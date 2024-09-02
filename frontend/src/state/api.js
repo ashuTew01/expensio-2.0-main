@@ -140,7 +140,7 @@ export const api = createApi({
     }),
     sendOtp: build.mutation({
       query: (data) => ({
-        url: `users/send-otp`,
+        url: `user/send-otp`,
         method: 'POST',
         body: data,
         headers: DEFAULT_HEADERS
@@ -148,7 +148,7 @@ export const api = createApi({
     }),
     verifyOtp: build.mutation({
       query: (data) => ({
-        url: `users/verify-otp`,
+        url: `user/verify-otp`,
         method: 'POST',
         body: data,
       })

@@ -17,7 +17,7 @@ import { TextField } from "@mui/material";
 import { useSendOtpMutation } from "../../state/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIfUserExist } from "../../state/authSlice";
 import { useEffect } from "react";
 
@@ -78,12 +78,12 @@ export default function PhoneNumberPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { userInfo } = useSelector((state) => state.auth);
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
       navigate('/dashboard');
     }
-  }, [navigate]);
+  }, [navigate, userInfo]);
 
 
 
