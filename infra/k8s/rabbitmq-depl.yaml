@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-depl
+  namespace: expensio-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management # Latest version with management UI
+          ports:
+            - containerPort: 5672 # AMQP port
+            - containerPort: 15672 # Management UI port
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_USER
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-srv
+  namespace: expensio-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp-port
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+    - name: management-port
+      protocol: TCP
+      port: 15672
+      targetPort: 15672

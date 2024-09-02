@@ -85,6 +85,18 @@ export const markUserExistsModel = async (phone, client = pool) => {
 	}
 };
 
+export const markUserDoesNotExistsModel = async (phone, client = pool) => {
+	const query = `
+			UPDATE otp_requests SET user_exists = FALSE WHERE phone = $1 RETURNING *;
+	`;
+	const result = await client.query(query, [phone]);
+	if (result.rowCount === 0) {
+		throw new NotFoundError(
+			`No OTP request found for phone ${phone} to update.`
+		);
+	}
+};
+
 export const resetOtpRequestModel = async (phone, client = pool) => {
 	const query = `
 			UPDATE otp_requests

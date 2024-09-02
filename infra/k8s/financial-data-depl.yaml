@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: financial-data-depl
+  namespace: expensio-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: financial-data
+  template:
+    metadata:
+      labels:
+        app: financial-data
+    spec:
+      containers:
+        - name: financial-data
+          image: ashuz057/expensio-financial-data
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: financial-data-secret
+                  key: MONGO_URI
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: financial-data-secret
+                  key: PORT
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: JWT_SECRET
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: financial-data-srv
+  namespace: expensio-dev
+spec:
+  selector:
+    app: financial-data
+  ports:
+    - name: financial-data
+      protocol: TCP
+      port: 3003
+      targetPort: 3003

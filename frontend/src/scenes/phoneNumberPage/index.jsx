@@ -19,6 +19,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { setIfUserExist } from "../../state/authSlice";
+import { useEffect } from "react";
 
 function Copyright(props) {
   return (
@@ -76,6 +77,15 @@ export default function PhoneNumberPage() {
   const [sendOtp, {isLoading, error}] = useSendOtpMutation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
+
 
   const onClickHandler = async () => {
     // console.log(phoneNumber);

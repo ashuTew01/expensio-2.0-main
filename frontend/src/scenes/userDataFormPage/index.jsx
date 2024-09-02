@@ -69,7 +69,7 @@ export default function UserDataForm() {
         dispatch(setUserInfo(response.user));
         dispatch(setToken(response.token));
         toast.success(response.message);
-        navigate("/home"); // Redirect to home or another page
+        navigate("/dashboard"); // Redirect to home or another page
       } else {
         toast.error(response.message || "Failed to verify OTP");
       }

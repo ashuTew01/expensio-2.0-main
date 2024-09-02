@@ -2,12 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-srv
+  namespace: expensio-dev
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: localhost
+    - host: expensio.com
       http:
         paths:
           - path: /api/user
@@ -16,11 +17,25 @@ spec:
               service:
                 name: user-srv
                 port:
-                  number: 3000
+                  number: 3001
           - path: /api/expense
             pathType: Prefix
             backend:
               service:
                 name: expense-srv
                 port:
-                  number: 3001
+                  number: 3002
+          - path: /api/financial-data
+            pathType: Prefix
+            backend:
+              service:
+                name: financial-data-srv
+                port:
+                  number: 3003
+          - path: /api/income
+            pathType: Prefix
+            backend:
+              service:
+                name: income-srv
+                port:
+                  number: 3004

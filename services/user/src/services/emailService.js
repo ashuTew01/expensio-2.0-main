@@ -4,6 +4,7 @@ import {
 	NotFoundError,
 	ValidationError,
 	OtpSendingError,
+	logInfo,
 } from "@expensio/sharedlib";
 const transporter = nodemailer.createTransport({
 	host: "smtp.zoho.in",
@@ -23,7 +24,7 @@ const sendEmail = async ({ from, to, subject, html }) => {
 			subject,
 			html,
 		});
-		console.log("Email sent: %s", info.messageId);
+		logInfo("Email sent: %s", info.messageId);
 	} catch (error) {
 		throw new OtpSendingError("Error sending email.");
 	}
