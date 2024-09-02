@@ -24,7 +24,7 @@ const formSchema = yup.object().shape({
   email: yup.string().email("Invalid email entered").required("This is a required field."),
   bio: yup.string(),
   dateOfBirth: yup.date().nullable(),
-  phoneNumber: yup.string()
+  phone: yup.string()
     .matches(/^\+91[789]\d{9}$/, "Invalid phone number. Must start with +91 followed by 10 digits starting with 7, 8, or 9.")
     .required("This is a required field."),
 });
@@ -56,13 +56,15 @@ export default function UserDataForm() {
   const location = useLocation();
   const dispatch = useDispatch();
   const [otp] = useState(location.state?.otp || "");
-  const phoneNumber = location.state?.phoneNumber || ""; // Extract phone number from location.state
+  const phone = location.state?.phoneNumber || ""; // Extract phone number from location.state
   const [verifyOtp, { isLoading, error }] = useVerifyOtpMutation(); 
 
+  console.log(phone);
   // Use Formik to handle form state and submission
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await verifyOtp({ phone: values.phoneNumber, otp, userData: values }).unwrap();
+      console.log(values.phone);
+      const response = await verifyOtp({ phone: values.phone, otp, userData: values }).unwrap();
       if (response.token) {
         dispatch(setUserInfo(response.user));
         dispatch(setToken(response.token));
@@ -123,7 +125,7 @@ export default function UserDataForm() {
                   email: '',
                   bio: '',
                   dateOfBirth: currentDate,
-                  phoneNumber: phoneNumber, // Set phone number from location.state
+                  phone: phone, // Set phone number from location.state
                 }}
                 validationSchema={formSchema}
                 onSubmit={handleSubmit}
@@ -188,11 +190,11 @@ export default function UserDataForm() {
                       label="Phone Number"
                       fullWidth
                       margin="normal"
-                      value={values.phoneNumber}
+                      value={values.phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.phoneNumber && !!errors.phoneNumber}
-                      helperText={touched.phoneNumber && errors.phoneNumber}
+                      error={touched.phone && !!errors.phone}
+                      helperText={touched.phone && errors.phone}
                       required
                       disabled
                     />

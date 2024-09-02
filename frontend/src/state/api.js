@@ -151,7 +151,6 @@ export const api = createApi({
         url: `users/verify-otp`,
         method: 'POST',
         body: data,
-        headers: DEFAULT_HEADERS
       })
     })
   }),
