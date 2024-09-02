@@ -7,6 +7,7 @@ import {
 	getExpensesService,
 	removeCategoriesService,
 	removeCognitiveTriggersService,
+	getCategoriesByIdsService,
 } from "../services/expenseService.js";
 import { ValidationError } from "@expensio/sharedlib";
 
@@ -159,6 +160,41 @@ export const addCognitiveTriggersController = async (req, res, next) => {
 	}
 };
 
+// @desc    Gets Cognitive Triggers
+// @route   POST
+// @access  Public
+// example request {
+//    "cognitiveTriggerIds": ["64df88c888e5835cf9c0561d", "64df88c888e5835cf9c0561e"]
+// }
+// example response {
+//     "64df88c888e5835cf9c0561d": "Groceries",
+//     "64df88c888e5835cf9c0561e": "Rent",
+// }
+export const getCognitiveTriggersByIdsController = async (req, res, next) => {
+	const schema = Joi.object({
+		cognitiveTriggerIds: Joi.array()
+			.items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
+			.required(),
+	});
+
+	const { error, value } = schema.validate(req.body);
+
+	if (error) {
+		throw new ValidationError(error.details[0].message);
+	}
+
+	try {
+		const cognitiveTriggerIds = value.cognitiveTriggerIds;
+
+		const cognitiveTriggers =
+			await getCognitiveTriggersByIdsService(cognitiveTriggerIds);
+
+		res.status(200).json(cognitiveTriggers);
+	} catch (error) {
+		next(error);
+	}
+};
+
 // @desc    Removes cognitive Triggers, receives array (codes) of cognitiveTriggerCodes
 // @route   POST
 // @access  Private
@@ -204,7 +240,7 @@ export const addCategoriesController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new Error(error.details[0].message);
+			throw new ValidationError(error.details[0].message);
 		}
 
 		const newCategories = await addCategoriesService(value, req.user?.id);
@@ -213,6 +249,40 @@ export const addCategoriesController = async (req, res, next) => {
 			message: "Categories added successfully!",
 			categories: newCategories,
 		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+// @desc    Gets Categories
+// @route   POST
+// @access  Public
+// example request {
+//    "categoryIds": ["64df88c888e5835cf9c0561d", "64df88c888e5835cf9c0561e"]
+// }
+// example response {
+//     "64df88c888e5835cf9c0561d": "Groceries",
+//     "64df88c888e5835cf9c0561e": "Rent",
+// }
+export const getCategoriesByIdsController = async (req, res, next) => {
+	const schema = Joi.object({
+		categoryIds: Joi.array()
+			.items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
+			.required(),
+	});
+
+	const { error, value } = schema.validate(req.body);
+
+	if (error) {
+		throw new ValidationError(error.details[0].message);
+	}
+
+	try {
+		const categoryIds = value.categoryIds;
+
+		const categories = await getCategoriesByIdsService(categoryIds);
+
+		res.status(200).json(categories);
 	} catch (error) {
 		next(error);
 	}
