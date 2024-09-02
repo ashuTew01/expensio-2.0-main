@@ -1,6 +1,7 @@
-import { logInfo, logError } from "@expensio/sharedlib";
+import { logInfo, logError, EVENTS, publishEvent } from "@expensio/sharedlib";
 import MonthlyExpenseFinancialData from "../models/MonthlyExpenseFinancialData.js";
 import MonthlyIncomeFinancialData from "../models/MonthlyIncomeFinancialData.js";
+import connectRabbitMQ from "../config/rabbitmq.js";
 
 export const addExpenseFinancialDataService = async (data) => {
 	const {
@@ -81,6 +82,15 @@ export const addExpenseFinancialDataService = async (data) => {
 		}
 		// Save the updated financial data
 		await financialData.save();
+
+		// Publish the updated financial data event
+		const channel = await connectRabbitMQ();
+		await publishEvent(
+			EVENTS.FINANCIALDATA_UPDATED_EXPENSE,
+			financialData.toObject(), // Send the updated financial data as the event data
+			channel
+		);
+
 		const monthName = date.toLocaleString("en-US", { month: "long" });
 		logInfo(
 			`Expense '${title}' added to financial data of user with id '${userId}', for '${monthName} ${year}'.`
@@ -210,6 +220,15 @@ export const removeExpenseFinancialDataService = async (deletedExpenses) => {
 
 				// Save the updated financial data
 				await financialData.save();
+
+				// Publish the updated financial data event
+				const channel = await connectRabbitMQ();
+				await publishEvent(
+					EVENTS.FINANCIALDATA_UPDATED_EXPENSE,
+					financialData.toObject(), // Send the updated financial data as the event data
+					channel
+				);
+
 				const monthName = date.toLocaleString("en-US", { month: "long" });
 				logInfo(
 					`Expense '${title}' for ₹${amount} deleted from Financial Data of User '${userId}', for ${monthName} ${year}`
@@ -263,6 +282,15 @@ export const addIncomeFinancialDataService = async (data) => {
 		}
 		// Save the updated income financial data
 		await financialData.save();
+
+		// Publish the updated financial data event
+		const channel = await connectRabbitMQ();
+		await publishEvent(
+			EVENTS.FINANCIALDATA_UPDATED_INCOME,
+			financialData.toObject(), // Send the updated financial data as the event data
+			channel
+		);
+
 		const monthName = date.toLocaleString("en-US", { month: "long" });
 		logInfo(
 			`Income '${title}' added to income financial data of user with id '${userId}', for '${monthName} ${year}'.`
@@ -350,6 +378,15 @@ export const removeIncomeFinancialDataService = async (deletedIncomes) => {
 
 				// Save the updated financial data
 				await financialData.save();
+
+				// Publish the updated financial data event
+				const channel = await connectRabbitMQ();
+				await publishEvent(
+					EVENTS.FINANCIALDATA_UPDATED_INCOME,
+					financialData.toObject(), // Send the updated financial data as the event data
+					channel
+				);
+
 				const monthName = date.toLocaleString("en-US", { month: "long" });
 				logInfo(
 					`Income '${title}' for ₹${amount} deleted from Income Financial Data of User '${userId}', for ${monthName} ${year}`

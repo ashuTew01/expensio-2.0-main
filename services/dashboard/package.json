@@ -1,7 +1,7 @@
 {
-	"name": "financial-data",
+	"name": "dashboard",
 	"version": "1.0.0",
-	"description": "Financial Data Microservice",
+	"description": "Dashboard Microservice",
 	"type": "module",
 	"main": "src/app.js",
 	"scripts": {
@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@expensio/sharedlib": "^1.0.1",
 		"amqplib": "^0.10.4",
+		"axios": "^1.7.7",
 		"body-parser": "^1.20.2",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.5",

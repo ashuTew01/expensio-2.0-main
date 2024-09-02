@@ -1,5 +1,8 @@
 #!/bin/bash
 
+############################### INCOMPLETE
+
+
 # Delete in reverse order of deployment
 echo "Deleting Ingress..."
 kubectl delete -f ./k8s/ingress-srv.yaml

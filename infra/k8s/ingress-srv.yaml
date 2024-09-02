@@ -39,3 +39,10 @@ spec:
                 name: income-srv
                 port:
                   number: 3004
+          - path: /api/dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: dashboard-srv
+                port:
+                  number: 3005

@@ -110,6 +110,7 @@ export const addExpensesService = async (expensesData, userId) => {
 		}
 
 		let cognitiveTriggerIds = [];
+		let cognitiveTriggerNames = [];
 		if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
 			const cognitiveTriggers = await CognitiveTrigger.find({
 				code: { $in: cognitiveTriggerCodes },
@@ -120,6 +121,7 @@ export const addExpensesService = async (expensesData, userId) => {
 				);
 			}
 			cognitiveTriggerIds = cognitiveTriggers.map((trigger) => trigger._id);
+			cognitiveTriggerNames = cognitiveTriggers.map((trigger) => trigger.name);
 		}
 
 		const newExpense = new Expense({
@@ -148,6 +150,8 @@ export const addExpensesService = async (expensesData, userId) => {
 			EVENTS.EXPENSE_CREATED,
 			{
 				...newExpense.toObject(),
+				categoryName: category.name,
+				cognitiveTriggerNames,
 				createdAt: newExpense.createdAt,
 			},
 			channel
@@ -308,4 +312,28 @@ export const removeCategoriesService = async (categoryCodes) => {
 	}
 
 	return result;
+};
+
+export const getCategoriesByIdsService = async (categoryIds) => {
+	const categories = await Category.find({ _id: { $in: categoryIds } });
+
+	const categoryMap = {};
+	categories.forEach((category) => {
+		categoryMap[category._id] = category.name;
+	});
+
+	return categoryMap;
+};
+
+export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
+	const cognitiveTriggers = await CognitiveTrigger.find({
+		_id: { $in: cognitiveTriggerIds },
+	});
+
+	const cognitiveTriggerMap = {};
+	cognitiveTriggers.forEach((trigger) => {
+		cognitiveTriggerMap[trigger._id] = trigger.name;
+	});
+
+	return cognitiveTriggerMap;
 };

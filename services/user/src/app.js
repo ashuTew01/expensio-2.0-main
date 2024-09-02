@@ -26,6 +26,7 @@ const requiredEnvVars = [
 	"DB_HOST",
 	"DB_PORT",
 	"DB_NAME",
+	"RABBITMQ_URL",
 	// "DB_AIVEN_POSTGRES_CERT",
 ];
 
@@ -38,7 +39,6 @@ const checkEnvVariables = () => {
 		process.exit(1);
 	}
 };
-
 checkEnvVariables();
 
 import bodyParser from "body-parser";
