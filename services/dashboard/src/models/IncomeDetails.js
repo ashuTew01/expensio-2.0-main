@@ -25,7 +25,7 @@ const incomeDetailsSchema = new mongoose.Schema({
 	},
 	incomeType: {
 		type: String,
-		enum: ["salary", "bonus", "investment", "other"],
+		enum: ["primary", "secondary", "settlement", "unknown"],
 		required: true,
 	},
 	categoryName: {

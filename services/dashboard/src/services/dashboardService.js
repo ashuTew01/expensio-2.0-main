@@ -1,7 +1,8 @@
-import { logError, logWarning } from "@expensio/sharedlib";
+import { logError, logWarning, logInfo } from "@expensio/sharedlib";
 import Dashboard from "../models/Dashboard.js";
 import ExpenseDetails from "../models/ExpenseDetails.js";
 import IncomeDetails from "../models/IncomeDetails.js";
+import axios from "axios";
 
 /**
  * Adds a newly created expense to the user's dashboard.
@@ -27,7 +28,19 @@ export const addExpenseToDashboardService = async (expenseData) => {
 	try {
 		const { userId, ...expenseDetails } = expenseData;
 
-		// Create a new ExpenseDetails document
+		// Check if the user already has 10 expenses stored in ExpenseDetails
+		const expenseCount = await ExpenseDetails.countDocuments({ userId });
+		if (expenseCount >= 10) {
+			// Find and remove the oldest expense for this user
+			const oldestExpense = await ExpenseDetails.findOne({ userId }).sort({
+				createdAt: 1,
+			});
+			if (oldestExpense) {
+				await ExpenseDetails.deleteOne({ _id: oldestExpense._id });
+			}
+		}
+
+		// Create and save the new ExpenseDetails document
 		const newExpenseDetails = new ExpenseDetails({
 			userId,
 			expenseId: expenseData._id,
@@ -60,7 +73,7 @@ export const addExpenseToDashboardService = async (expenseData) => {
 			expenseDetailsId: savedExpenseDetails._id,
 		});
 
-		// Ensure only the latest 10 expenses are kept
+		// Ensure only the latest 10 expenses are kept in the dashboard
 		if (dashboard.latestExpenses.length > 10) {
 			dashboard.latestExpenses.pop();
 		}
@@ -80,25 +93,31 @@ export const addExpenseToDashboardService = async (expenseData) => {
  * Removes expenses from the user's dashboard based on the array of deleted expenses.
  * If any of the expenses are found in the latest expenses list, they are removed, and the dashboard is updated.
  *
- * @param {Array<Object>} expenses - The array of deleted expenses.
- * @param {Number} userId - The ID of the user whose dashboard is being updated.
- *
+ * @param {Array<Object>} deletedExpenses - The array of deleted expenses by the SAME USER.
  * @returns {Promise<void>} - Returns a promise that resolves when the dashboard has been updated.
- *
  * @throws {Error} - Throws an error if the dashboard update fails.
+ *
  */
-export const removeExpensesFromDashboardService = async (expenses, userId) => {
+export const removeExpensesFromDashboardService = async (deletedExpenses) => {
 	try {
-		// Find the user's dashboard
+		if (deletedExpenses.length === 0) {
+			logError("No expenses to remove.");
+			return;
+		}
+
+		// Extract the userId from any of the expenses, assuming they all have the same userId
+		const userId = deletedExpenses[0].userId;
+
+		// Find the user's dashboard once
 		const dashboard = await Dashboard.findOne({ userId });
 
 		if (!dashboard) {
-			logError("Dashboard not found for the user.");
-			throw new Error("Dashboard not found for the user.");
+			logError(`Dashboard not found for the user with ID: ${userId}.`);
+			throw new Error(`Dashboard not found for the user with ID: ${userId}.`);
 		}
 
-		// Extract the expense IDs from the deleted expenses array
-		const expenseIds = expenses.map((expense) => expense._id.toString());
+		// Extract all expense IDs from the deleted expenses
+		const expenseIds = deletedExpenses.map((expense) => expense._id.toString());
 
 		// Find all ExpenseDetails documents that match the expense IDs
 		const expenseDetailsToRemove = await ExpenseDetails.find({
@@ -107,19 +126,22 @@ export const removeExpensesFromDashboardService = async (expenses, userId) => {
 
 		// Extract the expenseDetailsIds to remove from the dashboard
 		const expenseDetailsIdsToRemove = expenseDetailsToRemove.map(
-			(expenseDetail) => expenseDetail._id
+			(expenseDetail) => expenseDetail._id.toString()
 		);
 
 		// Filter out the expenseDetailsIds from the dashboard's latest expenses
 		dashboard.latestExpenses = dashboard.latestExpenses.filter(
-			(expense) => !expenseDetailsIdsToRemove.includes(expense.expenseId)
+			(expense) =>
+				!expenseDetailsIdsToRemove.includes(expense.expenseDetailsId.toString())
 		);
 
 		// Save the updated dashboard
 		await dashboard.save();
 
 		// Delete the ExpenseDetails documents as they're no longer needed
-		await ExpenseDetails.deleteMany({ expenseId: { $in: expenseIds } });
+		await ExpenseDetails.deleteMany({
+			_id: { $in: expenseDetailsIdsToRemove },
+		});
 	} catch (error) {
 		logError(`Failed to remove expenses from dashboard: ${error.message}`);
 		throw error;
@@ -148,9 +170,10 @@ export const addIncomeToDashboardService = async (incomeData) => {
 	try {
 		const { userId, ...incomeDetails } = incomeData;
 
+		// Create a new IncomeDetails document
 		const newIncomeDetails = new IncomeDetails({
 			userId,
-			incomeDetailsId: incomeData._id, // Reference to the original income ID
+			incomeId: incomeData._id, // Reference to the original income ID
 			title: incomeData.title,
 			amount: incomeData.amount,
 			incomeType: incomeData.incomeType,
@@ -180,7 +203,11 @@ export const addIncomeToDashboardService = async (incomeData) => {
 
 		// Ensure only the latest 10 incomes are kept
 		if (dashboard.latestIncomes.length > 10) {
-			dashboard.latestIncomes.pop();
+			// Remove the oldest income from the dashboard
+			const oldestIncome = dashboard.latestIncomes.pop();
+
+			// Also remove the corresponding IncomeDetails document from the collection
+			await IncomeDetails.findByIdAndDelete(oldestIncome.incomeDetailsId);
 		}
 
 		// Update the lastUpdated field
@@ -199,14 +226,21 @@ export const addIncomeToDashboardService = async (incomeData) => {
  * If any of the incomes are found in the latest incomes list, they are removed, and the dashboard is updated.
  *
  * @param {Array<Object>} incomes - The array of deleted incomes.
- * @param {Number} userId - The ID of the user whose dashboard is being updated.
  *
  * @returns {Promise<void>} - Returns a promise that resolves when the dashboard has been updated.
  *
  * @throws {Error} - Throws an error if the dashboard update fails.
  */
-export const removeIncomesFromDashboardService = async (incomes, userId) => {
+export const removeIncomesFromDashboardService = async (incomes) => {
 	try {
+		if (incomes.length === 0) {
+			logWarning("No Incomes to remove.");
+			return;
+		}
+
+		// Extract the userId from any of the expenses, assuming they all have the same userId
+		const userId = incomes[0].userId;
+
 		// Find the user's dashboard
 		const dashboard = await Dashboard.findOne({ userId });
 
@@ -224,20 +258,21 @@ export const removeIncomesFromDashboardService = async (incomes, userId) => {
 		});
 
 		// Extract the incomeDetailsIds to remove from the dashboard
-		const incomeDetailsIdsToRemove = incomeDetailsToRemove.map(
-			(incomeDetail) => incomeDetail._id
+		const incomeDetailsIdsToRemove = incomeDetailsToRemove.map((incomeDetail) =>
+			incomeDetail._id.toString()
 		);
 
 		// Filter out the incomeDetailsIds from the dashboard's latest incomes
 		dashboard.latestIncomes = dashboard.latestIncomes.filter(
-			(income) => !incomeDetailsIdsToRemove.includes(income.incomeId)
+			(income) =>
+				!incomeDetailsIdsToRemove.includes(income.incomeDetailsId.toString())
 		);
 
 		// Save the updated dashboard
 		await dashboard.save();
 
 		// Delete the IncomeDetails documents as they're no longer needed
-		await IncomeDetails.deleteMany({ incomeId: { $in: incomeIds } });
+		await IncomeDetails.deleteMany({ _id: { $in: incomeDetailsIdsToRemove } });
 	} catch (error) {
 		logError(`Failed to remove incomes from dashboard: ${error.message}`);
 		throw error;

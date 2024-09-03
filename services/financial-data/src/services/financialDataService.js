@@ -53,7 +53,7 @@ export const addExpenseFinancialDataService = async (data) => {
 			});
 		}
 		// Update the cognitive triggers information
-		cognitiveTriggerIds.forEach((triggerId) => {
+		cognitiveTriggerIds?.forEach((triggerId) => {
 			const trigger = financialData.cognitiveTriggers.find((t) =>
 				t.cognitiveTriggerId.equals(triggerId)
 			);

@@ -8,6 +8,7 @@ import {
 	removeCategoriesService,
 	removeCognitiveTriggersService,
 	getCategoriesByIdsService,
+	getCognitiveTriggersByIdsService,
 } from "../services/expenseService.js";
 import { ValidationError } from "@expensio/sharedlib";
 

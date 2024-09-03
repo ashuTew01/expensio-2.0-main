@@ -107,6 +107,7 @@ export const addIncomesService = async (incomesData, userId) => {
 			EVENTS.INCOME_CREATED,
 			{
 				...newIncome.toObject(),
+				categoryName: category.name,
 				createdAt: newIncome.createdAt,
 			},
 			channel
@@ -227,4 +228,15 @@ export const removeCategoriesService = async (categoryCodes) => {
 	}
 
 	return result;
+};
+
+export const getCategoriesByIdsService = async (categoryIds) => {
+	const categories = await Category.find({ _id: { $in: categoryIds } });
+
+	const categoryMap = {};
+	categories.forEach((category) => {
+		categoryMap[category._id] = category.name;
+	});
+
+	return categoryMap;
 };
