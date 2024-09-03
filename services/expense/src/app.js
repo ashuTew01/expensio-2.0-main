@@ -34,7 +34,7 @@ app.use(cors());
 // Use routes
 app.use("/api/expense", expenseRoutes);
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3000;
 
 const startServices = async () => {
 	try {

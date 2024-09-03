@@ -49,5 +49,5 @@ spec:
   ports:
     - name: income
       protocol: TCP
-      port: 3004
-      targetPort: 3004
+      port: 3000
+      targetPort: 3000

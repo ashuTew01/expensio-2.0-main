@@ -34,7 +34,7 @@ app.use(cors());
 // Use routes
 app.use("/api/income", incomeRoutes);
 
-const PORT = process.env.PORT || 3004;
+const PORT = process.env.PORT || 3000;
 
 const startServices = async () => {
 	try {

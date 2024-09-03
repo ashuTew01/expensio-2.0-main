@@ -6,13 +6,14 @@ let channel;
 
 const startRabbitMQ = async () => {
 	try {
-		channel = await connectRabbitMQ();
+		logInfo("Connecting to RabbitMQ Event Bus...");
+		channel = await connectRabbitMQ(45000, 500);
 
-		// Initialize event subscribers
+		logInfo("Subscribing to Events...");
 		await subscribeToUserDeletionFailed(channel);
-		// can initialize more event subscribers here
+		logInfo("Subscription to Events Complete...");
 
-		logInfo("Events subscribed and RabbitMQ setup completed successfully.");
+		logInfo("RabbitMQ setup completed successfully.");
 	} catch (error) {
 		logError("Failed to start RabbitMQ services:", error);
 		process.exit(1);

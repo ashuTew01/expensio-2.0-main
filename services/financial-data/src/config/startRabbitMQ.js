@@ -9,16 +9,15 @@ let channel;
 
 const startRabbitMQ = async () => {
 	try {
-		channel = await connectRabbitMQ();
+		logInfo("Connecting to RabbitMQ Event Bus...");
+		channel = await connectRabbitMQ(45000, 500);
 
-		// Initialize event subscribers
-
+		logInfo("Subscribing to Events...");
 		await subscribeToExpenseCreated(channel);
 		await subscribeToExpensesDeleted(channel);
 		await subscribeToIncomeCreated(channel);
 		await subscribeToIncomesDeleted(channel);
-
-		// can initialize more event subscribers here
+		logInfo("Subscription to Events Complete...");
 
 		logInfo("RabbitMQ setup completed successfully.");
 	} catch (error) {

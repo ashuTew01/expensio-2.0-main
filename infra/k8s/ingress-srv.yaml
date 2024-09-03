@@ -17,32 +17,32 @@ spec:
               service:
                 name: user-srv
                 port:
-                  number: 3001
+                  number: 3000
           - path: /api/expense
             pathType: Prefix
             backend:
               service:
                 name: expense-srv
                 port:
-                  number: 3002
+                  number: 3000
           - path: /api/financial-data
             pathType: Prefix
             backend:
               service:
                 name: financial-data-srv
                 port:
-                  number: 3003
+                  number: 3000
           - path: /api/income
             pathType: Prefix
             backend:
               service:
                 name: income-srv
                 port:
-                  number: 3004
+                  number: 3000
           - path: /api/dashboard
             pathType: Prefix
             backend:
               service:
                 name: dashboard-srv
                 port:
-                  number: 3005
+                  number: 3000

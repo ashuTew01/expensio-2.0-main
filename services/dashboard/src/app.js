@@ -35,7 +35,7 @@ app.use(cors());
 // Use routes
 app.use("/api/dashboard", dashboardRoutes);
 
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 3000;
 
 const startServices = async () => {
 	try {

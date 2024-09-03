@@ -35,7 +35,7 @@ app.use(cors());
 // Use routes
 app.use("/api/financial-data", financialDataRoutes);
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3000;
 
 const startServices = async () => {
 	try {
