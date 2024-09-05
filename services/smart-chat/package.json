@@ -1,0 +1,28 @@
+{
+	"name": "smart-chat",
+	"version": "1.0.0",
+	"description": "Smart Chat Microservice",
+	"type": "module",
+	"main": "src/app.js",
+	"scripts": {
+		"start": "node src/app.js",
+		"dev": "nodemon src/app.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@expensio/sharedlib": "^1.0.1",
+		"amqplib": "^0.10.4",
+		"axios": "^1.7.7",
+		"body-parser": "^1.20.2",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2",
+		"joi": "^17.13.3",
+		"mongoose": "^8.5.2",
+		"openai": "^4.57.3",
+		"socket.io": "^4.7.5"
+	}
+}
