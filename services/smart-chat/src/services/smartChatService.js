@@ -7,12 +7,9 @@ import { openAICreateExpenseFunction } from "../utils/openAiFunctions.js";
  * @param {Socket} socket - The WebSocket connection.
  * @param {Array} conversationHistory - The chat history to maintain context.
  * @param {String} userMessage - The expense related message.
+ * @returns {Promise} The title of the expense.
  */
-export const handleCreateExpenseService = async (
-	socket,
-	conversationHistory,
-	userMessage
-) => {
+export const handleCreateExpenseService = async (socket, userMessage) => {
 	try {
 		socket.emit("loading", {
 			type: "loading",
@@ -32,7 +29,7 @@ export const handleCreateExpenseService = async (
 		// Call OpenAI to get the expense details
 		const aiResponse = await callOpenAI(
 			// conversationHistory,
-			[{ role: "user", content: prompt }],
+			[{ role: "system", content: prompt }],
 			openAICreateExpenseFunction
 		);
 		if (aiResponse.choices[0].message.content === "NONE") {
@@ -47,16 +44,6 @@ export const handleCreateExpenseService = async (
 		const functionArgs = JSON.parse(
 			aiResponse.choices[0].message.function_call.arguments
 		);
-
-		// Update conversation history with OpenAI response
-		if (functionArgs) {
-			conversationHistory.push({
-				role: "assistant",
-				content: JSON.stringify(
-					`Function Called: Create Expense title ${functionArgs.title}`
-				),
-			});
-		}
 
 		// Prepare the data for the expense creation API
 		const expenseData = {
@@ -82,14 +69,16 @@ export const handleCreateExpenseService = async (
 				},
 			}
 		);
-
+		const expenseTitle = response?.data?.expenses[0]?.title;
 		// Respond to the user with the confirmation
 		socket.emit("response", {
 			type: "expense_created",
-			message: `Expense '${response?.data?.expenses[0]?.title}' created successfully!`, //'${response.data.title}'
+			message: `Expense '${expenseTitle}' created successfully!`,
 		});
+
+		return expenseTitle;
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		socket.emit("response", {
 			type: "error",
 			message: "Failed to create expense.",
