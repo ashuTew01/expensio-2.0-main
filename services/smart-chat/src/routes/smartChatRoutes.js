@@ -1,8 +1,8 @@
 import express from "express";
-import { authMiddleware } from "@expensio/sharedlib";
+import { smartChatTestController } from "../controllers/smartChatController.js";
 
 const router = express.Router();
 
-// router.get("/", authMiddleware, getDashboardController);
+router.get("/test", smartChatTestController);
 
 export default router;

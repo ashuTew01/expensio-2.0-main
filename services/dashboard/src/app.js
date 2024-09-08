@@ -47,7 +47,7 @@ const startServices = async () => {
 	}
 };
 
-startServices();
+await startServices();
 
 app.listen(PORT, () => {
 	logInfo("Dashboard service is running on port " + PORT);

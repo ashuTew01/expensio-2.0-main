@@ -63,7 +63,7 @@ const startServices = async () => {
 		process.exit(1);
 	}
 };
-startServices();
+await startServices();
 
 app.use(cors());
 

@@ -1,4 +1,4 @@
-import OpenAI from "openai"; // No Configuration import
+import OpenAI from "openai";
 import dotenv from "dotenv";
 import { logError } from "@expensio/sharedlib";
 // Load environment variables from .env file
@@ -50,7 +50,6 @@ export const callOpenAI = async (
 		return response; // Return the API response
 	} catch (error) {
 		logError("Failed to call OpenAI API: " + error.message);
-		console.error(error);
 		throw error;
 	}
 };

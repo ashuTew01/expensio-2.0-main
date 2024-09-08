@@ -52,7 +52,7 @@ const startServices = async () => {
 	}
 };
 
-startServices();
+await startServices();
 
 server.listen(PORT, () => {
 	logInfo("Smart Chat service is running on port " + PORT);

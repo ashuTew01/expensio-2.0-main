@@ -3,7 +3,9 @@ import axios from "axios"; // For making API calls to the expense service
 import {
 	openAICreateExpenseFunction,
 	openAICreateIncomeFunction,
-} from "../utils/openAiFunctions.js";
+	openAIGetFinancialDataFunction,
+} from "../utils/openaiFunctions.js";
+import { logError } from "@expensio/sharedlib";
 
 /**
  * Handles the expense creation process by communicating with OpenAI and the expense service.
@@ -80,7 +82,7 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 
 		return expenseTitle;
 	} catch (error) {
-		console.error(error);
+		logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "Failed to create expense.",
@@ -161,10 +163,95 @@ export const handleCreateIncomeService = async (socket, userMessage) => {
 
 		return incomeTitle;
 	} catch (error) {
-		console.error(error);
+		logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "Failed to create income.",
+		});
+	}
+};
+
+/**
+ * Handles the retrieval of financial data (expense/income/both) by communicating with OpenAI and the financial data service.
+ * @param {Socket} socket - The WebSocket connection.
+ * @param {String} userMessage - The message asking for financial data.
+ */
+export const handleGetFinancialDataService = async (socket, userMessage) => {
+	try {
+		// Emit a loading message
+		socket.emit("loading", {
+			type: "loading",
+			message: "Fetching Financial Data. Please Wait...",
+		});
+
+		// Get the current date (used in the prompt to infer ranges like "last 6 months")
+		// const currentDate = dayjs().format("MMMM YYYY");
+
+		// Prepare the prompt for OpenAI to understand the financial data request
+		const prompt = `The user is asking for financial data (expenses, income, or both) based on this message:
+                ${userMessage}
+                Today is ${new Date()}. If the user requests data for past months, infer the correct month-year pairs for the requested duration (e.g., last 6 months). 
+                Call the function with the parameters.
+                    `;
+
+		// Call OpenAI to interpret the message and get the required parameters
+		const aiResponse = await callOpenAI(
+			[{ role: "system", content: prompt }],
+			openAIGetFinancialDataFunction
+		);
+
+		const functionArgs = JSON.parse(
+			aiResponse.choices[0].message.function_call.arguments
+		);
+
+		const { type, monthYearPairs } = functionArgs;
+
+		// Ensure monthYearPairs is valid
+		if (!Array.isArray(monthYearPairs) || monthYearPairs.length === 0) {
+			socket.emit("response", {
+				type: "error",
+				message: "Failed to fetch financial data. Invalid month/year pair.",
+			});
+			return;
+		}
+		// Build the API calls based on the type
+		let financialData = {};
+		if (type === "expense" || type === "both") {
+			const expenseResponse = await axios.post(
+				`${process.env.FINANCIALDATA_SERVICE_URL}/expense`,
+				{ monthYearPairs },
+				{
+					headers: {
+						Authorization: `Bearer ${socket.token}`,
+					},
+				}
+			);
+			financialData.expense = expenseResponse.data;
+		}
+
+		if (type === "income" || type === "both") {
+			const incomeResponse = await axios.post(
+				`${process.env.FINANCIALDATA_SERVICE_URL}/income`,
+				{ monthYearPairs },
+				{
+					headers: {
+						Authorization: `Bearer ${socket.token}`,
+					},
+				}
+			);
+			financialData.income = incomeResponse.data;
+		}
+
+		// Send the aggregated data back to the client
+		socket.emit("financial-data", {
+			type: "financial-data",
+			message: financialData, // The complete financial data from both APIs (if applicable)
+		});
+	} catch (error) {
+		logError(error);
+		socket.emit("response", {
+			type: "error",
+			message: "Failed to retrieve financial data.",
 		});
 	}
 };

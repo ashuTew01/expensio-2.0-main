@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smart-chat-depl
+  namespace: expensio-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smart-chat
+  template:
+    metadata:
+      labels:
+        app: smart-chat
+    spec:
+      containers:
+        - name: smart-chat
+          image: ashuz057/expensio-smart-chat
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: smart-chat-secret
+                  key: MONGO_URI
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: smart-chat-secret
+                  key: PORT
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: RABBITMQ_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: JWT_SECRET
+            - name: EXPENSE_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: EXPENSE_SERVICE_URL
+            - name: INCOME_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: INCOME_SERVICE_URL
+            - name: FINANCIALDATA_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: FINANCIALDATA_SERVICE_URL
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: OPENAI_API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smart-chat-srv
+  namespace: expensio-dev
+spec:
+  selector:
+    app: smart-chat
+  ports:
+    - name: smart-chat
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

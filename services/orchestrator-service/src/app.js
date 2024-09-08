@@ -46,7 +46,7 @@ const startServices = async () => {
 	}
 };
 
-startServices();
+await startServices();
 
 app.listen(PORT, () => {
 	logInfo("Orchestrator service is running on port " + PORT);

@@ -77,6 +77,47 @@ export const openAICreateExpenseFunction = [
 	},
 ];
 
+export const openAIGetFinancialDataFunction = [
+	{
+		name: "getFinancialData",
+		description:
+			"Retrieves the financial data for the user based on the specified months and year.",
+		parameters: {
+			type: "object",
+			properties: {
+				type: {
+					type: "string",
+					enum: ["expense", "income", "both"],
+					description:
+						"Type of financial data to retrieve: 'expense', 'income', or 'both'. If can't tell, default to 'both'",
+				},
+				monthYearPairs: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							month: {
+								type: "number",
+								description:
+									"The month for which the financial data is requested (1-12).",
+							},
+							year: {
+								type: "number",
+								description:
+									"The year for which the financial data is requested.",
+							},
+						},
+						required: ["month", "year"],
+					},
+					description:
+						"An array of month-year pairs representing the months and years for which financial data is requested.",
+				},
+			},
+			required: ["type", "monthYearPairs"],
+		},
+	},
+];
+
 export const openAICreateIncomeFunction = [
 	{
 		name: "createIncome",
@@ -129,10 +170,10 @@ export const openAIGeneralFunctions = [
 		description:
 			"Call if user wants to add income (only 1).If no amount given or title can't be inferred, ask for it. All the income details must be given in single message.",
 	},
-	//   {
-	//     name: "getFinancialData",
-	//     description: "Call if user wants to fetch financial data.",
-	//   },
+	{
+		name: "getFinancialData",
+		description: "Call if user wants to fetch financial data.",
+	},
 	//   {
 	//     name: "getFinancialSummary",
 	//     description: "Call if user wants a financial summary.",

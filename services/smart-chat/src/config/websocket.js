@@ -1,11 +1,13 @@
 import { Server } from "socket.io";
 import { handleUserInputController } from "../controllers/smartChatController.js";
+import { logInfo } from "@expensio/sharedlib";
 import jwt from "jsonwebtoken";
 
 let io;
 
 export const initializeWebSocket = (server) => {
 	io = new Server(server, {
+		path: "/ws/smart-chat",
 		cors: {
 			origin: "*",
 		},
@@ -28,7 +30,7 @@ export const initializeWebSocket = (server) => {
 	});
 
 	io.on("connection", (socket) => {
-		console.log(`New client connected: ${socket.id}`);
+		logInfo(`New client connected, Socket ID: ${socket.id}`);
 
 		// Listen for chat_message events and handle input
 		socket.on("chat_message", (message) =>
@@ -37,7 +39,7 @@ export const initializeWebSocket = (server) => {
 		// Handle more custom events here
 
 		socket.on("disconnect", () => {
-			console.log(`Client disconnected: ${socket.id}`);
+			logInfo(`Client disconnected: ${socket.id}`);
 		});
 	});
 };

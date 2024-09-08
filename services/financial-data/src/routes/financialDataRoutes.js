@@ -7,7 +7,7 @@ import { authMiddleware } from "@expensio/sharedlib";
 
 const router = express.Router();
 
-router.get("/expense", authMiddleware, getExpenseFinancialDataController);
-router.get("/income", authMiddleware, getIncomeFinancialDataController);
+router.post("/expense", authMiddleware, getExpenseFinancialDataController);
+router.post("/income", authMiddleware, getIncomeFinancialDataController);
 
 export default router;

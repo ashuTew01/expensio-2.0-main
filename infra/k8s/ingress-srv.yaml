@@ -5,6 +5,9 @@ metadata:
   namespace: expensio-dev
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600" # Ensures long-lived WebSocket connections
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600" # Same for sending data
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
 spec:
   ingressClassName: nginx
   rules:
@@ -44,5 +47,19 @@ spec:
             backend:
               service:
                 name: dashboard-srv
+                port:
+                  number: 3000
+          - path: /api/smart-chat
+            pathType: Prefix
+            backend:
+              service:
+                name: smart-chat-srv
+                port:
+                  number: 3000
+          - path: /ws/smart-chat
+            pathType: Prefix
+            backend:
+              service:
+                name: smart-chat-srv
                 port:
                   number: 3000

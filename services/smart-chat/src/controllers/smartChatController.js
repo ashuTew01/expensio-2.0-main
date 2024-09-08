@@ -3,10 +3,18 @@ import { openAIGeneralFunctions } from "../utils/openaiFunctions.js";
 import {
 	handleCreateExpenseService,
 	handleCreateIncomeService,
+	handleGetFinancialDataService,
 } from "../services/smartChatService.js";
 import ConversationHistory from "../models/ConversationHistory.js";
+import { logError } from "@expensio/sharedlib";
 
-const MAX_CONVERSATION_HISTORY_LIMIT = 150;
+const MAX_CONVERSATION_HISTORY_LIMIT = 75;
+
+export const smartChatTestController = async (req, res) => {
+	res
+		.status(200)
+		.json({ status: "Smart Chat service is working. (GET @ /test)" });
+};
 
 /**
  * Handles the user input and determines the next action.
@@ -18,12 +26,12 @@ export const handleUserInputController = async (message, socket) => {
 		const userId = socket.user.id;
 		const initialPrompt = {
 			role: "system",
-			content: `THIS IS JUST A SYSTEM PROMPT, ALWAYS ATTACHED TO HISTORY TO HELP YOU. USER's MESSAGE IS ABOVE THIS. You are a helpful financial assistant. 
-				1. Always try to interpret whether the user wants to create an income or expense before calling any function, or simply asking for a simple query. 
-				2. If the user clearly provides details like title and amount, infer the category and other relevant details, then proceed with the function call.
+			content: `THIS IS JUST A SYSTEM PROMPT, ALWAYS ATTACHED TO HISTORY TO HELP YOU. USER's MESSAGE IS ABOVE THIS. Date: ${new Date()}. You are a helpful financial assistant. 
+				1. Always try to interpret what the user wants to do before calling any function, or simply asking for a simple query. 
+				2. If the user clearly provides details like title and amount, infer the category and other relevant details, then proceed with the function call of income/expense.
 				3. If you cannot infer the title or amount, or if the details are missing, ask the user to provide all the details in one message.
 				4. If the user confirms with a response like 'Yes' or 'Please do that', remind the user that their previous attempt at creating the expense or income was incomplete and they must provide the details again in a single message.
-				5. Never ask the user to confirm the creation of expenses or incomes. Either call function or prompt them to resend all the details in one single message.`,
+				5. Never ask the user to confirm the creation of expenses or incomes or any other function call. Either call function or prompt them to resend all the details in one single message.`,
 		};
 
 		// Ensure message is within character limit
@@ -49,8 +57,10 @@ export const handleUserInputController = async (message, socket) => {
 		// Add the user's latest message to the conversation history
 		conversationHistory.history.push({ role: "user", content: message });
 
-		// Enforce limit of 150 messages
-		if (conversationHistory.history.length > MAX_CONVERSATION_HISTORY_LIMIT) {
+		// Enforce limit of messages
+		while (
+			conversationHistory.history.length > MAX_CONVERSATION_HISTORY_LIMIT
+		) {
 			conversationHistory.history.shift(); // Remove the oldest message
 		}
 
@@ -93,6 +103,14 @@ export const handleUserInputController = async (message, socket) => {
 					});
 					break;
 
+				case "getFinancialData":
+					await handleGetFinancialDataService(socket, message);
+					conversationHistory.history.push({
+						role: "assistant",
+						content: `Function getFinancialData called and data sent successfully.`,
+					});
+					break;
+
 				// Handle other cases for financial data, etc.
 				// ...
 
@@ -122,7 +140,7 @@ export const handleUserInputController = async (message, socket) => {
 		// Save updated conversation history
 		await conversationHistory.save();
 	} catch (error) {
-		console.error(error);
+		logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "An error occurred. Please try again.",
