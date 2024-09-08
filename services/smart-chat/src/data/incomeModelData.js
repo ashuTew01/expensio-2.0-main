@@ -6,19 +6,19 @@ export const incomeCategoryCodesEnum = [
 	"rentalIncome",
 	"retirementIncome",
 	"governmentBenefits",
-	"alimonyChildSupport",
+	"alimonyAndChildSupport",
 	"royalties",
-	"grantsScholarships",
-	"inheritanceGifts",
+	"grantsAndScholarships",
+	"inheritanceAndGifts",
 	"commissions",
 	"sideHustles",
-	"prizesAwards",
+	"prizesAndAwards",
 	"miscellaneousIncome",
 ];
 
 export const incomeCategoryDescription = `
   Category codes are the category names in camelCased. Category names have their obvious meanings. Choose from one of these.
-  Salary/Wages,Business Income,Freelance/Contract,Investment Income,Rental Income,Retirement Income,Government Benefits,Alimony/Child Support,Royalties,Grants/Scholarships,Inheritance/Gifts,Commissions,Side Hustles,Prizes/Awards,Miscellaneous.
+  Salary/Wages,Business Income,Freelance/Contract,Investment Income,Rental Income,Retirement Income,Government Benefits,Alimony and Child Support,Royalties,Grants and Scholarships,Inheritance and Gifts,Commissions,Side Hustles,Prizes and Awards,Miscellaneous Income.
 `;
 
 export const incomeCategoryDetailedDescription = `
@@ -30,12 +30,12 @@ export const incomeCategoryDetailedDescription = `
   5. Rental Income: Earnings from renting property (residential, commercial, or vacation).
   6. Retirement Income: Pensions, retirement accounts, and Social Security benefits.
   7. Government Benefits: Income from government programs such as unemployment or disability.
-  8. Alimony/Child Support: Payments from alimony or child support arrangements.
+  8. Alimony and Child Support: Payments from alimony or child support arrangements.
   9. Royalties: Payments for intellectual property like books, music, or patents.
-  10. Grants/Scholarships: Non-repayable funds for education, research, or projects.
-  11. Inheritance/Gifts: Income from inheritance or large monetary gifts.
+  10. Grants and Scholarships: Non-repayable funds for education, research, or projects.
+  11. Inheritance and Gifts: Income from inheritance or large monetary gifts.
   12. Commissions: Earnings from performance-based pay such as sales commissions.
   13. Side Hustles: Income from secondary or part-time jobs.
-  14. Prizes/Awards: Monetary gains from competitions or lotteries.
+  14. Prizes and Awards: Monetary gains from competitions or lotteries.
   15. Miscellaneous: Any income not fitting into the above categories.
 `;

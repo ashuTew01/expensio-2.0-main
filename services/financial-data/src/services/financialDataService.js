@@ -9,6 +9,8 @@ export const addExpenseFinancialDataService = async (data) => {
 		userId,
 		amount,
 		categoryId,
+		categoryName,
+		cognitiveTriggerNames,
 		cognitiveTriggerIds,
 		mood,
 		createdAt,
@@ -45,24 +47,33 @@ export const addExpenseFinancialDataService = async (data) => {
 		if (category) {
 			category.numExpenses += 1;
 			category.totalAmountSpent += amount;
+			category.categoryName = categoryName;
 		} else {
 			financialData.categories.push({
 				categoryId,
+				categoryName,
 				numExpenses: 1,
 				totalAmountSpent: amount,
 			});
 		}
 		// Update the cognitive triggers information
-		cognitiveTriggerIds?.forEach((triggerId) => {
+		cognitiveTriggerIds?.forEach((triggerId, index) => {
+			const triggerName = cognitiveTriggerNames[index]; // Get the corresponding name from the array
+
 			const trigger = financialData.cognitiveTriggers.find((t) =>
 				t.cognitiveTriggerId.equals(triggerId)
 			);
+
 			if (trigger) {
+				// Update existing trigger data
 				trigger.numExpenses += 1;
 				trigger.totalAmountSpent += amount;
+				trigger.cognitiveTriggerName = triggerName;
 			} else {
+				// Add a new trigger with both ID and name
 				financialData.cognitiveTriggers.push({
 					cognitiveTriggerId: triggerId,
+					cognitiveTriggerName: triggerName,
 					numExpenses: 1,
 					totalAmountSpent: amount,
 				});
@@ -242,7 +253,7 @@ export const removeExpenseFinancialDataService = async (deletedExpenses) => {
 };
 
 export const addIncomeFinancialDataService = async (data) => {
-	const { title, userId, amount, categoryId, createdAt } = data;
+	const { title, userId, amount, categoryId, categoryName, createdAt } = data;
 	try {
 		const date = new Date(createdAt);
 		const year = date.getFullYear();
@@ -273,9 +284,11 @@ export const addIncomeFinancialDataService = async (data) => {
 		if (category) {
 			category.numIncomes += 1;
 			category.totalAmountEarned += amount;
+			category.categoryName = categoryName;
 		} else {
 			financialData.categories.push({
 				categoryId,
+				categoryName,
 				numIncomes: 1,
 				totalAmountEarned: amount,
 			});

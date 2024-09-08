@@ -12,7 +12,7 @@ export const expenseCategoryCodesEnum = [
 	"savingsAndInvestments",
 	"giftsAndDonations",
 	"pets",
-	"miscellaneousOthers",
+	"miscellaneous",
 ];
 export const expenseCognitiveTriggerCodesEnum = [
 	"impulseBuying",
@@ -34,7 +34,7 @@ export const expenseCognitiveTriggerCodesEnum = [
 
 export const expenseCategoryDescription = `
 Please choose the relevant category for the expense using the following codes: 
-housing, utilities, transportation, food, healthAndMedical, insurance, debtRepayment, educationAndChildcare, personalCare, entertainmentAndRecreation, savingsAndInvestments, giftsAndDonations, pets, miscellaneousOthers.
+housing, utilities, transportation, food, healthAndMedical, insurance, debtRepayment, educationAndChildcare, personalCare, entertainmentAndRecreation, savingsAndInvestments, giftsAndDonations, pets, miscellaneous.
 `;
 
 export const expenseCognitiveTriggerDescription = `
@@ -60,7 +60,7 @@ Please select the most appropriate category for the expense from the following c
 - savingsAndInvestments: Contributions to savings accounts, retirement funds, or investments.
 - giftsAndDonations: Money spent on gifts or charitable donations.
 - pets: All pet-related expenses, including food, grooming, and veterinary care.
-- miscellaneousOthers: Expenses that do not fit into the above categories.
+- miscellaneous: Expenses that do not fit into the above categories.
 `;
 
 export const expenseCognitiveTriggerDetailedDescription = `

@@ -16,7 +16,7 @@ const monthlyIncomefinancialDataSchema = new mongoose.Schema({
 	categories: [
 		{
 			categoryId: { type: mongoose.Schema.Types.ObjectId, required: true }, // Still store the ID for reference
-			// categoryName: { type: String, default: null }, // Optional field for the category name
+			categoryName: { type: String, default: null }, // Optional field for the category name
 			numIncomes: { type: Number, default: 0 },
 			totalAmountEarned: { type: Number, default: 0 },
 		},
