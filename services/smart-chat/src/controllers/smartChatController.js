@@ -1,6 +1,9 @@
 import { callOpenAI } from "../utils/openaiClient.js";
 import { openAIGeneralFunctions } from "../utils/openaiFunctions.js";
-import { handleCreateExpenseService } from "../services/smartChatService.js";
+import {
+	handleCreateExpenseService,
+	handleCreateIncomeService,
+} from "../services/smartChatService.js";
 import ConversationHistory from "../models/ConversationHistory.js";
 
 const MAX_CONVERSATION_HISTORY_LIMIT = 150;
@@ -15,8 +18,12 @@ export const handleUserInputController = async (message, socket) => {
 		const userId = socket.user.id;
 		const initialPrompt = {
 			role: "system",
-			content:
-				"You are a helpful financial assistant. Always keep responses concise and provide financial advice and/or call functions when appropriate.",
+			content: `THIS IS JUST A SYSTEM PROMPT, ALWAYS ATTACHED TO HISTORY TO HELP YOU. USER's MESSAGE IS ABOVE THIS. You are a helpful financial assistant. 
+				1. Always try to interpret whether the user wants to create an income or expense before calling any function, or simply asking for a simple query. 
+				2. If the user clearly provides details like title and amount, infer the category and other relevant details, then proceed with the function call.
+				3. If you cannot infer the title or amount, or if the details are missing, ask the user to provide all the details in one message.
+				4. If the user confirms with a response like 'Yes' or 'Please do that', remind the user that their previous attempt at creating the expense or income was incomplete and they must provide the details again in a single message.
+				5. Never ask the user to confirm the creation of expenses or incomes. Either call function or prompt them to resend all the details in one single message.`,
 		};
 
 		// Ensure message is within character limit
@@ -49,7 +56,7 @@ export const handleUserInputController = async (message, socket) => {
 
 		// Combine the initialPrompt and the stored conversation history when calling OpenAI
 		//Initial prompt kept out so that it doesn't get pop after max_limit.
-		const historyForOpenAI = [initialPrompt, ...conversationHistory.history];
+		const historyForOpenAI = [...conversationHistory.history, initialPrompt];
 
 		// Call OpenAI to understand the message and determine function calls
 		const aiResponse = await callOpenAI(
@@ -74,11 +81,19 @@ export const handleUserInputController = async (message, socket) => {
 					);
 					conversationHistory.history.push({
 						role: "assistant",
-						content: `Created Expense: ${expenseTitle}`,
+						content: `Function createExpense called: Created Expense, ${expenseTitle}`,
 					});
 					break;
 
-				// Handle other cases for income, financial data, etc.
+				case "createIncome":
+					const incomeTitle = await handleCreateIncomeService(socket, message);
+					conversationHistory.history.push({
+						role: "assistant",
+						content: `Function createIncome called: Created Income, ${incomeTitle}`,
+					});
+					break;
+
+				// Handle other cases for financial data, etc.
 				// ...
 
 				default:

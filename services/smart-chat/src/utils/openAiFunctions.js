@@ -5,10 +5,15 @@ import {
 	expenseCognitiveTriggerDescription,
 } from "../data/expenseModelData.js";
 
+import {
+	incomeCategoryCodesEnum,
+	incomeCategoryDescription,
+} from "../data/incomeModelData.js";
+
 export const openAICreateExpenseFunction = [
 	{
 		name: "createExpense",
-		description: "Creates an expense for the user",
+		description: "Creates 1 expense for the user.",
 		parameters: {
 			type: "object",
 			properties: {
@@ -72,16 +77,58 @@ export const openAICreateExpenseFunction = [
 	},
 ];
 
+export const openAICreateIncomeFunction = [
+	{
+		name: "createIncome",
+		description: "Creates 1 income entry for the user",
+		parameters: {
+			type: "object",
+			properties: {
+				title: {
+					type: "string",
+					description: "The title or name of the income source",
+				},
+				amount: {
+					type: "number",
+					description: "The amount of income received, must be greater than 0.",
+				},
+				categoryCode: {
+					type: "string",
+					enum: incomeCategoryCodesEnum,
+					description: incomeCategoryDescription,
+				},
+				incomeType: {
+					type: "string",
+					enum: ["primary", "secondary", "settlement", "unknown"],
+					description:
+						"The type of the income (primary: main source, secondary: additional source, settlement: compensation received, unknown if unspecified)",
+				},
+				isRecurring: {
+					type: "boolean",
+					description:
+						"Whether the income is recurring, like a salary or rental income.",
+				},
+				description: {
+					type: "string",
+					description: "Optional additional description of the income",
+				},
+			},
+			required: ["title", "amount", "categoryCode", "incomeType"],
+		},
+	},
+];
+
 export const openAIGeneralFunctions = [
 	{
 		name: "createExpense",
 		description:
-			"Call if user wants to add an expense. If no amount given or title can't be inferred, ask for it. All the expense details must be given in single message.",
+			"Call if user wants to add an expense (only 1).If no amount given or title can't be inferred, ask for it. All the expense details must be given in single message.",
 	},
-	//   {
-	//     name: "createIncome",
-	//     description: "Call if user wants to add income.",
-	//   },
+	{
+		name: "createIncome",
+		description:
+			"Call if user wants to add income (only 1).If no amount given or title can't be inferred, ask for it. All the income details must be given in single message.",
+	},
 	//   {
 	//     name: "getFinancialData",
 	//     description: "Call if user wants to fetch financial data.",
