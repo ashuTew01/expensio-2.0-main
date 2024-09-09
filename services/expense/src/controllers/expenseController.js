@@ -11,6 +11,7 @@ import {
 	getCognitiveTriggersByIdsService,
 } from "../services/expenseService.js";
 import { ValidationError } from "@expensio/sharedlib";
+import Idempotency from "../models/Idempotency.js";
 
 // @desc    Get user's single/multiple expense(s) based on query
 // @route   GET
@@ -84,18 +85,39 @@ export const addExpensesController = async (req, res, next) => {
 
 	try {
 		const userId = req.user.id;
+		const idempotencyKey = req.headers["idempotency-key"];
 
+		if (!idempotencyKey) {
+			return res.status(400).json({ message: "Idempotency key is required" });
+		}
+
+		const existingEntry = await Idempotency.findOne({ idempotencyKey, userId });
+
+		if (existingEntry) {
+			return res.status(200).json(existingEntry.response);
+		}
+
+		// Validate request body
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
 			throw new ValidationError(error.details[0].message);
 		}
-		// console.log(value);
+
 		const newExpenses = await addExpensesService(value, userId);
 
-		res.status(201).json({
+		const response = {
 			message: "Expenses added successfully!",
 			expenses: newExpenses,
+		};
+
+		// Save the idempotency key and response to the database
+		await Idempotency.create({
+			idempotencyKey,
+			userId,
+			response,
 		});
+
+		res.status(201).json(response);
 	} catch (error) {
 		next(error);
 	}

@@ -8,6 +8,7 @@ import {
 	getIncomesService,
 	removeCategoriesService,
 } from "../services/incomeService.js";
+import Idempotency from "../models/Idempotency.js";
 
 // @desc    Get user's single/multiple income(s) based on query
 // @route   GET
@@ -63,18 +64,39 @@ export const addIncomesController = async (req, res, next) => {
 
 	try {
 		const userId = req.user.id;
+		const idempotencyKey = req.headers["idempotency-key"];
+
+		if (!idempotencyKey) {
+			throw new ValidationError("Idempotency Key is Required.");
+		}
+
+		const existingEntry = await Idempotency.findOne({ idempotencyKey, userId });
+
+		if (existingEntry) {
+			// Return the previously processed response
+			return res.status(200).json(existingEntry.response);
+		}
 
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
 			throw new ValidationError(error.details[0].message);
 		}
-		// console.log(value);
+
 		const newIncomes = await addIncomesService(value, userId);
 
-		res.status(201).json({
+		const response = {
 			message: "Incomes added successfully!",
 			incomes: newIncomes,
+		};
+
+		// Save the idempotency key and response to the database
+		await Idempotency.create({
+			idempotencyKey,
+			userId,
+			response,
 		});
+
+		res.status(201).json(response);
 	} catch (error) {
 		next(error);
 	}
