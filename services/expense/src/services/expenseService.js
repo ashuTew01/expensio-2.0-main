@@ -2,9 +2,16 @@ import Expense from "../models/Expense.js";
 import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import CognitiveTrigger from "../models/CognitiveTrigger.js";
-import { ValidationError, publishEvent, EVENTS } from "@expensio/sharedlib";
+import {
+	ValidationError,
+	publishEvent,
+	EVENTS,
+	produceEvent,
+	TOPICS,
+} from "@expensio/sharedlib";
 import { logInfo, logWarning, logError } from "@expensio/sharedlib";
 import connectRabbitMQ from "../config/rabbitmq.js";
+import { connectKafka } from "../config/connectKafka.js";
 
 export const getExpensesService = async (queryParameters, userId) => {
 	const {
@@ -142,11 +149,24 @@ export const addExpensesService = async (expensesData, userId) => {
 		});
 
 		await newExpense.save();
+
 		createdExpenses.push(newExpense);
 
 		// Publish the event after successfully saving the expense
-		const channel = await connectRabbitMQ();
-		await publishEvent(
+		// const channel = await connectRabbitMQ();
+		// await publishEvent(
+		// 	EVENTS.EXPENSE_CREATED,
+		// 	{
+		// 		...newExpense.toObject(),
+		// 		categoryName: category.name,
+		// 		cognitiveTriggerNames,
+		// 		createdAt: newExpense.createdAt,
+		// 	},
+		// 	channel
+		// );
+
+		const { producerInstance } = await connectKafka();
+		await produceEvent(
 			EVENTS.EXPENSE_CREATED,
 			{
 				...newExpense.toObject(),
@@ -154,7 +174,8 @@ export const addExpensesService = async (expensesData, userId) => {
 				cognitiveTriggerNames,
 				createdAt: newExpense.createdAt,
 			},
-			channel
+			TOPICS.EXPENSE,
+			producerInstance
 		);
 	}
 
@@ -236,6 +257,34 @@ export const deleteExpensesByUserId = async (userId, retries = 3) => {
 	}
 };
 
+export const getCategoriesByIdsService = async (categoryIds) => {
+	const categories = await Category.find({ _id: { $in: categoryIds } });
+
+	const categoryMap = {};
+	categories.forEach((category) => {
+		categoryMap[category._id] = category.name;
+	});
+
+	return categoryMap;
+};
+
+export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
+	const cognitiveTriggers = await CognitiveTrigger.find({
+		_id: { $in: cognitiveTriggerIds },
+	});
+
+	const cognitiveTriggerMap = {};
+	cognitiveTriggers.forEach((trigger) => {
+		cognitiveTriggerMap[trigger._id] = trigger.name;
+	});
+
+	return cognitiveTriggerMap;
+};
+
+//
+//one time use services below.......
+// ***********************************
+// ***********************************
 export const addCognitiveTriggersService = async (cognitiveTriggersData) => {
 	const createdCognitiveTriggers = [];
 
@@ -312,28 +361,4 @@ export const removeCategoriesService = async (categoryCodes) => {
 	}
 
 	return result;
-};
-
-export const getCategoriesByIdsService = async (categoryIds) => {
-	const categories = await Category.find({ _id: { $in: categoryIds } });
-
-	const categoryMap = {};
-	categories.forEach((category) => {
-		categoryMap[category._id] = category.name;
-	});
-
-	return categoryMap;
-};
-
-export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
-	const cognitiveTriggers = await CognitiveTrigger.find({
-		_id: { $in: cognitiveTriggerIds },
-	});
-
-	const cognitiveTriggerMap = {};
-	cognitiveTriggers.forEach((trigger) => {
-		cognitiveTriggerMap[trigger._id] = trigger.name;
-	});
-
-	return cognitiveTriggerMap;
 };

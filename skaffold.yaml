@@ -2,7 +2,14 @@ apiVersion: skaffold/v4beta3
 kind: Config
 manifests:
   rawYaml:
-    - ./infra/k8s/*
+    - ./infra/k8s/dashboard-depl.yaml
+    - ./infra/k8s/expense-depl.yaml
+    - ./infra/k8s/financial-data-depl.yaml
+    - ./infra/k8s/income-depl.yaml
+    - ./infra/k8s/ingress-srv.yaml
+    - ./infra/k8s/rabbitmq-depl.yaml
+    - ./infra/k8s/smart-chat-depl.yaml
+    - ./infra/k8s/user-depl.yaml
 build:
   local:
     push: false

@@ -17,6 +17,16 @@ spec:
         - name: user
           image: ashuz057/expensio-user
           env:
+            - name: SERVICE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: SERVICE_NAME
+            - name: KAFKA_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: KAFKA_BROKER_URL
             - name: NODE_ENV
               valueFrom:
                 secretKeyRef:

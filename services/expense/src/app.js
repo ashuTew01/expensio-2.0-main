@@ -18,6 +18,7 @@ dotenv.config();
 //log setup
 import path from "path";
 import { fileURLToPath } from "url";
+import { startKafka } from "./config/startKafka.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logDirectory = path.join(__dirname, "..", "logs");
@@ -40,6 +41,7 @@ const startServices = async () => {
 	try {
 		await startRabbitMQ();
 		await connectDB();
+		await startKafka();
 	} catch (error) {
 		logError("Failed to start services:", error);
 		process.exit(1);

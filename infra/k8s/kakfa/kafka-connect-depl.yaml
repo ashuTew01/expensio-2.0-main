@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-connect-depl
+  namespace: expensio-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      initContainers:
+        - name: load-connector
+          image: appropriate/curl
+          command:
+            [
+              "sh",
+              "-c",
+              'until curl -X POST -H "Content-Type: application/json" --data @/etc/kafka-connect/connectors/mongodb-sink-connector.json http://localhost:8083/connectors; do echo "Waiting for Kafka Connect..."; sleep 5; done',
+            ]
+          volumeMounts:
+            - name: mongodb-sink-connector-config
+              mountPath: /etc/kafka-connect/connectors
+              readOnly: true
+      containers:
+        - name: kafka-connect
+          image: confluentinc/cp-kafka-connect:latest
+          env:
+            - name: CONNECT_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: KAFKA_BROKER_URL
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: "kafka-connect"
+            - name: CONNECT_GROUP_ID
+              value: "kafka-connect-group"
+            - name: CONNECT_CONFIG_STORAGE_TOPIC
+              value: "connect-configs"
+            - name: CONNECT_OFFSET_STORAGE_TOPIC
+              value: "connect-offsets"
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: "connect-status"
+            - name: CONNECT_KEY_CONVERTER
+              value: "org.apache.kafka.connect.storage.StringConverter"
+            - name: CONNECT_VALUE_CONVERTER
+              value: "org.apache.kafka.connect.storage.StringConverter"
+            - name: CONNECT_REST_PORT
+              value: "8083"
+          ports:
+            - containerPort: 8083
+          volumeMounts:
+            - name: mongodb-sink-connector-config
+              mountPath: /etc/kafka-connect/connectors
+              readOnly: true
+      volumes:
+        - name: mongodb-sink-connector-config
+          configMap:
+            name: kafka-connect-mongodb-config

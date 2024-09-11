@@ -48,6 +48,10 @@ const dashboardSchema = new mongoose.Schema({
 				totalAmountSpent: Number,
 			},
 		],
+		lastUpdated: {
+			type: Date,
+			required: true,
+		},
 	},
 	currentMonthIncomeFinancialData: {
 		year: Number,
@@ -61,6 +65,10 @@ const dashboardSchema = new mongoose.Schema({
 				totalAmountEarned: Number,
 			},
 		],
+		lastUpdated: {
+			type: Date,
+			required: true,
+		},
 	},
 	lastUpdated: {
 		type: Date,

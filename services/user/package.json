@@ -20,9 +20,11 @@
 		"express": "^4.19.2",
 		"googleapis": "^140.0.0",
 		"jsonwebtoken": "^9.0.2",
+		"kafkajs": "^2.2.4",
 		"nodemailer": "^6.9.13",
 		"pg": "^8.11.5",
 		"twilio": "^5.2.2",
+		"uuid": "^10.0.0",
 		"winston": "^3.13.1"
 	},
 	"devDependencies": {

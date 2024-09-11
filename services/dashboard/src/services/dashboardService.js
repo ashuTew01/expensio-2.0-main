@@ -28,6 +28,17 @@ export const addExpenseToDashboardService = async (expenseData) => {
 	try {
 		const { userId, ...expenseDetails } = expenseData;
 
+		// idempotency check.
+		const alreadyHasExpense = await ExpenseDetails.findOne({
+			expenseId: expenseData._id,
+		});
+		if (alreadyHasExpense) {
+			logInfo(
+				`Expense with ID '${expenseData._id}' already in Dashboard of userId: ${userId}. Skipping.`
+			);
+			return;
+		}
+
 		// Check if the user already has 10 expenses stored in ExpenseDetails
 		const expenseCount = await ExpenseDetails.countDocuments({ userId });
 		if (expenseCount >= 10) {
@@ -170,6 +181,17 @@ export const addIncomeToDashboardService = async (incomeData) => {
 	try {
 		const { userId, ...incomeDetails } = incomeData;
 
+		// idempotency check.
+		const alreadyHasIncome = await IncomeDetails.findOne({
+			incomeId: incomeData._id,
+		});
+		if (alreadyHasIncome) {
+			logInfo(
+				`Income with ID '${incomeData._id}' already in Dashboard of userId: ${userId}. Skipping.`
+			);
+			return;
+		}
+
 		// Create a new IncomeDetails document
 		const newIncomeDetails = new IncomeDetails({
 			userId,
@@ -226,9 +248,7 @@ export const addIncomeToDashboardService = async (incomeData) => {
  * If any of the incomes are found in the latest incomes list, they are removed, and the dashboard is updated.
  *
  * @param {Array<Object>} incomes - The array of deleted incomes.
- *
  * @returns {Promise<void>} - Returns a promise that resolves when the dashboard has been updated.
- *
  * @throws {Error} - Throws an error if the dashboard update fails.
  */
 export const removeIncomesFromDashboardService = async (incomes) => {
@@ -290,6 +310,7 @@ export const removeIncomesFromDashboardService = async (incomes) => {
  * @param {Array<Object>} financialData.cognitiveTriggers - The cognitive triggers with their IDs, number of expenses, and total amount spent.
  * @param {number} financialData.totalMoneySpent - The total money spent by the user in the given month.
  * @param {number} financialData.totalExpenses - The total number of expenses in the given month.
+ * @param {Date} financialData.updatedAt
  *
  * @throws Will throw an error if the financial data cannot be updated.
  */
@@ -303,6 +324,7 @@ export const updateExpenseFinancialDataService = async (financialData) => {
 			cognitiveTriggers,
 			totalMoneySpent,
 			totalExpenses,
+			updatedAt,
 		} = financialData;
 
 		const currentDate = new Date();
@@ -348,6 +370,17 @@ export const updateExpenseFinancialDataService = async (financialData) => {
 			});
 		}
 
+		//Check if coming financial data is older than what came last.
+		if (
+			dashboard?.currentMonthExpenseFinancialData?.lastUpdated &&
+			dashboard.currentMonthExpenseFinancialData.lastUpdated > updatedAt
+		) {
+			logInfo(
+				"Financial Data update is older than the stored financial data. Skipping..."
+			);
+			return;
+		}
+
 		// Update the current month's expense financial data in the dashboard
 		dashboard.currentMonthExpenseFinancialData = {
 			year,
@@ -364,6 +397,7 @@ export const updateExpenseFinancialDataService = async (financialData) => {
 				numExpenses: trigger.numExpenses,
 				totalAmountSpent: trigger.totalAmountSpent,
 			})),
+			lastUpdated: updatedAt,
 		};
 
 		await dashboard.save();
@@ -389,13 +423,21 @@ export const updateExpenseFinancialDataService = async (financialData) => {
  * @param {Array<Object>} financialData.categories - The income categories with their IDs, number of incomes, and total amount earned.
  * @param {number} financialData.totalMoneyEarned - The total money earned by the user in the given month.
  * @param {number} financialData.totalIncomes - The total number of incomes in the given month.
+ * @param {Date} financialData.updatedAt - The last updated time of the financial data.
  *
  * @throws Will throw an error if the financial data cannot be updated.
  */
 export const updateIncomeFinancialDataService = async (financialData) => {
 	try {
-		const { userId, year, month, categories, totalMoneyEarned, totalIncomes } =
-			financialData;
+		const {
+			userId,
+			year,
+			month,
+			categories,
+			totalMoneyEarned,
+			totalIncomes,
+			updatedAt,
+		} = financialData;
 
 		const currentDate = new Date();
 		const currentYear = currentDate.getFullYear();
@@ -432,6 +474,17 @@ export const updateIncomeFinancialDataService = async (financialData) => {
 			});
 		}
 
+		//Check if coming financial data is older than what came last.
+		if (
+			dashboard?.currentMonthIncomeFinancialData?.lastUpdated &&
+			dashboard.currentMonthIncomeFinancialData.lastUpdated > updatedAt
+		) {
+			logInfo(
+				"Financial Data update is older than the stored financial data. Skipping..."
+			);
+			return;
+		}
+
 		// Update the current month's income financial data in the dashboard
 		dashboard.currentMonthIncomeFinancialData = {
 			year,
@@ -443,6 +496,7 @@ export const updateIncomeFinancialDataService = async (financialData) => {
 				numIncomes: category.numIncomes,
 				totalAmountEarned: category.totalAmountEarned,
 			})),
+			lastUpdated: updatedAt,
 		};
 
 		await dashboard.save();

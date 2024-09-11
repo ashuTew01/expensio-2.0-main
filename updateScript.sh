@@ -14,6 +14,10 @@ for dir in */; do
     echo "Updating @expensio/sharedlib in $dir..."
     npm update @expensio/sharedlib
 
+    # Install uuid in all services
+    # echo "Installing uuid in $dir..."
+    # npm i uuid
+
     # Navigate back to the services directory
     cd ..
   fi
