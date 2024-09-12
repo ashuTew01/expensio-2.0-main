@@ -9,6 +9,8 @@ import {
 	removeCognitiveTriggersService,
 	getCategoriesByIdsService,
 	getCognitiveTriggersByIdsService,
+	getCognitiveTriggersService,
+	getAllCategoriesService
 } from "../services/expenseService.js";
 import { ValidationError } from "@expensio/sharedlib";
 import Idempotency from "../models/Idempotency.js";
@@ -24,11 +26,10 @@ export const getExpensesController = async (req, res, next) => {
 		eventId: Joi.string()
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
-		categoryId: Joi.string()
-			.optional()
-			.pattern(/^[0-9a-fA-F]{24}$/),
-		cognitiveTriggerIds: Joi.array()
-			.items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/))
+		categoryCode: Joi.string()
+			.optional(),
+		cognitiveTriggerCodes: Joi.array()
+			.items(Joi.string())
 			.optional(),
 		mood: Joi.string().valid("happy", "neutral", "regretful").optional(),
 		page: Joi.number().integer().min(1).optional(),
@@ -337,3 +338,25 @@ export const removeCategoriesController = async (req, res, next) => {
 		next(error);
 	}
 };
+
+export const getCognitiveTriggersController = async (req, res, next) => {
+	try{
+		const cognitiveTriggers = await getCognitiveTriggersService();
+
+		res.status(200).json({cognitiveTriggers});
+	}
+	catch(error){
+		next(error);
+	}
+}
+
+export const getAllCategoriesController = async (req, res, next) => {
+	try{
+		const categories = await getAllCategoriesService();
+
+		res.status(200).json({categories})
+	}
+	catch(error){
+		next(error)
+	}
+}

@@ -18,6 +18,8 @@ export const getExpensesService = async (queryParameters, userId) => {
 		search,
 		categoryId,
 		cognitiveTriggerIds,
+		categoryCode,
+		cognitiveTriggerCodes,
 		mood,
 		eventId,
 		page = 1,
@@ -57,6 +59,24 @@ export const getExpensesService = async (queryParameters, userId) => {
 
 	if (eventId) {
 		query.eventId = eventId;
+	}
+
+	// Fetch categoryID is categoryCode is provided
+	if (!categoryId && categoryCode) {
+		const category = await Category.find({ code: categoryCode });
+		if (category) query.categoryId = category._id;
+	}
+
+	// Fetch cognitiveTriggerIds based on cognitiveTriggerCodes if provided
+	if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
+		const cognitiveTriggers = await CognitiveTrigger.find({
+			code: { $in: cognitiveTriggerCodes },
+		});
+		if (cognitiveTriggers && cognitiveTriggers.length > 0) {
+			query.cognitiveTriggerIds = cognitiveTriggers.map(
+				(trigger) => trigger._id
+			); // Assign fetched cognitiveTriggerIds
+		}
 	}
 
 	if (categoryId) {
@@ -446,4 +466,38 @@ export const removeCategoriesService = async (categoryCodes) => {
 	}
 
 	return result;
+};
+
+export const getCategoriesByIdsService = async (categoryIds) => {
+	const categories = await Category.find({ _id: { $in: categoryIds } });
+
+	const categoryMap = {};
+	categories.forEach((category) => {
+		categoryMap[category._id] = category.name;
+	});
+
+	return categoryMap;
+};
+
+export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
+	const cognitiveTriggers = await CognitiveTrigger.find({
+		_id: { $in: cognitiveTriggerIds },
+	});
+
+	const cognitiveTriggerMap = {};
+	cognitiveTriggers.forEach((trigger) => {
+		cognitiveTriggerMap[trigger._id] = trigger.name;
+	});
+
+	return cognitiveTriggerMap;
+};
+
+export const getCognitiveTriggersService = async () => {
+	const cognitiveTriggers = await CognitiveTrigger.find({});
+	return cognitiveTriggers;
+};
+
+export const getAllCategoriesService = async () => {
+	const categories = await Category.find({});
+	return categories;
 };
