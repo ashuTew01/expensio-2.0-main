@@ -8,7 +8,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { useGetAllExpensesQuery } from "../../state/api";
+import { useGetAllExpensesQuery, useGetDasboardQuery } from "../../state/api";
 import { useSelector } from "react-redux";
 import BreakdownChart from "../../components/BreakdownChart";
 
@@ -16,33 +16,45 @@ const Dashboard = () => {
   const theme = useTheme();
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
-  const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?._id;
+  const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
   const {
-    data: expensesData,
-    isLoading: expensesLoading,
-    isError: expensesError,
-  } = useGetAllExpensesQuery({ userId });
+    data: dashboardData,
+    isLoading: dashboardDataLoading,
+    isError: dashboardDataError
+  } = useGetDasboardQuery();
+
+  console.log(dashboardData)
+
+  // const {
+  //   data: expensesData,
+  //   isLoading: expensesLoading,
+  //   isError: expensesError,
+  // } = useGetAllExpensesQuery({ userId });
+
+  const expensesData = [];
+  const expensesLoading = [];
+
 
   // calculations to format data for pie chart of category
   const categoryTotals = {};
-  expensesData?.expenses?.forEach((expense) => {
-    const { category, amount } = expense;
-    if (category.name in categoryTotals) {
-      categoryTotals[category.name] += amount;
+  dashboardData?.currentMonthExpenseFinancialData?.expenseCategories?.forEach((expense) => {
+    const { categoryName, totalAmountSpent } = expense;
+    if (categoryName in categoryTotals) {
+      categoryTotals[categoryName] += totalAmountSpent;
     } else {
-      categoryTotals[category.name] = amount;
+      categoryTotals[categoryName] = totalAmountSpent;
     }
   });
 
   // calculations to format data for pie chart of psychological type
   const psychologicalTotals = {};
-  expensesData?.expenses?.forEach((expense) => {
-    const { psychologicalType, amount } = expense;
-    if (psychologicalType.name in psychologicalTotals) {
-      psychologicalTotals[psychologicalType.name] += amount;
+  dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.forEach((expense) => {
+    const { cognitiveTriggerName, totalAmountSpent } = expense;
+    if (cognitiveTriggerName in psychologicalTotals) {
+      psychologicalTotals[cognitiveTriggerName] += totalAmountSpent;
     } else {
-      psychologicalTotals[psychologicalType.name] = amount;
+      psychologicalTotals[cognitiveTriggerName] = totalAmountSpent;
     }
   });
 

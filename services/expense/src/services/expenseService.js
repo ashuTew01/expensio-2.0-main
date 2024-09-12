@@ -13,6 +13,8 @@ export const getExpensesService = async (queryParameters, userId) => {
 		search,
 		categoryId,
 		cognitiveTriggerIds,
+		categoryCode,
+		cognitiveTriggerCodes,
 		mood,
 		eventId,
 		page = 1,
@@ -52,6 +54,24 @@ export const getExpensesService = async (queryParameters, userId) => {
 
 	if (eventId) {
 		query.eventId = eventId;
+	}
+
+	// Fetch categoryID is categoryCode is provided
+	if (!categoryId && categoryCode) {
+		const category = await Category.find({ code: categoryCode });
+		if (category) query.categoryId = category._id;
+	}
+
+	// Fetch cognitiveTriggerIds based on cognitiveTriggerCodes if provided
+	if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
+		const cognitiveTriggers = await CognitiveTrigger.find({
+			code: { $in: cognitiveTriggerCodes },
+		});
+		if (cognitiveTriggers && cognitiveTriggers.length > 0) {
+			query.cognitiveTriggerIds = cognitiveTriggers.map(
+				(trigger) => trigger._id
+			); // Assign fetched cognitiveTriggerIds
+		}
 	}
 
 	if (categoryId) {
@@ -336,4 +356,14 @@ export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
 	});
 
 	return cognitiveTriggerMap;
+};
+
+export const getCognitiveTriggersService = async () => {
+	const cognitiveTriggers = await CognitiveTrigger.find({});
+	return cognitiveTriggers;
+};
+
+export const getAllCategoriesService = async () => {
+	const categories = await Category.find({});
+	return categories;
 };

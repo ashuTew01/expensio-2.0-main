@@ -31,11 +31,11 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  // const userInfo = JSON.parse(localStorage.getItem("userInfoExpensio"));
+  const userInfo = JSON.parse(localStorage.getItem("userInfoExpensio"));
   // const { image: userImage, name: userName } = userInfo;
 
   const userImage = "";
-  const userName = "Anubhav"
+  const userName = userInfo.first_name;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
