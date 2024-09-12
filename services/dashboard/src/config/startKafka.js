@@ -6,14 +6,12 @@ import {
 	EVENTS,
 	TOPICS,
 } from "@expensio/sharedlib";
-import {
-	addExpenseToDashboardService,
-	addIncomeToDashboardService,
-	removeExpensesFromDashboardService,
-	removeIncomesFromDashboardService,
-	updateExpenseFinancialDataService,
-	updateIncomeFinancialDataService,
-} from "../services/dashboardService.js";
+import { expenseCreatedEventHandler } from "../events/handlers/expenseCreatedEventHandler.js";
+import { incomeCreatedEventHandler } from "../events/handlers/incomeCreatedEventHandler.js";
+import { expenseDeletedEventHandler } from "../events/handlers/expenseDeletedEventHandler.js";
+import { incomeDeletedEventHandler } from "../events/handlers/incomeDeletedEventHandler.js";
+import { financialdataUpdatedExpenseEventHandler } from "../events/handlers/financialdataUpdatedExpenseEventHandler.js";
+import { financialdataUpdatedIncomeEventHandler } from "../events/handlers/financialdataUpdatedIncomeEventHandler.js";
 
 let producer; // Global producer
 let consumer; // Global consumer
@@ -47,25 +45,14 @@ export const startKafka = async () => {
 
 		// Define event handlers for various event names
 		const eventHandlers = {
-			[EVENTS.EXPENSE_CREATED]: async (message) => {
-				await addExpenseToDashboardService(message);
-			},
-			[EVENTS.INCOME_CREATED]: async (message) => {
-				await addIncomeToDashboardService(message);
-			},
-			[EVENTS.EXPENSE_DELETED]: async (message) => {
-				await removeExpensesFromDashboardService(message);
-			},
-			[EVENTS.INCOME_DELETED]: async (message) => {
-				await removeIncomesFromDashboardService(message);
-			},
-			[EVENTS.FINANCIALDATA_UPDATED_EXPENSE]: async (message) => {
-				await updateExpenseFinancialDataService(message);
-			},
-			[EVENTS.FINANCIALDATA_UPDATED_INCOME]: async (message) => {
-				await updateIncomeFinancialDataService(message);
-			},
-			// Add more handlers as needed
+			[EVENTS.EXPENSE_CREATED]: expenseCreatedEventHandler,
+			[EVENTS.INCOME_CREATED]: incomeCreatedEventHandler,
+			[EVENTS.EXPENSE_DELETED]: expenseDeletedEventHandler,
+			[EVENTS.INCOME_DELETED]: incomeDeletedEventHandler,
+			[EVENTS.FINANCIALDATA_UPDATED_EXPENSE]:
+				financialdataUpdatedExpenseEventHandler,
+			[EVENTS.FINANCIALDATA_UPDATED_INCOME]:
+				financialdataUpdatedIncomeEventHandler,
 		};
 
 		// Call the consumeEvent function with the handlers and topics
