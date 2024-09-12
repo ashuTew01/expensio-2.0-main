@@ -1,7 +1,6 @@
 // Database Configuration
 import pkg from "pg";
 const { Pool } = pkg;
-import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 

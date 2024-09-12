@@ -4,13 +4,11 @@ import Category from "../models/Category.js";
 import CognitiveTrigger from "../models/CognitiveTrigger.js";
 import {
 	ValidationError,
-	publishEvent,
 	EVENTS,
 	produceEvent,
 	TOPICS,
 } from "@expensio/sharedlib";
 import { logInfo, logWarning, logError } from "@expensio/sharedlib";
-import connectRabbitMQ from "../config/rabbitmq.js";
 import { connectKafka } from "../config/connectKafka.js";
 
 export const getExpensesService = async (queryParameters, userId) => {
@@ -92,137 +90,224 @@ export const getExpensesService = async (queryParameters, userId) => {
 	};
 };
 
-export const addExpensesService = async (expensesData, userId) => {
+export const addExpensesService = async (expensesData, userId, retries = 3) => {
+	const session = await mongoose.startSession(); // Start a session for transactions
+	session.startTransaction(); // Begin a transaction
 	const createdExpenses = [];
 
-	for (const expenseData of expensesData) {
-		const {
-			title,
-			amount,
-			categoryCode,
-			expenseType,
-			isRecurring,
-			description,
-			notes,
-			image,
-			paymentMethod,
-			mood,
-			eventId,
-			cognitiveTriggerCodes,
-		} = expenseData;
+	try {
+		// Timeout mechanism to abort the process after 30 seconds
+		const processWithTimeout = new Promise(async (resolve, reject) => {
+			const timeoutId = setTimeout(() => {
+				reject(new Error("Processing timeout. Failed to process expenses."));
+			}, 30000); // 30 seconds timeout
 
-		const category = await Category.findOne({ code: categoryCode });
-		if (!category) {
-			throw new ValidationError("Invalid category code.");
-		}
+			try {
+				// Process each expense in the expensesData array
+				for (const expenseData of expensesData) {
+					const {
+						title,
+						amount,
+						categoryCode,
+						expenseType,
+						isRecurring,
+						description,
+						notes,
+						image,
+						paymentMethod,
+						mood,
+						eventId,
+						cognitiveTriggerCodes,
+					} = expenseData;
 
-		let cognitiveTriggerIds = [];
-		let cognitiveTriggerNames = [];
-		if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
-			const cognitiveTriggers = await CognitiveTrigger.find({
-				code: { $in: cognitiveTriggerCodes },
-			});
-			if (cognitiveTriggers.length !== cognitiveTriggerCodes.length) {
-				throw new ValidationError(
-					"One or more cognitive trigger codes are invalid."
-				);
+					// Validate the category
+					const category = await Category.findOne({
+						code: categoryCode,
+					}).session(session);
+					if (!category) {
+						throw new ValidationError("Invalid category code.");
+					}
+
+					// Fetch cognitive triggers
+					let cognitiveTriggerIds = [];
+					let cognitiveTriggerNames = [];
+					if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
+						const cognitiveTriggers = await CognitiveTrigger.find({
+							code: { $in: cognitiveTriggerCodes },
+						}).session(session);
+
+						if (cognitiveTriggers.length !== cognitiveTriggerCodes.length) {
+							throw new ValidationError(
+								"One or more cognitive trigger codes are invalid."
+							);
+						}
+
+						cognitiveTriggerIds = cognitiveTriggers.map(
+							(trigger) => trigger._id
+						);
+						cognitiveTriggerNames = cognitiveTriggers.map(
+							(trigger) => trigger.name
+						);
+					}
+
+					// Create a new expense
+					const newExpense = new Expense({
+						userId,
+						title,
+						amount,
+						categoryId: category._id,
+						expenseType,
+						isRecurring,
+						description: description || null,
+						notes,
+						image,
+						paymentMethod,
+						mood: mood || "neutral",
+						eventId: eventId || null,
+						cognitiveTriggerIds:
+							cognitiveTriggerIds.length > 0 ? cognitiveTriggerIds : null,
+					});
+
+					await newExpense.save({ session });
+					createdExpenses.push(newExpense);
+
+					// Publish the expense created event to Kafka
+					const { producerInstance } = await connectKafka();
+					await produceEvent(
+						EVENTS.EXPENSE_CREATED,
+						{
+							...newExpense.toObject(),
+							categoryName: category.name,
+							cognitiveTriggerNames,
+							createdAt: newExpense.createdAt,
+						},
+						TOPICS.EXPENSE,
+						producerInstance
+					);
+				}
+
+				clearTimeout(timeoutId); // Clear the timeout if everything is processed successfully
+				resolve();
+			} catch (error) {
+				reject(error);
 			}
-			cognitiveTriggerIds = cognitiveTriggers.map((trigger) => trigger._id);
-			cognitiveTriggerNames = cognitiveTriggers.map((trigger) => trigger.name);
-		}
-
-		const newExpense = new Expense({
-			userId,
-			title,
-			amount,
-			categoryId: category._id,
-			expenseType,
-			isRecurring,
-			description: description || null,
-			notes,
-			image,
-			paymentMethod,
-			mood: mood || "neutral",
-			eventId: eventId || null,
-			cognitiveTriggerIds:
-				cognitiveTriggerIds.length > 0 ? cognitiveTriggerIds : null,
 		});
 
-		await newExpense.save();
+		// Wait for the process to complete or timeout
+		await processWithTimeout;
 
-		createdExpenses.push(newExpense);
+		// Commit the transaction if everything is successful
+		await session.commitTransaction();
+		session.endSession();
 
-		// Publish the event after successfully saving the expense
-		// const channel = await connectRabbitMQ();
-		// await publishEvent(
-		// 	EVENTS.EXPENSE_CREATED,
-		// 	{
-		// 		...newExpense.toObject(),
-		// 		categoryName: category.name,
-		// 		cognitiveTriggerNames,
-		// 		createdAt: newExpense.createdAt,
-		// 	},
-		// 	channel
-		// );
+		return createdExpenses;
+	} catch (error) {
+		// Rollback the transaction on failure
+		await session.abortTransaction();
+		session.endSession();
 
-		const { producerInstance } = await connectKafka();
-		await produceEvent(
-			EVENTS.EXPENSE_CREATED,
-			{
-				...newExpense.toObject(),
-				categoryName: category.name,
-				cognitiveTriggerNames,
-				createdAt: newExpense.createdAt,
-			},
-			TOPICS.EXPENSE,
-			producerInstance
-		);
+		logError(`Failed to process expenses: ${error.message}`);
+
+		// Retry mechanism
+		if (retries > 0) {
+			logInfo(`Retrying to process expenses (${3 - retries + 1})...`);
+			return addExpensesService(expensesData, userId, retries - 1);
+		}
+
+		throw error; // After all retries fail, throw the error to the caller
+	} finally {
+		session.endSession(); // Ensure the session ends
 	}
-
-	return createdExpenses;
 };
 
-export const deleteExpensesByIdsService = async (expenseIds, userId) => {
-	if (!Array.isArray(expenseIds) || expenseIds.length === 0) {
-		throw new ValidationError("Expense IDs must be a non-empty array.");
-	}
+export const deleteExpensesByIdsService = async (
+	expenseIds,
+	userId,
+	retries = 3
+) => {
+	// Start a session for the transaction
+	const session = await mongoose.startSession();
+	session.startTransaction();
 
-	// Validate the expense IDs
-	const invalidIds = expenseIds.filter(
-		(id) => !mongoose.Types.ObjectId.isValid(id)
-	);
-	if (invalidIds.length > 0) {
-		throw new ValidationError("Invalid expense ID(s) provided.");
-	}
+	try {
+		if (!Array.isArray(expenseIds) || expenseIds.length === 0) {
+			throw new ValidationError("Expense IDs must be a non-empty array.");
+		}
 
-	// Find and delete the expenses
-	const expensesToDelete = await Expense.find({
-		_id: { $in: expenseIds },
-		userId: userId,
-	});
-
-	// if (expensesToDelete.length === 0) {
-	//     throw new ValidationError(
-	//         "No expenses found for the given IDs or you do not have permission to delete them."
-	//     );
-	// }
-
-	const result = await Expense.deleteMany({
-		_id: { $in: expenseIds },
-		userId: userId,
-	});
-
-	// If the deletion was successful, publish the EXPENSES_DELETED event
-	if (result.deletedCount > 0) {
-		const channel = await connectRabbitMQ();
-		await publishEvent(
-			EVENTS.EXPENSE_DELETED,
-			expensesToDelete, // Sending the array of deleted expenses
-			channel
+		// Validate the expense IDs
+		const invalidIds = expenseIds.filter(
+			(id) => !mongoose.Types.ObjectId.isValid(id)
 		);
-	}
+		if (invalidIds.length > 0) {
+			throw new ValidationError("Invalid expense ID(s) provided.");
+		}
 
-	return result;
+		// Find the expenses to delete
+		const expensesToDelete = await Expense.find({
+			_id: { $in: expenseIds },
+			userId: userId,
+		}).session(session); // Use session for transaction
+
+		// Delete the expenses
+		const result = await Expense.deleteMany({
+			_id: { $in: expenseIds },
+			userId: userId,
+		}).session(session); // Use session for transaction
+
+		// If deletion was successful, publish the event
+		if (result.deletedCount > 0) {
+			// Timeout mechanism to abort the process after 30 seconds
+			const processWithTimeout = new Promise(async (resolve, reject) => {
+				const timeoutId = setTimeout(() => {
+					reject(new Error("Processing timeout. Failed to delete expenses."));
+				}, 30000); // 30 seconds timeout
+
+				try {
+					// Produce the EXPENSE_DELETED event
+					const { producerInstance } = await connectKafka();
+					await produceEvent(
+						EVENTS.EXPENSE_DELETED,
+						expensesToDelete,
+						TOPICS.EXPENSE,
+						producerInstance
+					);
+
+					clearTimeout(timeoutId); // Clear timeout if successful
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
+			});
+
+			await processWithTimeout; // Wait for the process to finish or timeout
+
+			// Commit the transaction
+			await session.commitTransaction();
+			session.endSession();
+
+			logInfo(
+				`Successfully deleted expenses and published the event for user ${userId}.`
+			);
+		}
+
+		return result;
+	} catch (error) {
+		// Rollback the transaction on failure
+		await session.abortTransaction();
+		session.endSession();
+
+		logError(`Failed to delete expenses: ${error.message}`);
+
+		// Retry mechanism
+		if (retries > 0) {
+			logInfo(`Retrying to delete expenses (${3 - retries + 1})...`);
+			return deleteExpensesByIdsService(expenseIds, userId, retries - 1);
+		}
+
+		throw error; // After all retries fail, throw the error to the caller
+	} finally {
+		session.endSession(); // Ensure the session ends
+	}
 };
 
 export const deleteExpensesByUserId = async (userId, retries = 3) => {

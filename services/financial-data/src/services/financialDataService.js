@@ -1,10 +1,16 @@
 import mongoose from "mongoose";
-import { logInfo, logError, EVENTS, publishEvent } from "@expensio/sharedlib";
+import {
+	logInfo,
+	logError,
+	EVENTS,
+	produceEvent,
+	TOPICS,
+} from "@expensio/sharedlib";
 import MonthlyExpenseFinancialData from "../models/MonthlyExpenseFinancialData.js";
 import MonthlyIncomeFinancialData from "../models/MonthlyIncomeFinancialData.js";
-import connectRabbitMQ from "../config/rabbitmq.js";
 import ProcessedExpense from "../models/ProcessedExpense.js";
 import ProcessedIncome from "../models/ProcessedIncome.js";
+import { connectKafka } from "../config/connectKafka.js";
 
 const RETRIES = 3; // Default retries
 const TIMEOUT = 30000; // 30 seconds timeout
@@ -179,11 +185,12 @@ export const addExpenseFinancialDataService = async (
 				clearTimeout(timeoutId); // Clear timeout if successful
 
 				// Publish event
-				const channel = await connectRabbitMQ();
-				await publishEvent(
+				const { producerInstance } = await connectKafka();
+				await produceEvent(
 					EVENTS.FINANCIALDATA_UPDATED_EXPENSE,
 					savedFinancialData.toObject(),
-					channel
+					TOPICS.EXPENSE,
+					producerInstance
 				);
 
 				resolve();
@@ -374,12 +381,14 @@ export const removeExpenseFinancialDataService = async (
 						clearTimeout(timeoutId);
 
 						// Publish the updated financial data event
-						const channel = await connectRabbitMQ();
-						await publishEvent(
+						const { producerInstance } = await connectKafka();
+						await produceEvent(
 							EVENTS.FINANCIALDATA_UPDATED_EXPENSE,
 							savedFinancialData.toObject(),
-							channel
+							TOPICS.EXPENSE,
+							producerInstance
 						);
+
 						logInfo(
 							`Expense '${title}' deleted from userId ${userId}'s FINANCIAL DATA.`
 						);
@@ -521,12 +530,13 @@ export const addIncomeFinancialDataService = async (
 
 				clearTimeout(timeoutId); // Clear timeout if successful
 
-				// Publish event
-				const channel = await connectRabbitMQ();
-				await publishEvent(
+				// Publish the updated financial data event
+				const { producerInstance } = await connectKafka();
+				await produceEvent(
 					EVENTS.FINANCIALDATA_UPDATED_INCOME,
 					updatedFinancialData.toObject(),
-					channel
+					TOPICS.INCOME,
+					producerInstance
 				);
 
 				resolve();
@@ -683,11 +693,12 @@ export const removeIncomeFinancialDataService = async (
 						clearTimeout(timeoutId);
 
 						// Publish the updated financial data event
-						const channel = await connectRabbitMQ();
-						await publishEvent(
+						const { producerInstance } = await connectKafka();
+						await produceEvent(
 							EVENTS.FINANCIALDATA_UPDATED_INCOME,
 							updatedFinancialData.toObject(),
-							channel
+							TOPICS.INCOME,
+							producerInstance
 						);
 
 						logInfo(

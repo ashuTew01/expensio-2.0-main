@@ -1,4 +1,4 @@
-import { logInfo } from "@expensio/sharedlib";
+import { logError, logInfo } from "@expensio/sharedlib";
 import mongoose from "mongoose";
 
 const connectDB = async () => {

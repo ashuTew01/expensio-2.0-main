@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 import Category from "../models/Category.js";
-import { ValidationError, publishEvent, EVENTS } from "@expensio/sharedlib";
+import {
+	ValidationError,
+	EVENTS,
+	produceEvent,
+	TOPICS,
+} from "@expensio/sharedlib";
 import { logInfo, logWarning, logError } from "@expensio/sharedlib";
-import connectRabbitMQ from "../config/rabbitmq.js";
 import Income from "../models/Income.js";
+import { connectKafka } from "../config/connectKafka.js";
 
 export const getIncomesService = async (queryParameters, userId) => {
 	const {
@@ -68,96 +73,187 @@ export const getIncomesService = async (queryParameters, userId) => {
 	};
 };
 
-export const addIncomesService = async (incomesData, userId) => {
+export const addIncomesService = async (incomesData, userId, retries = 3) => {
+	// Start a MongoDB session for transactions
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
 	const createdIncomes = [];
 
-	for (const incomeData of incomesData) {
-		const {
-			title,
-			amount,
-			categoryCode,
-			incomeType,
-			isRecurring,
-			description,
-			image,
-		} = incomeData;
+	try {
+		for (const incomeData of incomesData) {
+			const {
+				title,
+				amount,
+				categoryCode,
+				incomeType,
+				isRecurring,
+				description,
+				image,
+			} = incomeData;
 
-		const category = await Category.findOne({ code: categoryCode });
-		if (!category) {
-			throw new ValidationError("Invalid category code.");
+			const category = await Category.findOne({ code: categoryCode });
+			if (!category) {
+				throw new ValidationError("Invalid category code.");
+			}
+
+			const newIncome = new Income({
+				userId,
+				title,
+				amount,
+				categoryId: category._id,
+				incomeType,
+				isRecurring,
+				description: description || null,
+				image,
+			});
+
+			await newIncome.save({ session });
+			createdIncomes.push(newIncome);
+
+			// Timeout mechanism to abort the process after 30 seconds
+			const processWithTimeout = new Promise(async (resolve, reject) => {
+				const timeoutId = setTimeout(() => {
+					reject(new Error("Processing timeout. Failed to process income."));
+				}, 30000); // 30 seconds timeout
+
+				try {
+					// Produce the event after successfully saving the income
+
+					const { producerInstance } = await connectKafka();
+					await produceEvent(
+						EVENTS.INCOME_CREATED,
+						{
+							...newIncome.toObject(),
+							categoryName: category.name,
+							createdAt: newIncome.createdAt,
+						},
+						TOPICS.INCOME,
+						producerInstance
+					);
+
+					clearTimeout(timeoutId); // Clear timeout if successful
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
+			});
+
+			await processWithTimeout; // Wait for the process to finish or timeout
 		}
 
-		const newIncome = new Income({
-			userId,
-			title,
-			amount,
-			categoryId: category._id,
-			incomeType,
-			isRecurring,
-			description: description || null,
-			image,
-		});
+		// Commit the transaction if everything is successful
+		await session.commitTransaction();
+		session.endSession();
 
-		await newIncome.save();
-		createdIncomes.push(newIncome);
+		return createdIncomes;
+	} catch (error) {
+		// Rollback the transaction on failure
+		await session.abortTransaction();
+		session.endSession();
 
-		// Publish the event after successfully saving the income
-		const channel = await connectRabbitMQ();
-		await publishEvent(
-			EVENTS.INCOME_CREATED,
-			{
-				...newIncome.toObject(),
-				categoryName: category.name,
-				createdAt: newIncome.createdAt,
-			},
-			channel
-		);
+		// Retry mechanism
+		if (retries > 0) {
+			logInfo(`Retrying to process incomes (${3 - retries + 1})...`);
+			return addIncomesService(incomesData, userId, retries - 1);
+		}
+
+		logError(`Failed to process incomes: ${error.message}`);
+		throw error; // After all retries fail, throw the error
+	} finally {
+		session.endSession(); // Ensure the session ends
 	}
-
-	return createdIncomes;
 };
 
-export const deleteIncomesByIdsService = async (incomeIds, userId) => {
-	if (!Array.isArray(incomeIds) || incomeIds.length === 0) {
-		throw new ValidationError("Income IDs must be a non-empty array.");
-	}
+export const deleteIncomesByIdsService = async (
+	incomeIds,
+	userId,
+	retries = 3
+) => {
+	// Start a session for the transaction
+	const session = await mongoose.startSession();
+	session.startTransaction();
 
-	// Validate the income IDs
-	const invalidIds = incomeIds.filter(
-		(id) => !mongoose.Types.ObjectId.isValid(id)
-	);
-	if (invalidIds.length > 0) {
-		throw new ValidationError("Invalid income ID(s) provided.");
-	}
+	try {
+		if (!Array.isArray(incomeIds) || incomeIds.length === 0) {
+			throw new ValidationError("Income IDs must be a non-empty array.");
+		}
 
-	// Find and delete the incomes
-	const incomesToDelete = await Income.find({
-		_id: { $in: incomeIds },
-		userId: userId,
-	});
-
-	// if (incomesToDelete.length === 0) {
-	//     throw new ValidationError(
-	//         "No incomes found for the given IDs or you do not have permission to delete them."
-	//     );
-	// }
-
-	const result = await Income.deleteMany({
-		_id: { $in: incomeIds },
-		userId: userId,
-	});
-
-	// If the deletion was successful, publish the INCOME_DELETED event
-	if (result.deletedCount > 0) {
-		const channel = await connectRabbitMQ();
-		await publishEvent(
-			EVENTS.INCOME_DELETED,
-			incomesToDelete, // Sending the array of deleted incomes
-			channel
+		// Validate the income IDs
+		const invalidIds = incomeIds.filter(
+			(id) => !mongoose.Types.ObjectId.isValid(id)
 		);
-	}
+		if (invalidIds.length > 0) {
+			throw new ValidationError("Invalid income ID(s) provided.");
+		}
 
-	return result;
+		// Find the incomes to delete
+		const incomesToDelete = await Income.find({
+			_id: { $in: incomeIds },
+			userId: userId,
+		}).session(session); // Use session for transaction
+
+		// Delete the incomes
+		const result = await Income.deleteMany({
+			_id: { $in: incomeIds },
+			userId: userId,
+		}).session(session); // Use session for transaction
+
+		// If deletion was successful, publish the event
+		if (result.deletedCount > 0) {
+			// Timeout mechanism to abort the process after 30 seconds
+			const processWithTimeout = new Promise(async (resolve, reject) => {
+				const timeoutId = setTimeout(() => {
+					reject(new Error("Processing timeout. Failed to delete incomes."));
+				}, 30000); // 30 seconds timeout
+
+				try {
+					// Produce the INCOME_DELETED event
+
+					const { producerInstance } = await connectKafka();
+					await produceEvent(
+						EVENTS.INCOME_DELETED,
+						incomesToDelete,
+						TOPICS.INCOME,
+						producerInstance
+					);
+
+					clearTimeout(timeoutId); // Clear timeout if successful
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
+			});
+
+			await processWithTimeout; // Wait for the process to finish or timeout
+
+			// Commit the transaction
+			await session.commitTransaction();
+			session.endSession();
+
+			logInfo(
+				`Successfully deleted incomes and published the event for user ${userId}.`
+			);
+		}
+
+		return result;
+	} catch (error) {
+		// Rollback the transaction on failure
+		await session.abortTransaction();
+		session.endSession();
+
+		logError(`Failed to delete incomes: ${error.message}`);
+
+		// Retry mechanism
+		if (retries > 0) {
+			logInfo(`Retrying to delete incomes (${3 - retries + 1})...`);
+			return deleteIncomesByIdsService(incomeIds, userId, retries - 1);
+		}
+
+		throw error; // After all retries fail, throw the error to the caller
+	} finally {
+		session.endSession(); // Ensure the session ends
+	}
 };
 
 export const deleteIncomesByUserId = async (userId, retries = 3) => {

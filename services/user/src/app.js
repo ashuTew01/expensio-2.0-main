@@ -44,7 +44,6 @@ checkEnvVariables();
 import bodyParser from "body-parser";
 import {
 	errorHandlingMiddleware,
-	EVENTS,
 	initLogger,
 	logError,
 	logInfo,
@@ -54,14 +53,13 @@ import pool from "./config/db.js";
 const app = express();
 
 //start RabbitMQ
-import startRabbitMQ from "./config/startRabbitMQ.js";
+
 import { startKafka } from "./config/startKafka.js";
 const startServices = async () => {
 	try {
-		await startRabbitMQ();
 		await startKafka();
 	} catch (error) {
-		logError("Failed to start services:", error);
+		logError("Failed to start services: " + error);
 		process.exit(1);
 	}
 };

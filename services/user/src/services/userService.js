@@ -2,13 +2,13 @@ import * as userModel from "../models/userModel.js";
 import * as otpModel from "../models/otpModel.js";
 import pool from "../config/db.js";
 
-import connectRabbitMQ from "../config/rabbitmq.js";
-import { publishEvent } from "@expensio/sharedlib";
+import { produceEvent, TOPICS } from "@expensio/sharedlib";
 import { EVENTS } from "@expensio/sharedlib";
 
 import { sendVerificationEmailService } from "../services/emailService.js";
 
 import { NotFoundError, InternalServerError } from "@expensio/sharedlib";
+import { connectKafka } from "../config/connectKafka.js";
 
 export const createUserService = async (userData) => {
 	let user;
@@ -76,11 +76,16 @@ export const deleteUserService = async (userId, userPhone) => {
 		await client.query("COMMIT");
 
 		// Publish the UserDeleted event after commit ONLY
-		const channel = await connectRabbitMQ();
-		await publishEvent(EVENTS.USER_DELETED, { userId, userPhone }, channel);
+		const { producerInstance } = await connectKafka();
+		await produceEvent(
+			EVENTS.USER_DELETED,
+			{ userId, userPhone },
+			TOPICS.USER,
+			producerInstance
+		);
 
 		return rowsDeleted;
-	} catch (error) {
+	} catch (_error) {
 		await client.query("ROLLBACK");
 
 		throw new InternalServerError(

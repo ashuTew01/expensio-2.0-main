@@ -18,6 +18,11 @@ spec:
               kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic expense-events --replication-factor 1 --partitions 1;
               kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic financial-data-events --replication-factor 1 --partitions 1;
               kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic income-events --replication-factor 1 --partitions 1;
+              kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic user-events-dlq --replication-factor 1 --partitions 1;
+              kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic expense-events-dlq --replication-factor 1 --partitions 1;
+              kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic financial-data-events-dlq --replication-factor 1 --partitions 1;
+              kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic income-events-dlq --replication-factor 1 --partitions 1;
+              kafka-topics.sh --bootstrap-server kafka-srv:9092 --create --if-not-exists --topic manual-dlq --replication-factor 1 --partitions 1;
           env:
             - name: KAFKA_BROKER_ID
               value: "1"

@@ -17,6 +17,10 @@ export const connectKafka = async (timeout = 15000, interval = 500) => {
 			producer = kafka.producer();
 			consumer = kafka.consumer({
 				groupId: `${process.env.SERVICE_NAME}-service`,
+				retry: {
+					retries: 5,
+				},
+				enableAutoCommit: false,
 			});
 
 			await producer.connect();

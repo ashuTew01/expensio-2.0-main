@@ -10,7 +10,7 @@ import {
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 import cors from "cors";
-import startRabbitMQ from "./config/startRabbitMQ.js";
+
 import { initializeWebSocket } from "./config/websocket.js";
 import http from "http"; // Required to run WebSocket on the same server
 
@@ -44,12 +44,11 @@ const server = http.createServer(app);
 
 const startServices = async () => {
 	try {
-		// await startRabbitMQ();
-		await connectDB();
-		initializeWebSocket(server); // Initialize WebSocket when services start
 		await startKafka();
+		initializeWebSocket(server); // Initialize WebSocket when services start
+		await connectDB();
 	} catch (error) {
-		logError("Failed to start services:", error);
+		logError("Failed to start services: " + error);
 		process.exit(1);
 	}
 };

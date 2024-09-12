@@ -10,8 +10,6 @@ import {
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 import cors from "cors";
-import startRabbitMQ from "./config/startRabbitMQ.js";
-
 // Load environment variables from .env file
 dotenv.config();
 
@@ -40,11 +38,10 @@ const PORT = process.env.PORT || 3000;
 
 const startServices = async () => {
 	try {
-		await startRabbitMQ();
-		await connectDB();
 		await startKafka();
+		await connectDB();
 	} catch (error) {
-		logError("Failed to start services:", error);
+		logError("Failed to start services: " + error);
 		process.exit(1);
 	}
 };
