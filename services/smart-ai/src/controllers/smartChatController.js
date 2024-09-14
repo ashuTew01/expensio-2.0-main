@@ -1,4 +1,4 @@
-import { callOpenAI } from "../utils/openaiClient.js";
+import { callOpenaiService } from "../services/openaiService.js";
 import { openAIGeneralFunctions } from "../utils/openaiFunctions.js";
 import {
 	handleCreateExpenseService,
@@ -69,7 +69,8 @@ export const handleUserInputController = async (message, socket) => {
 		const historyForOpenAI = [...conversationHistory.history, initialPrompt];
 
 		// Call OpenAI to understand the message and determine function calls
-		const aiResponse = await callOpenAI(
+		const aiResponse = await callOpenaiService(
+			userId,
 			historyForOpenAI,
 			openAIGeneralFunctions
 		);
@@ -139,8 +140,8 @@ export const handleUserInputController = async (message, socket) => {
 		}
 		// Save updated conversation history
 		await conversationHistory.save();
-	} catch (error) {
-		logError(error);
+	} catch (err) {
+		logError(err);
 		socket.emit("response", {
 			type: "error",
 			message: "An error occurred. Please try again.",

@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smart-chat-depl
+  name: smart-ai-depl
   namespace: expensio-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: smart-chat
+      app: smart-ai
   template:
     metadata:
       labels:
-        app: smart-chat
+        app: smart-ai
     spec:
       containers:
-        - name: smart-chat
-          image: ashuz057/expensio-smart-chat
+        - name: smart-ai
+          image: ashuz057/expensio-smart-ai
           env:
             - name: SERVICE_NAME
               valueFrom:
                 secretKeyRef:
-                  name: smart-chat-secret
+                  name: smart-ai-secret
                   key: SERVICE_NAME
             - name: KAFKA_BROKER_URL
               valueFrom:
@@ -30,12 +30,12 @@ spec:
             - name: MONGO_URI
               valueFrom:
                 secretKeyRef:
-                  name: smart-chat-secret
+                  name: smart-ai-secret
                   key: MONGO_URI
             - name: PORT
               valueFrom:
                 secretKeyRef:
-                  name: smart-chat-secret
+                  name: smart-ai-secret
                   key: PORT
             - name: RABBITMQ_URL
               valueFrom:
@@ -71,13 +71,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: smart-chat-srv
+  name: smart-ai-srv
   namespace: expensio-dev
 spec:
   selector:
-    app: smart-chat
+    app: smart-ai
   ports:
-    - name: smart-chat
+    - name: smart-ai
       protocol: TCP
       port: 3000
       targetPort: 3000

@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import smartChatRoutes from "./routes/smartChatRoutes.js";
+import smartAiRoutes from "./routes/smartAiRoutes.js";
 import {
 	errorHandlingMiddleware,
 	initLogger,
@@ -21,6 +21,9 @@ dotenv.config();
 import path from "path";
 import { fileURLToPath } from "url";
 import { startKafka } from "./config/startKafka.js";
+import { connectOpenai } from "./config/connectOpenai.js";
+import { starterFunctions } from "./utils/starterFunctions.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logDirectory = path.join(__dirname, "..", "logs");
@@ -35,7 +38,7 @@ app.use(cors());
 app.use(errorHandlingMiddleware);
 
 // Use routes
-app.use("/api/smart-chat", smartChatRoutes);
+app.use("/api/smart-ai", smartAiRoutes);
 
 const PORT = process.env.PORT || 3000;
 
@@ -46,6 +49,7 @@ const startServices = async () => {
 	try {
 		await startKafka();
 		initializeWebSocket(server); // Initialize WebSocket when services start
+		await connectOpenai();
 		await connectDB();
 	} catch (error) {
 		logError("Failed to start services: " + error);
@@ -56,5 +60,6 @@ const startServices = async () => {
 await startServices();
 
 server.listen(PORT, () => {
-	logInfo("Smart Chat service is running on port " + PORT);
+	logInfo("Smart Ai service is running on port " + PORT);
+	starterFunctions();
 });

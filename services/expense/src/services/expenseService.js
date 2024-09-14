@@ -468,30 +468,6 @@ export const removeCategoriesService = async (categoryCodes) => {
 	return result;
 };
 
-export const getCategoriesByIdsService = async (categoryIds) => {
-	const categories = await Category.find({ _id: { $in: categoryIds } });
-
-	const categoryMap = {};
-	categories.forEach((category) => {
-		categoryMap[category._id] = category.name;
-	});
-
-	return categoryMap;
-};
-
-export const getCognitiveTriggersByIdsService = async (cognitiveTriggerIds) => {
-	const cognitiveTriggers = await CognitiveTrigger.find({
-		_id: { $in: cognitiveTriggerIds },
-	});
-
-	const cognitiveTriggerMap = {};
-	cognitiveTriggers.forEach((trigger) => {
-		cognitiveTriggerMap[trigger._id] = trigger.name;
-	});
-
-	return cognitiveTriggerMap;
-};
-
 export const getCognitiveTriggersService = async () => {
 	const cognitiveTriggers = await CognitiveTrigger.find({});
 	return cognitiveTriggers;

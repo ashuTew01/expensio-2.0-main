@@ -49,17 +49,17 @@ spec:
                 name: dashboard-srv
                 port:
                   number: 3000
-          - path: /api/smart-chat
+          - path: /api/smart-ai
             pathType: Prefix
             backend:
               service:
-                name: smart-chat-srv
+                name: smart-ai-srv
                 port:
                   number: 3000
           - path: /ws/smart-chat
             pathType: Prefix
             backend:
               service:
-                name: smart-chat-srv
+                name: smart-ai-srv
                 port:
                   number: 3000

@@ -8,7 +8,7 @@ manifests:
     - ./infra/k8s/income-depl.yaml
     - ./infra/k8s/ingress-srv.yaml
     - ./infra/k8s/rabbitmq-depl.yaml
-    - ./infra/k8s/smart-chat-depl.yaml
+    - ./infra/k8s/smart-ai-depl.yaml
     - ./infra/k8s/user-depl.yaml
 build:
   local:
@@ -54,8 +54,8 @@ build:
         manual:
           - src: "src/**/*.js"
             dest: .
-    - image: ashuz057/expensio-smart-chat
-      context: ./services/smart-chat
+    - image: ashuz057/expensio-smart-ai
+      context: ./services/smart-ai
       docker:
         dockerfile: Dockerfile
       sync:

@@ -5,6 +5,11 @@ import jwt from "jsonwebtoken";
 
 let io;
 
+/**
+ * Initializes the WebSocket server and sets up authentication using Bearer tokens.
+ * @param {http.Server} server The HTTP server to attach the WebSocket server to.
+ * @returns {void}
+ */
 export const initializeWebSocket = (server) => {
 	io = new Server(server, {
 		path: "/ws/smart-chat",

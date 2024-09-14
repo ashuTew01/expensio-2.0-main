@@ -1,4 +1,4 @@
-import { callOpenAI } from "../utils/openaiClient.js";
+import { callOpenaiService } from "./openaiService.js";
 import axios from "axios"; // For making API calls to the expense service
 import {
 	openAICreateExpenseFunction,
@@ -31,8 +31,8 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
                     `;
 
 		// Call OpenAI to get the expense details
-		const aiResponse = await callOpenAI(
-			// conversationHistory,
+		const aiResponse = await callOpenaiService(
+			socket.user.id,
 			[{ role: "system", content: prompt }],
 			openAICreateExpenseFunction
 		);
@@ -73,7 +73,7 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 				},
 			}
 		);
-		const expenseTitle = response?.data?.expenses[0]?.title;
+		const expenseTitle = await response?.data?.expenses[0]?.title;
 		// Respond to the user with the confirmation
 		socket.emit("response", {
 			type: "expense_created",
@@ -82,11 +82,11 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 
 		return expenseTitle;
 	} catch (error) {
-		logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "Failed to create expense.",
 		});
+		throw error;
 	}
 };
 
@@ -113,7 +113,8 @@ export const handleCreateIncomeService = async (socket, userMessage) => {
                     `;
 
 		// Call OpenAI to get the income details
-		const aiResponse = await callOpenAI(
+		const aiResponse = await callOpenaiService(
+			socket.user.id,
 			[{ role: "system", content: prompt }],
 			openAICreateIncomeFunction
 		);
@@ -195,7 +196,8 @@ export const handleGetFinancialDataService = async (socket, userMessage) => {
                     `;
 
 		// Call OpenAI to interpret the message and get the required parameters
-		const aiResponse = await callOpenAI(
+		const aiResponse = await callOpenaiService(
+			socket.user.id,
 			[{ role: "system", content: prompt }],
 			openAIGetFinancialDataFunction
 		);

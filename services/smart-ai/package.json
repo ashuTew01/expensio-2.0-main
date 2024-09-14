@@ -1,7 +1,7 @@
 {
-	"name": "smart-chat",
+	"name": "smart-ai",
 	"version": "1.0.0",
-	"description": "Smart Chat Microservice",
+	"description": "Smart AI Microservice",
 	"type": "module",
 	"main": "src/app.js",
 	"scripts": {
