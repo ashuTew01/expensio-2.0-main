@@ -18,7 +18,6 @@ const expenseSchema = new mongoose.Schema(
 		expenseType: {
 			type: String,
 			enum: ["necessity", "luxury", "investment", "saving"],
-			required: true,
 		},
 		isRecurring: {
 			type: Boolean,

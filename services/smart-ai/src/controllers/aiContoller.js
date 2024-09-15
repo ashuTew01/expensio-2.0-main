@@ -7,8 +7,8 @@ export const callAiController = async (req, res, next) => {
 		const userId = req.user.id;
 
 		const requestSchema = Joi.object({
-			conversationHistory: Joi.array().items(Joi.string()).required(),
-			functions: Joi.array().items(Joi.string()).optional(),
+			conversationHistory: Joi.array().items(Joi.object()).required(),
+			functions: Joi.array().items().optional(),
 			model: Joi.string().optional(),
 		});
 

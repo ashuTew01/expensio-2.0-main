@@ -50,6 +50,7 @@ const dashboardSchema = new mongoose.Schema({
 		],
 		lastUpdated: {
 			type: Date,
+			default: Date.now,
 			required: true,
 		},
 	},
@@ -67,6 +68,7 @@ const dashboardSchema = new mongoose.Schema({
 		],
 		lastUpdated: {
 			type: Date,
+			default: Date.now,
 			required: true,
 		},
 	},

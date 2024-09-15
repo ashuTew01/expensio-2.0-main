@@ -47,6 +47,11 @@ spec:
                 secretKeyRef:
                   name: shared-secret
                   key: JWT_SECRET
+            - name: SMART_AI_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: SMART_AI_SERVICE_URL
 ---
 apiVersion: v1
 kind: Service
