@@ -71,6 +71,12 @@ export const openAICreateExpenseFunction = [
 					enum: ["happy", "neutral", "regretful"],
 					description: "Mood associated with the expense",
 				},
+				createdAt: {
+					type: "string",
+					format: "date-time",
+					description:
+						"ISO 8601 date-time when the expense was made. Include this if the user has mentioned any particular time frame of the expense; otherwise, it's not required.",
+				},
 			},
 			required: ["title", "amount", "categoryCode", "expenseType"],
 		},
@@ -153,6 +159,12 @@ export const openAICreateIncomeFunction = [
 					type: "string",
 					description: "Optional additional description of the income",
 				},
+				createdAt: {
+					type: "string",
+					format: "date-time",
+					description:
+						"ISO 8601 date-time when the income was received. Include this if the user has mentioned any particular time frame of the income; otherwise, it's not required.",
+				},
 			},
 			required: ["title", "amount", "categoryCode", "incomeType"],
 		},
@@ -162,13 +174,11 @@ export const openAICreateIncomeFunction = [
 export const openAIGeneralFunctions = [
 	{
 		name: "createExpense",
-		description:
-			"Call if user wants to add an expense (only 1).If no amount given or title can't be inferred, ask for it. All the expense details must be given in single message.",
+		description: "Call if user wants to add an expense (only 1).",
 	},
 	{
 		name: "createIncome",
-		description:
-			"Call if user wants to add income (only 1).If no amount given or title can't be inferred, ask for it. All the income details must be given in single message.",
+		description: "Call if user wants to add income (only 1).",
 	},
 	{
 		name: "getFinancialData",

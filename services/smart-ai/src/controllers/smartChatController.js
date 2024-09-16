@@ -27,11 +27,11 @@ export const handleUserInputController = async (message, socket) => {
 		const initialPrompt = {
 			role: "system",
 			content: `THIS IS JUST A SYSTEM PROMPT, ALWAYS ATTACHED TO HISTORY TO HELP YOU. USER's MESSAGE IS ABOVE THIS. Date: ${new Date()}. You are a helpful financial assistant. 
+			    Dont answer queries if the user's messages get too drifted off the financial related domain.
 				1. Always try to interpret what the user wants to do before calling any function, or simply asking for a simple query. 
-				2. If the user clearly provides details like title and amount, infer the category and other relevant details, then proceed with the function call of income/expense.
-				3. If you cannot infer the title or amount, or if the details are missing, ask the user to provide all the details in one message.
-				4. If the user confirms with a response like 'Yes' or 'Please do that', remind the user that their previous attempt at creating the expense or income was incomplete and they must provide the details again in a single message.
-				5. Never ask the user to confirm the creation of expenses or incomes or any other function call. Either call function or prompt them to resend all the details in one single message.`,
+				2. If you think expense/income is to be created: If you can infer the title and amount, call the createExpense function, don't trouble the user into asking. If it is impossible to infer these, then only ask the user to provide details of the expense/income. 
+				3. If the user sends a message like "Hello" or similar, that means he is most likely starting a new chat, dont trouble him what he was doing before that chat unless he asks.
+			`,
 		};
 
 		// Ensure message is within character limit
@@ -83,12 +83,12 @@ export const handleUserInputController = async (message, socket) => {
 				message: aiResponse.choices[0].message.content,
 			});
 			const { name } = functionCall;
-
+			let incomeTitle, expenseTitle;
 			switch (name) {
 				case "createExpense":
-					const expenseTitle = await handleCreateExpenseService(
+					expenseTitle = await handleCreateExpenseService(
 						socket,
-						message
+						conversationHistory
 					);
 					conversationHistory.history.push({
 						role: "assistant",
@@ -97,7 +97,10 @@ export const handleUserInputController = async (message, socket) => {
 					break;
 
 				case "createIncome":
-					const incomeTitle = await handleCreateIncomeService(socket, message);
+					incomeTitle = await handleCreateIncomeService(
+						socket,
+						conversationHistory
+					);
 					conversationHistory.history.push({
 						role: "assistant",
 						content: `Function createIncome called: Created Income, ${incomeTitle}`,
@@ -105,7 +108,7 @@ export const handleUserInputController = async (message, socket) => {
 					break;
 
 				case "getFinancialData":
-					await handleGetFinancialDataService(socket, message);
+					await handleGetFinancialDataService(socket, conversationHistory);
 					conversationHistory.history.push({
 						role: "assistant",
 						content: `Function getFinancialData called and data sent successfully.`,
@@ -140,8 +143,8 @@ export const handleUserInputController = async (message, socket) => {
 		}
 		// Save updated conversation history
 		await conversationHistory.save();
-	} catch (err) {
-		logError(err);
+	} catch (error) {
+		logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "An error occurred. Please try again.",

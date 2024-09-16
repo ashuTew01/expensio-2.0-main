@@ -6,41 +6,49 @@ import {
 	openAIGetFinancialDataFunction,
 } from "../utils/openaiFunctions.js";
 import { logError } from "@expensio/sharedlib";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Handles the expense creation process by communicating with OpenAI and the expense service.
  * @param {Socket} socket - The WebSocket connection.
- * @param {String} userMessage - The expense related message.
- * @returns {Promise} The title of the expense.
+ * @param {Array<Object>} conversationHistory - The conversation history between the user and the AI.
+ * @returns {Promise<String>} The title of the created expense.
  */
-export const handleCreateExpenseService = async (socket, userMessage) => {
+export const handleCreateExpenseService = async (
+	socket,
+	conversationHistory
+) => {
 	try {
 		socket.emit("loading", {
 			type: "loading",
 			message: "Creating Expense. Please Wait...",
 		});
-		const prompt = `Create an expense from this message. 
+		const prompt = `Create an expense from the messages you see above this in the conversation history. 
                 TRY TO INFER AND ASSUME AS MANY PARAMETERS AS POSSIBLE.. AND FOLLOW THESE RULES
                 1. Title must be inferrable from user's message. Amount must be mentioned. Add 'purchase' or similar word at last of title to signify expense.'
                 2. Infer the category from the given ones. 
                 3. Infer AT LEAST one cognitive trigger; leave blank if none.  
                 5. Use default mood (neutral) and paymentMethod (unknown). 
                 6. Keep responses short.
-                User's message: ${userMessage}
                 If title, amount missing, or other issue, send just "NONE" in response, DO NOT CALL FUNCTION..
                     `;
 
+		// Get the last 10 messages from conversationHistory
+		const lastMessages = conversationHistory.history.slice(-10);
+
+		// Append the system prompt at the end
+		const messages = [...lastMessages, { role: "system", content: prompt }];
 		// Call OpenAI to get the expense details
 		const aiResponse = await callOpenaiService(
 			socket.user.id,
-			[{ role: "system", content: prompt }],
+			messages,
 			openAICreateExpenseFunction
 		);
 		if (aiResponse.choices[0].message.content === "NONE") {
 			socket.emit("response", {
 				type: "error",
 				message:
-					"Failed to create expense. Please provide correct expense details in just one message.",
+					"Failed to create expense. Please provide at least the amount of expense.",
 			});
 			return;
 		}
@@ -48,7 +56,6 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 		const functionArgs = JSON.parse(
 			aiResponse.choices[0].message.function_call.arguments
 		);
-
 		// Prepare the data for the expense creation API
 		const expenseData = {
 			title: functionArgs.title,
@@ -61,7 +68,9 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 			paymentMethod: functionArgs.paymentMethod || "unknown",
 			mood: functionArgs.mood || "neutral",
 			description: functionArgs.description || undefined, // optional
+			createdAt: functionArgs.createdAt || undefined, // optional
 		};
+		const idempotencyKey = uuidv4();
 
 		// Make the API call to create the expense
 		const response = await axios.post(
@@ -70,6 +79,7 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 			{
 				headers: {
 					Authorization: `Bearer ${socket.token}`,
+					"Idempotency-Key": idempotencyKey,
 				},
 			}
 		);
@@ -93,29 +103,36 @@ export const handleCreateExpenseService = async (socket, userMessage) => {
 /**
  * Handles the income creation process by communicating with OpenAI and the income service.
  * @param {Socket} socket - The WebSocket connection.
- * @param {String} userMessage - The income-related message.
- * @returns {Promise} The title of the income.
+ * @param {Array<Object>} conversationHistory - The conversation history between the user and the AI.
+ * @returns {Promise<String>} The title of the created income.
  */
-export const handleCreateIncomeService = async (socket, userMessage) => {
+export const handleCreateIncomeService = async (
+	socket,
+	conversationHistory
+) => {
 	try {
 		socket.emit("loading", {
 			type: "loading",
 			message: "Creating Income. Please Wait...",
 		});
-		const prompt = `Just call the createIncome function and create an income from this message.
+		const prompt = `Just call the createIncome function and create an income from this conversation history above this message.
                 TRY TO INFER AND ASSUME AS MANY PARAMETERS AS POSSIBLE.. AND FOLLOW THESE RULES
                 1. Title must be inferrable from user's message. Amount must be mentioned. Add appropriate word at the end of the title to signify income.
                 2. Infer the category from the given ones. 
                 3. Use default description (empty) and isRecurring (false).
                 4. Keep responses short.
-                User's message: ${userMessage}
                 If title, amount missing, or other issue, send just "NONE" in response, DO NOT CALL FUNCTION..
                     `;
 
+		// Get the last 10 messages from conversationHistory
+		const lastMessages = conversationHistory.history.slice(-10);
+
+		// Append the system prompt at the end
+		const messages = [...lastMessages, { role: "system", content: prompt }];
 		// Call OpenAI to get the income details
 		const aiResponse = await callOpenaiService(
 			socket.user.id,
-			[{ role: "system", content: prompt }],
+			messages,
 			openAICreateIncomeFunction
 		);
 
@@ -141,15 +158,18 @@ export const handleCreateIncomeService = async (socket, userMessage) => {
 			incomeType: functionArgs.incomeType,
 			isRecurring: functionArgs.isRecurring || false,
 			description: functionArgs.description || undefined,
+			createdAt: functionArgs.createdAt || undefined,
 		};
 
 		// Make the API call to create the income
+		const idempotencyKey = uuidv4();
 		const response = await axios.post(
 			`${process.env.INCOME_SERVICE_URL}`,
 			[incomeData],
 			{
 				headers: {
 					Authorization: `Bearer ${socket.token}`,
+					"Idempotency-Key": idempotencyKey,
 				},
 			}
 		);
@@ -175,9 +195,12 @@ export const handleCreateIncomeService = async (socket, userMessage) => {
 /**
  * Handles the retrieval of financial data (expense/income/both) by communicating with OpenAI and the financial data service.
  * @param {Socket} socket - The WebSocket connection.
- * @param {String} userMessage - The message asking for financial data.
+ * @param {Array<Object>} conversationHistory - The conversation history between the user and the AI.
  */
-export const handleGetFinancialDataService = async (socket, userMessage) => {
+export const handleGetFinancialDataService = async (
+	socket,
+	conversationHistory
+) => {
 	try {
 		// Emit a loading message
 		socket.emit("loading", {
@@ -189,16 +212,20 @@ export const handleGetFinancialDataService = async (socket, userMessage) => {
 		// const currentDate = dayjs().format("MMMM YYYY");
 
 		// Prepare the prompt for OpenAI to understand the financial data request
-		const prompt = `The user is asking for financial data (expenses, income, or both) based on this message:
-                ${userMessage}
+		const prompt = `The user is asking for financial data (expenses, income, or both) based on the conversation history:
                 Today is ${new Date()}. If the user requests data for past months, infer the correct month-year pairs for the requested duration (e.g., last 6 months). 
                 Call the function with the parameters.
                     `;
+		// Get the last 10 messages from conversationHistory
+		const lastMessages = conversationHistory.history.slice(-10);
+
+		// Append the system prompt at the end
+		const messages = [...lastMessages, { role: "system", content: prompt }];
 
 		// Call OpenAI to interpret the message and get the required parameters
 		const aiResponse = await callOpenaiService(
 			socket.user.id,
-			[{ role: "system", content: prompt }],
+			messages,
 			openAIGetFinancialDataFunction
 		);
 
