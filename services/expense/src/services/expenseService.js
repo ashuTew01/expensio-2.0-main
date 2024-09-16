@@ -138,6 +138,7 @@ export const addExpensesService = async (expensesData, userId, retries = 3) => {
 						mood,
 						eventId,
 						cognitiveTriggerCodes,
+						createdAt,
 					} = expenseData;
 
 					// Validate the category
@@ -186,6 +187,8 @@ export const addExpensesService = async (expensesData, userId, retries = 3) => {
 						eventId: eventId || null,
 						cognitiveTriggerIds:
 							cognitiveTriggerIds.length > 0 ? cognitiveTriggerIds : null,
+						createdAt: createdAt || new Date(),
+						updatedAt: new Date(),
 					});
 
 					await newExpense.save({ session });

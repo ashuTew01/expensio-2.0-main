@@ -10,6 +10,21 @@ import { logInfo, logWarning, logError } from "@expensio/sharedlib";
 import Income from "../models/Income.js";
 import { connectKafka } from "../config/connectKafka.js";
 
+/**
+ * Retrieves multiple income entries based on the query parameters provided.
+ * @param {Object} queryParameters - An object containing query parameters.
+ * @param {Date} queryParameters.start_date - The start date of the date range.
+ * @param {Date} queryParameters.end_date - The end date of the date range.
+ * @param {string} queryParameters.search - The search term to search for in the title and description.
+ * @param {string} queryParameters.categoryId - The ID of the category to filter by.
+ * @param {number} queryParameters.page - The page number to retrieve, defaults to 1.
+ * @param {number} queryParameters.pageSize - The number of items to return per page, defaults to 20.
+ * @param {string} queryParameters.id - The ID of the specific income to retrieve (supersedes all other parameters).
+ * @param {string} userId - The ID of the user whose incomes are being retrieved.
+ * @returns {Promise<Object>} - A promise that resolves with an object containing the
+ * following properties: incomes (an array of income objects), total (the total count of
+ * incomes), page (the current page number), pages (the total number of pages).
+ */
 export const getIncomesService = async (queryParameters, userId) => {
 	const {
 		start_date,
@@ -73,6 +88,26 @@ export const getIncomesService = async (queryParameters, userId) => {
 	};
 };
 
+/**
+ * Adds multiple income entries to the database, supports transactions, retries, and timeouts.
+ * If any of the income entries fail to be added, the entire operation is rolled back and retried.
+ * The function also produces an event for each income entry created.
+ *
+ * @param {Array<Object>} incomesData - An array of objects containing the income data.
+ * @param {string} incomesData.title - The title of the income.
+ * @param {number} incomesData.amount - The amount of the income.
+ * @param {string} incomesData.categoryCode - The code of the category the income belongs to.
+ * @param {string} incomesData.incomeType - The type of the income (e.g. salary, freelance, etc.).
+ * @param {boolean} incomesData.isRecurring - Whether the income is recurring or not.
+ * @param {string} [incomesData.description] - The description of the income.
+ * @param {string} [incomesData.image] - The image associated with the income.
+ * @param {Date} incomesData.createdAt - The date and time when the income was created.
+ * @param {string} userId - The ID of the user who owns the income.
+ * @param {number} [retries=3] - The number of retry attempts in case of failure.
+ *
+ * @throws {Error} - Throws an error if the process fails after retries.
+ * @returns {Promise<Array<Object>>} - Returns a promise that resolves with an array of created income objects.
+ */
 export const addIncomesService = async (incomesData, userId, retries = 3) => {
 	// Start a MongoDB session for transactions
 	const session = await mongoose.startSession();
@@ -90,6 +125,7 @@ export const addIncomesService = async (incomesData, userId, retries = 3) => {
 				isRecurring,
 				description,
 				image,
+				createdAt,
 			} = incomeData;
 
 			const category = await Category.findOne({ code: categoryCode });
@@ -106,6 +142,8 @@ export const addIncomesService = async (incomesData, userId, retries = 3) => {
 				isRecurring,
 				description: description || null,
 				image,
+				createdAt: createdAt || new Date(),
+				updatedAt: new Date(),
 			});
 
 			await newIncome.save({ session });

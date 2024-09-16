@@ -1,4 +1,4 @@
-export const financialSummaryPrompt = `As an expert with PhDs in finance, psychology, and economics, generate a comprehensive financial summary for the user based on the financial data provided below. Provide Beautifully formatted markdown for each section. The summary should include the following sections:
+export const financialSummaryPrompt = `As an expert with PhDs in finance, psychology, and economics, generate a comprehensive financial summary for the user based on the financial data provided below. Provide Beautifully formatted markdown for each section. If extremely little data to work on, mention that in the sections, otherwise always try to work with what you have. The summary should include the following sections:
 
 1. **Behavioral Insights**: Provide deep, novel analysis of the user's spending behaviors that goes beyond easily observable patterns. Consider complex interactions and underlying motivations that may not be immediately apparent. Include:
 

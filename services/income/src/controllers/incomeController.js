@@ -58,6 +58,7 @@ export const addIncomesController = async (req, res, next) => {
 		amount: Joi.number().positive().required(),
 		categoryCode: Joi.string().required(),
 		image: Joi.string().max(300).optional(),
+		createdAt: Joi.date().iso().optional(),
 	});
 
 	const requestSchema = Joi.array().items(incomeSchema).min(1).required();
