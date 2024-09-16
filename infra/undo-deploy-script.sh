@@ -20,8 +20,5 @@ echo "Deleting User Service..."
 kubectl delete -f ./k8s/user-depl.yaml
 echo "User Service deleted."
 
-echo "Deleting RabbitMQ..."
-kubectl delete -f ./k8s/rabbitmq-depl.yaml
-echo "RabbitMQ deleted."
 
 echo "Undo deployment process completed."

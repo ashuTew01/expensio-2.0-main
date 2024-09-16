@@ -12,9 +12,6 @@ fi
 ############################### INCOMPLETE
 
 # Deploy in the specified order
-echo "Deploying RabbitMQ..."
-kubectl apply -f ./k8s/rabbitmq-depl.yaml
-echo "RabbitMQ deployed."
 
 echo "Deploying User Service..."
 kubectl apply -f ./k8s/user-depl.yaml

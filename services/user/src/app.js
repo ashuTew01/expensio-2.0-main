@@ -26,7 +26,7 @@ const requiredEnvVars = [
 	"DB_HOST",
 	"DB_PORT",
 	"DB_NAME",
-	"RABBITMQ_URL",
+	"KAFKA_BROKER_URL",
 	// "DB_AIVEN_POSTGRES_CERT",
 ];
 

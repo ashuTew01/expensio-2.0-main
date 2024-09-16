@@ -37,11 +37,6 @@ spec:
                 secretKeyRef:
                   name: income-secret
                   key: PORT
-            - name: RABBITMQ_URL
-              valueFrom:
-                secretKeyRef:
-                  name: shared-secret
-                  key: RABBITMQ_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

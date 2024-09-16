@@ -7,7 +7,7 @@ manifests:
     - ./infra/k8s/financial-data-depl.yaml
     - ./infra/k8s/income-depl.yaml
     - ./infra/k8s/ingress-srv.yaml
-    - ./infra/k8s/rabbitmq-depl.yaml
+    # - ./infra/k8s/rabbitmq-depl.yaml
     - ./infra/k8s/smart-ai-depl.yaml
     - ./infra/k8s/user-depl.yaml
 build:
