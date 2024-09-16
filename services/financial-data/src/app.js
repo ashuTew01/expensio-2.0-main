@@ -13,15 +13,14 @@ import cors from "cors";
 
 // Load environment variables from .env file
 dotenv.config();
+import { startKafka } from "./config/startKafka.js";
 
 // log setup
 import path from "path";
 import { fileURLToPath } from "url";
-import { startKafka } from "./config/startKafka.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logDirectory = path.join(__dirname, "..", "logs");
-// console.log(logDirectory);
 initLogger(logDirectory);
 
 const app = express();
@@ -29,11 +28,11 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(errorHandlingMiddleware);
 app.use(cors());
 
 // Use routes
 app.use("/api/financial-data", financialDataRoutes);
+app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT || 3000;
 

@@ -27,11 +27,11 @@ const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(errorHandlingMiddleware);
 app.use(cors());
 
 // Routes
 app.post("api/orchestrator/saga/user-deletion", initiateUserDeletion);
+app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT || 3000;
 

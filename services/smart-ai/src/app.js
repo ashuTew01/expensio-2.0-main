@@ -35,10 +35,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
-app.use(errorHandlingMiddleware);
 
 // Use routes
 app.use("/api/smart-ai", smartAiRoutes);
+app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT || 3000;
 

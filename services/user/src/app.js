@@ -69,8 +69,9 @@ app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/api/user", userRoutes);
 
+// Use routes
+app.use("/api/user", userRoutes);
 app.use(errorHandlingMiddleware);
 
 const PORT = process.env.PORT || 3000;
