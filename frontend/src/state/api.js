@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { v4 as uuidv4 } from "uuid"; // Import UUID generator
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
@@ -19,19 +20,27 @@ export const api = createApi({
 			}),
 		}),
 		saveExpenses: build.mutation({
-			query: (data) => ({
-				url: `expense/`,
-				method: "POST",
-				body: data,
-				headers: DEFAULT_HEADERS,
-			}),
+			query: (data) => {
+				const idempotencyKey = uuidv4(); // Generate a new idempotency key inside the query function
+				return {
+					url: `expense/`,
+					method: "POST",
+					body: data,
+					headers: {
+						...DEFAULT_HEADERS, // Spread any default headers you have
+						"Idempotency-Key": idempotencyKey, // Add the idempotency key to the headers
+					},
+				};
+			},
 		}),
 		saveExpensesThroughText: build.mutation({
 			query: (data) => ({
 				url: `expense/add/text`,
 				method: "POST",
 				body: data,
-				headers: DEFAULT_HEADERS,
+				headers: {
+					DEFAULT_HEADERS,
+				},
 			}),
 		}),
 		transcribeAudio: build.mutation({
@@ -73,6 +82,12 @@ export const api = createApi({
 				method: "GET",
 			}),
 		}),
+		getAllIncomeCategories: build.query({
+			query: () => ({
+				url: `income/category/all`,
+				method: "GET",
+			}),
+		}),
 		getAllExpenses: build.query({
 			query: ({
 				start_date,
@@ -108,6 +123,45 @@ export const api = createApi({
 				params: { id },
 				headers: DEFAULT_HEADERS,
 			}),
+		}),
+		// income
+		getAllIncome: build.query({
+			query: ({
+				start_date,
+				end_date,
+				search,
+				categoryCode,
+				page,
+				pageSize,
+				id,
+			}) => ({
+				url: `income`,
+				method: "GET",
+				params: {
+					...(start_date && { start_date }),
+					...(end_date && { end_date }),
+					...(search && { search }),
+					...(categoryCode && { categoryCode }),
+					...(page && { page }),
+					...(pageSize && { pageSize }),
+					...(id && { id }),
+				},
+				headers: DEFAULT_HEADERS,
+			}),
+		}),
+		saveIncome: build.mutation({
+			query: (data) => {
+				const idempotencyKey = uuidv4(); // Generate a new idempotency key inside the query function
+				return {
+					url: `income/`,
+					method: "POST",
+					body: data,
+					headers: {
+						...DEFAULT_HEADERS, // Spread any default headers you have
+						"Idempotency-Key": idempotencyKey, // Add the idempotency key to the headers
+					},
+				};
+			},
 		}),
 		// PUT GOALS QUERIES HERE
 		saveGoal: build.mutation({
@@ -156,11 +210,16 @@ export const {
 	useGetExpenseByIdQuery,
 	useGetUserSummaryQuery,
 	useGetAllExpensesQuery,
+
+	useGetAllIncomeQuery,
+	useGetAllIncomeCategoriesQuery,
+
 	useSaveGoalMutation,
 
 	useGetDasboardQuery,
 
 	useSaveExpensesMutation,
+	useSaveIncomeMutation,
 	useSaveExpensesThroughTextMutation,
 	useTranscribeAudioMutation,
 	useGetAllCategoriesQuery,

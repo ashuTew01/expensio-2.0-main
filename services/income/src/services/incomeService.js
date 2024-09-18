@@ -31,6 +31,7 @@ export const getIncomesService = async (queryParameters, userId) => {
 		end_date,
 		search,
 		categoryId,
+		categoryCode,
 		page = 1,
 		pageSize = 20,
 		id, // id supersedes everything else
@@ -63,6 +64,12 @@ export const getIncomesService = async (queryParameters, userId) => {
 			{ title: { $regex: search, $options: "i" } },
 			{ description: { $regex: search, $options: "i" } },
 		];
+	}
+
+	// Fetch categoryID is categoryCode is provided
+	if (!categoryId && categoryCode) {
+		const category = await Category.find({ code: categoryCode });
+		if (category) query.categoryId = category._id;
 	}
 
 	if (categoryId) {
@@ -373,4 +380,9 @@ export const getCategoriesByIdsService = async (categoryIds) => {
 	});
 
 	return categoryMap;
+};
+
+export const getAllCategoriesService = async () => {
+	const categories = await Category.find({});
+	return categories;
 };

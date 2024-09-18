@@ -37,23 +37,12 @@ const ExpensesForm = ({
 	// const [dateTime, setDateTime] = useState(new Date());
 	// const [event, setEvent] = useState("");
 	const [expenseType, setExpenseType] = useState("");
-	const [cognitiveTriggerCode, setCognitiveTriggerCode] = useState("");
+	const [cognitiveTriggerCode, setCognitiveTriggerCode] = useState([]);
 	const [description, setDescription] = useState("");
-	//   const [notes, setNotes] = useState("");
-	//   const [image, setImage] = useState("");
 	const [paymentMethod, setPaymentMethod] = useState("");
 	const [mood, setMood] = useState(moods[0]);
-	//   const [goalId, setGoalId] = useState("");
 
 	const [saveExpenses, { isLoading, isError }] = useSaveExpensesMutation();
-	// console.log(expenseType)
-
-	// const {
-	//   data: userEvents,
-	//   isLoading: isLoadingEvents,
-	//   isError: eventsError,
-	// } = useGetAllEventsQuery();
-	//   console.log(JSON.parse(localStorage.getItem("tokenExpensio")));
 
 	const {
 		data: categoriesData,
@@ -64,14 +53,27 @@ const ExpensesForm = ({
 	const handleCategoryChange = (event) => {
 		setCategoryCode(event.target.value);
 	};
+
+	const resetForm = () => {
+		setAmount(0);
+		setTitle("");
+		setCategoryCode("");
+		setExpenseType("");
+		setCognitiveTriggerCode([]);
+		setDescription("");
+		setPaymentMethod("");
+		setMood(moods[0]);
+	};
 	const handleSubmit = async () => {
 		try {
 			const expenseData = {
 				title,
-				amount,
+				amount: Number(amount),
 				categoryCode,
 				expenseType,
-				cognitiveTriggerCodes: [cognitiveTriggerCode],
+				cognitiveTriggerCodes: Array.isArray(cognitiveTriggerCode)
+					? cognitiveTriggerCode
+					: [cognitiveTriggerCode], // Ensure it's an array
 				description,
 				paymentMethod,
 				mood,
@@ -87,39 +89,17 @@ const ExpensesForm = ({
 						!(Array.isArray(value) && value.length === 0)
 				)
 			);
+			console.log(filteredExpenseData);
 
 			const response = await saveExpenses([filteredExpenseData]);
 
-			// const response = await saveExpenses([{
-			//   title,
-			//   amount,
-			//   categoryCode,
-			//   dateTime,
-			//   expenseType,
-			//   cognitiveTriggerCodes : [cognitiveTriggerCode],
-			//   description,
-			//   paymentMethod,
-			//   mood,
-			// }]);
-			// Check if the mutation is successful
 			if (response.data) {
-				// If successful, display success notification
 				toast.success("Expense added successfully!");
-				setAmount(0);
-				setTitle("");
-				setCategoryCode("");
-				// setDateTime("");
-				setExpenseType("");
-				setCognitiveTriggerCode("");
-				setDescription("");
-				setPaymentMethod("");
-				setMood("");
+				resetForm(); // Reset form fields
 			} else {
-				// If not successful, display error notification
 				toast.error("Failed to add expense. Please try again.");
 			}
 		} catch (error) {
-			// If an error is caught, display error notification
 			console.error("Error saving expense:", error);
 			toast.error("Failed to add expense. Please try again.");
 		}
@@ -223,6 +203,7 @@ const ExpensesForm = ({
 								value={cognitiveTriggerCode}
 								onChange={(e) => setCognitiveTriggerCode(e.target.value)}
 								label="Psychological Type"
+								multiple // Allow selecting multiple values
 							>
 								{cognitiveTriggersDataLoading ? (
 									<MenuItem disabled>Loading...</MenuItem>
@@ -241,6 +222,7 @@ const ExpensesForm = ({
 							</Select>
 						</FormControl>
 					</Grid>
+
 					<Grid item xs={6}>
 						<TextField
 							sx={{ ...backgroundColorStyle }}
@@ -272,14 +254,28 @@ const ExpensesForm = ({
             />
           </Grid> */}
 					<Grid item xs={6}>
-						<TextField
-							sx={{ ...backgroundColorStyle }}
-							label="Payment Method"
-							variant="outlined"
-							value={paymentMethod}
-							onChange={(e) => setPaymentMethod(e.target.value)}
-							fullWidth
-						/>
+						<FormControl fullWidth variant="outlined">
+							<InputLabel id="payment-method-label">Payment Method</InputLabel>
+							<Select
+								sx={{ ...backgroundColorStyle }}
+								labelId="payment-method-label"
+								value={paymentMethod}
+								onChange={(e) => setPaymentMethod(e.target.value)}
+								label="Payment Method"
+							>
+								{[
+									"cash",
+									"credit_card",
+									"debit_card",
+									"online_payment",
+									"unknown",
+								].map((method) => (
+									<MenuItem key={method} value={method}>
+										{capitalizeFirstLetter(method.replace("_", " "))}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
 					</Grid>
 					<Grid item xs={6}>
 						<FormControl fullWidth variant="outlined">

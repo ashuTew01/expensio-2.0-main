@@ -56,6 +56,7 @@ export const getExpensesController = async (req, res, next) => {
 // @route   POST
 // @access  Private
 export const addExpensesController = async (req, res, next) => {
+	console.log("in expense controller");
 	const expenseSchema = Joi.object({
 		title: Joi.string().max(200).required(),
 		description: Joi.string().max(1000).optional(),

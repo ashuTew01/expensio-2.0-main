@@ -2,11 +2,11 @@ import React from "react";
 import FlexBetween from "../../../components/FlexBetween.jsx";
 import Header from "../../../components/Header.jsx";
 import { Box, Button, useTheme, useMediaQuery } from "@mui/material";
-import ExpensesForm from "../../../components/ExpensesForm.jsx";
+import IncomeForm from "../../../components/IncomeForm.jsx";
 import { useGetAllCognitiveTriggersQuery } from "../../../state/api.js";
 import PsychologicalTypesExplain from "../../../components/PsychoTypesExplain.jsx";
 
-const AddExpenseScreen = () => {
+const AddIncomeScreen = () => {
 	const theme = useTheme();
 	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
@@ -54,7 +54,7 @@ const AddExpenseScreen = () => {
 					p="1.5rem"
 					borderRadius="0.55rem"
 				>
-					<ExpensesForm
+					<IncomeForm
 						cognitiveTriggersData={cognitiveTriggersData}
 						cognitiveTriggersDataLoading={cognitiveTriggersDataLoading}
 						cognitiveTriggersDataError={cognitiveTriggersDataError}
@@ -78,4 +78,4 @@ const AddExpenseScreen = () => {
 	);
 };
 
-export default AddExpenseScreen;
+export default AddIncomeScreen;

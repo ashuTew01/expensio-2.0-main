@@ -6,6 +6,7 @@ import {
 	getIncomesController,
 	// removeCategoriesController,
 	getCategoriesByIdsController,
+	getAllCategoriesController,
 } from "../controllers/incomeController.js";
 import { authMiddleware } from "@expensio/sharedlib";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 //@public
 router.post("/category/get", getCategoriesByIdsController);
+router.get("/category/all", getAllCategoriesController);
 
 //@private
 router.get("/", authMiddleware, getIncomesController);

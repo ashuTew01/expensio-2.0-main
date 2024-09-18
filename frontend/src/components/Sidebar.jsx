@@ -65,7 +65,7 @@ const navItems = [
 	},
 	{
 		text: "List Income",
-		route: "income/add",
+		route: "income/list",
 		icon: <ListAlt />,
 	},
 	{

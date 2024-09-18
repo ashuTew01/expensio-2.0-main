@@ -20,12 +20,12 @@ import {
 	useGetAllCategoriesQuery,
 	useGetAllEventsQuery,
 	useGetAllCognitiveTriggersQuery,
+	useGetAllIncomeQuery,
 } from "../../../state/api";
 import { toast } from "react-toastify";
 import LoadingIndicator from "../../../components/LoadingIndicator";
-import { formatExpenseListData } from "../../../utils/formatterFunctions";
+import { formatIncomeListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
-import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
 
 const useStyles = makeStyles((theme) => ({
 	tableHeader: {
@@ -43,13 +43,15 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const ExpenseListScreen = () => {
+const IncomeListScreen = () => {
 	const theme = useTheme();
 	const classes = useStyles();
 
 	const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
 	const [selectedType, setSelectedType] = useState("");
 	const [selectedMood, setSelectedMood] = useState("");
+	// const [rowsPerPage, setRowsPerPage] = useState(10);
+	// const [page, setPage] = useState(1);
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 10,
@@ -70,15 +72,16 @@ const ExpenseListScreen = () => {
 	} = useGetAllCategoriesQuery();
 
 	const {
-		data: expensesData,
-		isLoading: expensesLoading,
-		isError: expensesError,
-	} = useGetAllExpensesQuery({
+		data: incomesData,
+		isLoading: incomesLoading,
+		isError: incomesError,
+	} = useGetAllIncomeQuery({
+		userId,
 		page: paginationModel.page + 1,
 		pageSize: paginationModel.pageSize,
 	});
 
-	if (isLoadingCognitiveTriggersData || categoriesLoading || expensesLoading)
+	if (isLoadingCognitiveTriggersData || categoriesLoading || incomesLoading)
 		return <LoadingIndicator />;
 
 	const backgroundColorStyle = {
@@ -86,7 +89,6 @@ const ExpenseListScreen = () => {
 	};
 
 	const handleCategoryChange = (event) => {
-		// console.log("cat" + event.target.value);
 		const value = event.target.value;
 		setSelectedCategoryCode(value === "" ? "" : value);
 	};
@@ -101,7 +103,7 @@ const ExpenseListScreen = () => {
 		setSelectedMood(value === "" ? "" : value);
 	};
 
-	const Datagridcolumns = [
+	const incomesDatagridcolumns = [
 		{
 			field: "serial",
 			headerName: "S.No",
@@ -128,27 +130,16 @@ const ExpenseListScreen = () => {
 			headerName: "Date Time",
 			flex: 1,
 		},
-		{
-			field: "cognitiveTriggers",
-			headerName: "Cognitive Triggers",
-			flex: 1,
-		},
-		{
-			field: "mood",
-			headerName: "Mood",
-			flex: 1,
-		},
 	];
 
-	const formattedData = formatExpenseListData(expensesData.expenses);
-	console.log(typeof formattedData);
+	const formattedData = formatIncomeListData(incomesData.incomes);
 
 	const moodData = ["Happy", "Neutral", "Regretful"];
 
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween marginBottom="25px">
-				<Header title="Expense List" subtitle="Keep track of your finances." />
+				<Header title="Income List" subtitle="Keep track of your income." />
 
 				<Box>
 					<Button
@@ -291,23 +282,20 @@ const ExpenseListScreen = () => {
 				}}
 			>
 				<DataGrid
-					loading={expensesLoading}
+					loading={incomesLoading}
 					rows={formattedData}
 					getRowId={(row) => row.id}
-					columns={Datagridcolumns}
-					rowCount={expensesData.total}
+					columns={incomesDatagridcolumns}
+					rowCount={incomesData.total}
 					pageSizeOptions={[5, 10, 25, 50, 100]}
 					pagination
 					paginationMode="server"
 					paginationModel={paginationModel}
 					onPaginationModelChange={setPaginationModel}
-					slots={{
-						toolbar: CustomToolbar,
-					}}
 				/>
 			</Box>
 		</Box>
 	);
 };
 
-export default ExpenseListScreen;
+export default IncomeListScreen;

@@ -4,6 +4,7 @@ import {
 	addCategoriesService,
 	addIncomesService,
 	deleteIncomesByIdsService,
+	getAllCategoriesService,
 	getCategoriesByIdsService,
 	getIncomesService,
 	removeCategoriesService,
@@ -21,6 +22,7 @@ export const getIncomesController = async (req, res, next) => {
 		categoryId: Joi.string()
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
+		categoryCode: Joi.string().optional(),
 		page: Joi.number().integer().min(1).optional(),
 		pageSize: Joi.number().integer().min(1).optional(),
 		id: Joi.string()
@@ -219,6 +221,16 @@ export const removeCategoriesController = async (req, res, next) => {
 		res.status(200).json({
 			message: "Categories removed successfully!",
 		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getAllCategoriesController = async (req, res, next) => {
+	try {
+		const categories = await getAllCategoriesService();
+
+		res.status(200).json({ categories });
 	} catch (error) {
 		next(error);
 	}

@@ -26,8 +26,8 @@ const Layout = () => {
 					setIsSidebarOpen={setIsSidebarOpen}
 				/>
 				<Outlet />
-				<Box className="chatbot-animation" />
-				<ChatBot />
+				{/* <Box className="chatbot-animation" />
+				<ChatBot /> */}
 			</Box>
 		</Box>
 	);

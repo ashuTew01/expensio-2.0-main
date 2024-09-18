@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
 // import "./App.css";
-import "./index.css";
+// import "./index.css";
 import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -27,6 +27,8 @@ import ExpenseListScreen from "./scenes/expense/list";
 // import AddExpenseThroughTextScreen from "scenes/expense/addText";
 // import SummaryScreen from "scenes/summary";
 import ExpenseScreen from "./scenes/expense/screen";
+import IncomeListScreen from "./scenes/income/list";
+import AddIncomeScreen from "./scenes/income/add";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -52,6 +54,9 @@ function App() {
               /> */}
 							<Route path="/expense/:id" element={<ExpenseScreen />} />
 							<Route path="/expense/list" element={<ExpenseListScreen />} />
+							{/* income */}
+							<Route path="/income/list" element={<IncomeListScreen />} />
+							<Route path="/income/add" element={<AddIncomeScreen />} />
 							{/* goals */}
 							{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
 							{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}
