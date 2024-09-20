@@ -29,6 +29,7 @@ import ExpenseListScreen from "./scenes/expense/list";
 import ExpenseScreen from "./scenes/expense/screen";
 import IncomeListScreen from "./scenes/income/list";
 import AddIncomeScreen from "./scenes/income/add";
+import SummaryScreen from "./scenes/summary";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -57,6 +58,8 @@ function App() {
 							{/* income */}
 							<Route path="/income/list" element={<IncomeListScreen />} />
 							<Route path="/income/add" element={<AddIncomeScreen />} />
+							{/* Summary routes */}
+							<Route path="/user/summary" element={<SummaryScreen />} />
 							{/* goals */}
 							{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
 							{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}

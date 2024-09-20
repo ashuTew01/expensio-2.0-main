@@ -61,7 +61,6 @@ export const getFinancialSummaryService = async (
 		return { message: "UNAVAILABLE" };
 	} else if (["last3months", "last6months"].includes(timePeriod)) {
 		summary = await FinancialSummary.findOne({ userId, timePeriod });
-
 		if (summary) {
 			const endDate = new Date(summary.endDate);
 			if (
@@ -98,7 +97,7 @@ export const buildFinancialSummaryService = async (
 	const getMonthsAndYears = (monthsToSubtract) => {
 		const currentDate = new Date();
 		const result = [];
-		let currentMonth = currentDate.getMonth() + 1;
+		let currentMonth = currentDate.getMonth();
 		let currentYear = currentDate.getFullYear();
 
 		for (let i = 0; i < monthsToSubtract; i++) {
