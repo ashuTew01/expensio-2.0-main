@@ -17,7 +17,7 @@ import {
 } from "../../state/summaryApi";
 import FlexBetween from "../../components/FlexBetween";
 import Header from "../../components/Header";
-import SummaryMarkdownDisplay from "../../components/SummaryMarkdownDisplay";
+import SummaryList from "../../components/summaryList/SummaryList";
 
 const SummaryScreen = () => {
 	const theme = useTheme();
@@ -163,86 +163,7 @@ const SummaryScreen = () => {
 			{/* Display Summary */}
 			{financialSummary && (
 				<Box mt="2rem">
-					<Box
-						sx={{
-							backgroundColor: theme.palette.background.alt,
-							borderRadius: "8px",
-							p: "2rem",
-							// boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-							// overflow: "hidden",
-							gridColumn: "span 12", // occupies the full width
-							gridRow: "span 4",
-							overflow: "auto",
-							"&::-webkit-scrollbar": {
-								width: "6px",
-							},
-							"&::-webkit-scrollbar-track": {
-								background: theme.palette.background.default,
-							},
-							"&::-webkit-scrollbar-thumb": {
-								background: theme.palette.secondary.main,
-								borderRadius: "3px",
-							},
-						}}
-					>
-						<Header
-							title="BEHAVIOURAL INSIGHTS"
-							subtitle="See your financial spending behaviour!"
-							variant="h2"
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								// color: "blue",
-							}}
-							titleFontColor="#36da45"
-						/>
-					</Box>
-
-					<SummaryMarkdownDisplay
-						markdown={financialSummary.behavioralInsights}
-					/>
-
-					<Typography
-						variant="h5"
-						sx={{
-							width: "100%",
-							mt: "2rem",
-							mb: "1rem",
-							fontFamily: "'Roboto', sans-serif",
-						}}
-					>
-						Benchmarking
-					</Typography>
-					<SummaryMarkdownDisplay markdown={financialSummary.benchmarking} />
-					<Typography
-						variant="h5"
-						sx={{
-							width: "100%",
-							mt: "2rem",
-							mb: "1rem",
-							fontFamily: "'Roboto', sans-serif",
-						}}
-					>
-						Personality Insights
-					</Typography>
-					<SummaryMarkdownDisplay
-						markdown={financialSummary.personalityInsights}
-					/>
-					<Typography
-						variant="h5"
-						sx={{
-							width: "100%",
-							mt: "2rem",
-							mb: "1rem",
-							fontFamily: "'Roboto', sans-serif",
-						}}
-					>
-						Personalized Recommendations
-					</Typography>
-					<SummaryMarkdownDisplay
-						markdown={financialSummary.personalizedRecommendations}
-					/>
+					<SummaryList financialSummary={financialSummary} />
 				</Box>
 			)}
 
