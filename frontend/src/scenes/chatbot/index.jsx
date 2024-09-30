@@ -118,7 +118,6 @@ const ChatBot = () => {
 								onChange={(val) => setInputMessage(val)}
 								onSend={handleSend}
 								attachButton={false}
-								style={{ textAlign: "left" }}
 							/>
 						</ChatContainer>
 					</MainContainer>

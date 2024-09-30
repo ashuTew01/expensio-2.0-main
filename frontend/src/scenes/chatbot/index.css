@@ -3,14 +3,16 @@
 /* Main chatbot container - Floating in the bottom-right corner */
 .chatbot-container {
 	position: fixed;
-	bottom: 20px;
+	display: flex;
+	flex-direction: column;
+	bottom: 50px;
 	right: 20px;
 	z-index: 1000; /* Ensures the chatbot stays on top of other elements */
 }
 
 /* Chatbot icon animation near the toggle button */
 .chatbot-animation {
-	position: absolute;
+	position: fixed;
 	bottom: 50px; /* Keep the same vertical position above the toggle button*/
 	right: 100px; /* Move it further left from the toggle button */
 	width: 80px;
@@ -54,9 +56,9 @@
 
 /* Chat toggle button - Circular button to open/close the chat window */
 .chat-toggle-btn {
-	background-color: #007bff; /* Primary blue color */
+	/* Primary blue color */
 	color: #ffffff; /* White icon color */
-	border-radius: 50%; /* Circular button */
+	border-radius: 50%;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow for 3D effect */
 	transition:
 		transform 0.3s ease,
