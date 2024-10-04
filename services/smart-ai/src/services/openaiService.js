@@ -4,6 +4,7 @@ import UserTokens from "../models/UserTokens.js"; // Import UserTokens model
 import mongoose from "mongoose"; // For transactions
 import { validModels } from "../utils/openaiApiModels.js";
 import { calculateAiTokens } from "../utils/calculateAiTokens.js";
+import AiSubscription from "../models/AiSubscription.js";
 
 const validRoles = ["user"];
 
@@ -100,7 +101,9 @@ export const callOpenaiService = async (
 		}
 
 		// Fetch the user's current token balance and subscription
-		let userTokens = await UserTokens.findOne({ userId });
+		let userTokens = await UserTokens.findOne({ userId }).populate(
+			"aiSubscriptionId"
+		);
 		if (!userTokens) {
 			throw new Error(
 				`Please buy a subscription. No token data found for user: ${userId}`
@@ -109,7 +112,6 @@ export const callOpenaiService = async (
 
 		// Reset tokens if it's a new month
 		userTokens = await resetTokensIfNewMonth(userTokens);
-
 		// Check if the user has enough tokens
 		checkTokenAvailability(userTokens);
 
