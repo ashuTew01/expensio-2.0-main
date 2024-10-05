@@ -16,6 +16,7 @@ import LoadingIndicator from "../../components/LoadingIndicator";
 import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
+import { useSelector } from "react-redux";
 
 const ExpenseFinancialData = () => {
 	const theme = useTheme();
@@ -41,6 +42,7 @@ const ExpenseFinancialData = () => {
 		getExpenseFinancialData(requestBody);
 	}, [month, year, getExpenseFinancialData]);
 
+	const { userInfo } = useSelector((state) => state.auth);
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>
@@ -90,7 +92,7 @@ const ExpenseFinancialData = () => {
 
 			{data && data.length > 0 && (
 				<>
-					<Box display="flex" flexDirection="row">
+					<Box display="flex" flexDirection="row" alignItems={"center"}>
 						<Box
 							gridColumn="span 4"
 							gridRow="span 2"
@@ -99,12 +101,13 @@ const ExpenseFinancialData = () => {
 							borderRadius="0.55rem"
 							display="flex"
 							justifyContent="space-between"
+							alignItems="center"
 						>
 							<Box
 								component="img"
 								sx={{
-									height: 330,
-									width: 330,
+									height: 300,
+									width: 300,
 									// maxHeight: { xs: 233, md: 167 },
 									// maxWidth: { xs: 350, md: 250 },
 								}}
@@ -112,6 +115,7 @@ const ExpenseFinancialData = () => {
 								src={"/expense-data.png"}
 							/>
 						</Box>
+						<Box width="2rem"></Box>
 						<Box
 							gridColumn="span 8"
 							gridRow="span 2"
@@ -120,22 +124,74 @@ const ExpenseFinancialData = () => {
 							borderRadius="0.55rem"
 							display="flex"
 							flexDirection="column"
-							mt="7rem"
+							// mt="7rem"
 						>
 							<Box>
-								<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-									You have spent a total of ₹ {data[0].totalMoneySpent}
+								{/* Add spacing between elements */}
+								<Box height="1.5rem"></Box>
+
+								{/* Greeting message */}
+								<Typography
+									variant="h1"
+									sx={{
+										fontSize: 55,
+										color: "#50a8fa", // Bright, attention-grabbing color for greeting
+										fontWeight: "bold",
+										textShadow: "2px 2px 8px rgba(0, 0, 0, 0.3)", // Add a subtle shadow for depth
+									}}
+								>
+									Hello {userInfo.first_name}!
 								</Typography>
-								<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-									on {data[0].totalExpenses} expenses on selected date.
+
+								{/* Expenditure message */}
+								<Typography
+									variant="h1"
+									sx={{
+										fontSize: 28,
+										color: "#ffffff", // Slightly smaller and clean color to focus attention on the number
+										marginTop: "0.5rem",
+									}}
+								>
+									You have spent a total of
 								</Typography>
+
+								{/* Money spent */}
+								<Typography
+									variant="h1"
+									sx={{
+										fontSize: 90,
+										fontWeight: "bold",
+										color: "#02d487", // Bold, bright color for emphasis
+										textShadow: "3px 3px 10px rgba(0, 0, 0, 0.5)", // Larger shadow for emphasis
+									}}
+								>
+									₹ {data[0].totalMoneySpent}
+								</Typography>
+
+								{/* Expense count */}
+								<Typography
+									variant="h1"
+									sx={{
+										fontSize: 28,
+										marginTop: "0.5rem",
+										color: "#ffffff",
+									}}
+								>
+									on the given month on{" "}
+									<Box
+										component="span"
+										sx={{
+											fontWeight: "bold",
+											color: "#f5bd02", // Highlight the number of expenses with a bright yellow color
+											fontSize: "32px", // Make the number stand out more
+											textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)", // Add depth to the number
+										}}
+									>
+										{data[0].totalExpenses} expenses.
+									</Box>
+								</Typography>
+
 								<Box height="10px"></Box>
-							</Box>
-							<Box width="38rem">
-								<Typography variant="h4" sx={{ fontSize: "0.2 rem" }}>
-									Gain insight into your spending habits and unlock the power to
-									control your financial future.
-								</Typography>
 							</Box>
 						</Box>
 					</Box>
