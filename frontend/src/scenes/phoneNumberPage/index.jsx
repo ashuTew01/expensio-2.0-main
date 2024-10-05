@@ -1,7 +1,6 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,14 +12,14 @@ import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
-import { TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useSendOtpMutation } from "../../state/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { setIfUserExist } from "../../state/authSlice";
-import { useEffect } from "react";
 
+// Copyright component
 function Copyright(props) {
 	return (
 		<Typography
@@ -39,50 +38,40 @@ function Copyright(props) {
 	);
 }
 
-const useStyles = makeStyles((theme) => ({
-	grid: {
-		height: "50vh",
-		textAlign: "center",
-	},
-	avatar: {
-		margin: theme.spacing(1),
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2),
-		background: "black",
-	},
-	paper: {
-		marginTop: theme.spacing(8),
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-	},
-	phoneInputContainer: {
-		width: "100%",
-	},
-	phoneInput: {
-		width: "100%",
-		padding: "10px",
-		fontSize: "16px",
-		border: "1px solid #ccc",
-		borderRadius: "4px",
-		outline: "none",
-		transition: "border-color 0.3s",
-		"&:focus": {
-			borderColor: "#3f51b5",
-			boxShadow: "0 0 0 1px #3f51b5",
-		},
-	},
+// Styled Components replacing makeStyles
+const PaperContainer = styled("div")(({ theme }) => ({
+	marginTop: theme.spacing(8),
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
 }));
 
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+	margin: theme.spacing(1),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+	margin: theme.spacing(3, 0, 2),
+	backgroundColor: "black",
+}));
+
+const GridContainer = styled(Grid)(({ theme }) => ({
+	height: "50vh",
+	textAlign: "center",
+}));
+
+const PhoneInputContainer = styled("div")({
+	width: "100%",
+});
+
 export default function PhoneNumberPage() {
-	const classes = useStyles();
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [sendOtp, { isLoading, error }] = useSendOtpMutation();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
 	const { userInfo } = useSelector((state) => state.auth);
+
 	useEffect(() => {
 		if (userInfo) {
 			navigate("/dashboard");
@@ -111,10 +100,9 @@ export default function PhoneNumberPage() {
 	return (
 		<Container component="main" maxWidth="sm">
 			<CssBaseline />
-			<div className={classes.paper}>
-				<Grid
+			<PaperContainer>
+				<GridContainer
 					container
-					className={classes.grid}
 					justify="center"
 					alignItems="center"
 					spacing={3}
@@ -122,9 +110,9 @@ export default function PhoneNumberPage() {
 					<Grid item container justify="center">
 						<Grid item container alignItems="center" direction="column">
 							<Grid item>
-								<Avatar className={classes.avatar}>
+								<StyledAvatar>
 									<LockOutlinedIcon />
-								</Avatar>
+								</StyledAvatar>
 							</Grid>
 							<Grid item>
 								<Typography component="h1" variant="h5">
@@ -149,30 +137,29 @@ export default function PhoneNumberPage() {
 						direction="column"
 					>
 						<Grid container item spacing={3} justify="center">
-							<div className={classes.phoneInputContainer}>
+							<PhoneInputContainer>
 								<PhoneInput
 									placeholder="Enter phone number"
 									value={phoneNumber}
 									onChange={setPhoneNumber}
 									defaultCountry="IN"
 								/>
-							</div>
+							</PhoneInputContainer>
 						</Grid>
 						<Grid item>
-							<Button
+							<SubmitButton
 								type="submit"
 								fullWidth
 								variant="contained"
 								color="primary"
-								className={classes.submit}
 								onClick={onClickHandler}
 							>
 								Send OTP
-							</Button>
+							</SubmitButton>
 						</Grid>
 					</Grid>
-				</Grid>
-			</div>
+				</GridContainer>
+			</PaperContainer>
 			<ToastContainer />
 		</Container>
 	);

@@ -1,7 +1,7 @@
 import FlexBetween from "../../../components/FlexBetween";
 import React, { useState } from "react";
 import Header from "../../../components/Header";
-import { makeStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import {
 	Box,
@@ -18,7 +18,6 @@ import { Search } from "@mui/icons-material";
 import {
 	useGetAllExpensesQuery,
 	useGetAllCategoriesQuery,
-	useGetAllEventsQuery,
 	useGetAllCognitiveTriggersQuery,
 } from "../../../state/api";
 import { toast } from "react-toastify";
@@ -27,25 +26,24 @@ import { formatExpenseListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
 import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
 
-const useStyles = makeStyles((theme) => ({
-	tableHeader: {
-		backgroundColor: theme.palette.secondary,
-		color: "white",
-	},
-	hoverRow: {
-		"&:hover": {
-			backgroundColor: theme.palette.secondary, // Change this to your desired hover color
-			cursor: "pointer",
-			"& > *": {
-				color: "white", // Change this to your desired hover text color
-			},
+// Styled components
+const TableHeader = styled(Box)(({ theme }) => ({
+	backgroundColor: theme.palette.secondary.main,
+	color: "white",
+}));
+
+const HoverRow = styled(Box)(({ theme }) => ({
+	"&:hover": {
+		backgroundColor: theme.palette.secondary.main,
+		cursor: "pointer",
+		"& > *": {
+			color: "white",
 		},
 	},
 }));
 
 const ExpenseListScreen = () => {
 	const theme = useTheme();
-	const classes = useStyles();
 
 	const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
 	const [selectedType, setSelectedType] = useState("");
@@ -86,7 +84,6 @@ const ExpenseListScreen = () => {
 	};
 
 	const handleCategoryChange = (event) => {
-		// console.log("cat" + event.target.value);
 		const value = event.target.value;
 		setSelectedCategoryCode(value === "" ? "" : value);
 	};
@@ -141,7 +138,6 @@ const ExpenseListScreen = () => {
 	];
 
 	const formattedData = formatExpenseListData(expensesData.expenses);
-	console.log(typeof formattedData);
 
 	const moodData = ["Happy", "Neutral", "Regretful"];
 
@@ -149,7 +145,6 @@ const ExpenseListScreen = () => {
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween marginBottom="25px">
 				<Header title="Expense List" subtitle="Keep track of your finances." />
-
 				<Box>
 					<Button
 						sx={{
@@ -197,7 +192,7 @@ const ExpenseListScreen = () => {
 							onChange={handleCategoryChange}
 							label="Category"
 						>
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{categoriesLoading ? (
 								<MenuItem disabled>Loading categories...</MenuItem>
 							) : (
@@ -223,7 +218,7 @@ const ExpenseListScreen = () => {
 							onChange={handleTypeChange}
 							label="type"
 						>
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{isLoadingCognitiveTriggersData ? (
 								<MenuItem disabled>Loading Psychological types...</MenuItem>
 							) : (
@@ -247,16 +242,12 @@ const ExpenseListScreen = () => {
 							onChange={handleMoodChange}
 							label="Mood"
 						>
-							{/* {categoriesLoading ? (
-                <MenuItem disabled>Loading Mood...</MenuItem>
-              ) : ( */}
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{moodData?.map((mood) => (
 								<MenuItem key={mood} value={mood}>
 									{mood}
 								</MenuItem>
 							))}
-							{/* )} */}
 						</Select>
 					</FormControl>
 				</Box>

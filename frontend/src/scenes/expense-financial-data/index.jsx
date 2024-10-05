@@ -80,6 +80,7 @@ const ExpenseFinancialData = () => {
 					</FormControl>
 				</Box>
 			</FlexBetween>
+			<Box mt="3rem"></Box>
 
 			{isLoading && <LoadingIndicator />}
 

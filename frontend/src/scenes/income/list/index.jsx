@@ -1,7 +1,7 @@
 import FlexBetween from "../../../components/FlexBetween";
 import React, { useState } from "react";
 import Header from "../../../components/Header";
-import { makeStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import {
 	Box,
@@ -18,7 +18,6 @@ import { Search } from "@mui/icons-material";
 import {
 	useGetAllExpensesQuery,
 	useGetAllCategoriesQuery,
-	useGetAllEventsQuery,
 	useGetAllCognitiveTriggersQuery,
 	useGetAllIncomeQuery,
 } from "../../../state/api";
@@ -27,31 +26,28 @@ import LoadingIndicator from "../../../components/LoadingIndicator";
 import { formatIncomeListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
 
-const useStyles = makeStyles((theme) => ({
-	tableHeader: {
-		backgroundColor: theme.palette.secondary,
-		color: "white",
-	},
-	hoverRow: {
-		"&:hover": {
-			backgroundColor: theme.palette.secondary, // Change this to your desired hover color
-			cursor: "pointer",
-			"& > *": {
-				color: "white", // Change this to your desired hover text color
-			},
+// Styled components using styled API
+const StyledTableHeader = styled(Box)(({ theme }) => ({
+	backgroundColor: theme.palette.secondary.main,
+	color: "white",
+}));
+
+const StyledHoverRow = styled(Box)(({ theme }) => ({
+	"&:hover": {
+		backgroundColor: theme.palette.secondary.main,
+		cursor: "pointer",
+		"& > *": {
+			color: "white",
 		},
 	},
 }));
 
 const IncomeListScreen = () => {
 	const theme = useTheme();
-	const classes = useStyles();
 
 	const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
 	const [selectedType, setSelectedType] = useState("");
 	const [selectedMood, setSelectedMood] = useState("");
-	// const [rowsPerPage, setRowsPerPage] = useState(10);
-	// const [page, setPage] = useState(1);
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 10,
@@ -160,8 +156,8 @@ const IncomeListScreen = () => {
 				sx={{
 					display: "flex",
 					gap: "1.5rem",
-					padding: "1 rem",
-					margin: "1 rem",
+					padding: "1rem",
+					margin: "1rem",
 				}}
 			>
 				<Box sx={{ width: "50%" }}>
@@ -188,7 +184,7 @@ const IncomeListScreen = () => {
 							onChange={handleCategoryChange}
 							label="Category"
 						>
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{categoriesLoading ? (
 								<MenuItem disabled>Loading categories...</MenuItem>
 							) : (
@@ -214,7 +210,7 @@ const IncomeListScreen = () => {
 							onChange={handleTypeChange}
 							label="type"
 						>
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{isLoadingCognitiveTriggersData ? (
 								<MenuItem disabled>Loading Psychological types...</MenuItem>
 							) : (
@@ -238,16 +234,12 @@ const IncomeListScreen = () => {
 							onChange={handleMoodChange}
 							label="Mood"
 						>
-							{/* {categoriesLoading ? (
-                <MenuItem disabled>Loading Mood...</MenuItem>
-              ) : ( */}
-							<MenuItem value="">None</MenuItem> {/* Add this line */}
+							<MenuItem value="">None</MenuItem>
 							{moodData?.map((mood) => (
 								<MenuItem key={mood} value={mood}>
 									{mood}
 								</MenuItem>
 							))}
-							{/* )} */}
 						</Select>
 					</FormControl>
 				</Box>
