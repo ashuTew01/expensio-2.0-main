@@ -196,6 +196,7 @@ const IncomeFinancialData = () => {
 										name={categoryName}
 										count={numIncomes}
 										totalAmount={totalAmountEarned}
+										type="Income(s)"
 									/>
 								)
 							)}

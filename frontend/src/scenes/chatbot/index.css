@@ -5,23 +5,10 @@
 	position: fixed;
 	display: flex;
 	flex-direction: column;
-	bottom: 50px;
+	bottom: 20px;
 	right: 20px;
 	z-index: 1000; /* Ensures the chatbot stays on top of other elements */
-}
-
-/* Chatbot icon animation near the toggle button */
-.chatbot-animation {
-	position: fixed;
-	bottom: 50px; /* Keep the same vertical position above the toggle button*/
-	right: 100px; /* Move it further left from the toggle button */
-	width: 80px;
-	height: 60px;
-	/* color: aqua; */
-	background-image: url("../../assets/chatbot-icon.svg"); /* Replace with your chatbot icon */
-	background-size: cover;
-	animation: bounce 2s infinite; /* Adds the bouncing animation */
-	z-index: 999; /* Ensures it's above other elements */
+	/* color: white; */
 }
 
 /* Bounce animation keyframes */
@@ -34,10 +21,22 @@
 		transform: translateY(0); /* Default position */
 	}
 	40% {
-		transform: translateY(-15px); /* Move up slightly */
+		transform: translateY(-5px); /* Move up slightly */
 	}
 	60% {
-		transform: translateY(-10px); /* Move up slightly less */
+		transform: translateY(-5px); /* Move up slightly less */
+	}
+}
+
+@keyframes gradient-flow {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
 	}
 }
 
@@ -55,21 +54,8 @@
 }
 
 /* Chat toggle button - Circular button to open/close the chat window */
-.chat-toggle-btn {
-	/* Primary blue color */
-	color: #ffffff; /* White icon color */
-	border-radius: 50%;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow for 3D effect */
-	transition:
-		transform 0.3s ease,
-		box-shadow 0.3s ease; /* Smooth transition for hover effects */
-}
 
 /* Hover effect for chat toggle button - enlarges and adds more shadow */
-.chat-toggle-btn:hover {
-	transform: scale(1.1); /* Enlarges the button */
-	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow for hover */
-}
 
 /* Chat header (name, avatar, status) */
 .chat-window .cs-conversation-header {

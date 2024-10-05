@@ -8,8 +8,17 @@ import {
 } from "@mui/material"; // Material UI components
 import { useTheme } from "@mui/material/styles"; // useTheme hook for accessing theme
 
-const CustomCard = ({ name, count, totalAmount, percentage }) => {
+const CustomCard = ({
+	name,
+	count,
+	totalAmount,
+	percentage,
+	type = "Expense(s)",
+}) => {
 	const theme = useTheme();
+
+	// Ensure that percentage is treated as a number
+	const percentageValue = Number(percentage) || 0; // Fallback to 0 if percentage is not a valid number
 
 	return (
 		<Card
@@ -48,20 +57,38 @@ const CustomCard = ({ name, count, totalAmount, percentage }) => {
 					sx={{ fontSize: 14, color: theme.palette.text.secondary }} // Smaller font for number of expenses
 					variant="body2"
 				>
-					{count} Expenses
+					{count} {type}
 				</Typography>
 			</CardContent>
 
-			<Box display="flex" alignItems="center" justifyContent="center">
+			<Box
+				position="relative"
+				display="flex"
+				alignItems="center"
+				justifyContent="center"
+			>
+				{/* Background Circular Progress (Light color) */}
 				<CircularProgress
 					variant="determinate"
-					value={percentage}
-					size={80} // Adjusted size for better responsiveness
+					value={100} // Full circle for the background
+					size={80}
 					thickness={4}
 					sx={{
-						color: theme.palette.primary.main,
+						color: theme.palette.primary.main, // Light grey for the background circle
+						position: "absolute",
 					}}
 				/>
+				{/* Foreground Circular Progress (Blue progress) */}
+				<CircularProgress
+					variant="determinate"
+					value={percentageValue}
+					size={80}
+					thickness={4}
+					sx={{
+						color: "#50a8fa", // Blue color for the actual progress
+					}}
+				/>
+				{/* Percentage Display */}
 				<Box
 					position="absolute"
 					display="flex"
@@ -76,7 +103,7 @@ const CustomCard = ({ name, count, totalAmount, percentage }) => {
 						variant="h5"
 						sx={{ fontWeight: "bold", color: theme.palette.text.primary }}
 					>
-						{percentage}%
+						{percentageValue.toFixed(1)}% {/* Round percentage to 1 decimal */}
 					</Typography>
 				</Box>
 			</Box>

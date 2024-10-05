@@ -252,17 +252,87 @@ export const getExpenseFinancialDataService = async (
 			$or: conditions,
 		}).lean(); // Using lean() to get plain JavaScript objects instead of Mongoose documents
 
-		// Return the structured response
-		return financialData.map((data) => ({
-			userId: data.userId,
-			year: data.year,
-			month: data.month,
-			totalMoneySpent: data.totalMoneySpent,
-			totalExpenses: data.totalExpenses,
-			categories: data.categories,
-			cognitiveTriggers: data.cognitiveTriggers,
-			moods: data.moods,
-		}));
+		// Process the financial data to calculate percentages
+		return financialData.map((data) => {
+			// Calculate total amounts and expenses for categories, triggers, and moods
+			const totalAmountSpentInCategories = data.categories.reduce(
+				(sum, category) => sum + category.totalAmountSpent,
+				0
+			);
+			const totalExpensesInCategories = data.categories.reduce(
+				(sum, category) => sum + category.numExpenses,
+				0
+			);
+
+			const totalAmountSpentInTriggers = data.cognitiveTriggers.reduce(
+				(sum, trigger) => sum + trigger.totalAmountSpent,
+				0
+			);
+			const totalExpensesInTriggers = data.cognitiveTriggers.reduce(
+				(sum, trigger) => sum + trigger.numExpenses,
+				0
+			);
+
+			const totalAmountSpentInMoods = data.moods.reduce(
+				(sum, mood) => sum + mood.totalAmountSpent,
+				0
+			);
+			const totalExpensesInMoods = data.moods.reduce(
+				(sum, mood) => sum + mood.numExpenses,
+				0
+			);
+
+			// Add percentage calculations for categories
+			const categoriesWithPercentages = data.categories.map((category) => ({
+				...category,
+				percentageByAmount: (
+					(category.totalAmountSpent / totalAmountSpentInCategories) *
+					100
+				).toFixed(2), // Percentage by amount spent
+				percentageByNumber: (
+					(category.numExpenses / totalExpensesInCategories) *
+					100
+				).toFixed(2), // Percentage by number of expenses
+			}));
+
+			// Add percentage calculations for cognitiveTriggers
+			const triggersWithPercentages = data.cognitiveTriggers.map((trigger) => ({
+				...trigger,
+				percentageByAmount: (
+					(trigger.totalAmountSpent / totalAmountSpentInTriggers) *
+					100
+				).toFixed(2),
+				percentageByNumber: (
+					(trigger.numExpenses / totalExpensesInTriggers) *
+					100
+				).toFixed(2),
+			}));
+
+			// Add percentage calculations for moods
+			const moodsWithPercentages = data.moods.map((mood) => ({
+				...mood,
+				percentageByAmount: (
+					(mood.totalAmountSpent / totalAmountSpentInMoods) *
+					100
+				).toFixed(2),
+				percentageByNumber: (
+					(mood.numExpenses / totalExpensesInMoods) *
+					100
+				).toFixed(2),
+			}));
+
+			// Return the structured response with calculated fields
+			return {
+				userId: data.userId,
+				year: data.year,
+				month: data.month,
+				totalMoneySpent: data.totalMoneySpent,
+				totalExpenses: data.totalExpenses,
+				categories: categoriesWithPercentages,
+				cognitiveTriggers: triggersWithPercentages,
+				moods: moodsWithPercentages,
+			};
+		});
 	} catch (error) {
 		logError(`Failed to retrieve financial data: ${error.message}`);
 		throw error;
@@ -590,19 +660,46 @@ export const getIncomeFinancialDataService = async (userId, monthYearPairs) => {
 			year,
 		}));
 
+		// Query the MonthlyIncomeFinancialData collection
 		const financialData = await MonthlyIncomeFinancialData.find({
 			$or: conditions,
 		}).lean(); // Using lean() to get plain JavaScript objects instead of Mongoose documents
 
-		// Return the structured response
-		return financialData.map((data) => ({
-			userId: data.userId,
-			year: data.year,
-			month: data.month,
-			totalMoneyEarned: data.totalMoneyEarned,
-			totalIncomes: data.totalIncomes,
-			categories: data.categories,
-		}));
+		// Process the financial data to calculate percentages
+		return financialData.map((data) => {
+			// Calculate total amounts and incomes for categories
+			const totalAmountEarnedInCategories = data.categories.reduce(
+				(sum, category) => sum + category.totalAmountEarned,
+				0
+			);
+			const totalIncomesInCategories = data.categories.reduce(
+				(sum, category) => sum + category.numIncomes,
+				0
+			);
+
+			// Add percentage calculations for categories
+			const categoriesWithPercentages = data.categories.map((category) => ({
+				...category,
+				percentageByAmount: (
+					(category.totalAmountEarned / totalAmountEarnedInCategories) *
+					100
+				).toFixed(2), // Percentage by amount earned
+				percentageByNumber: (
+					(category.numIncomes / totalIncomesInCategories) *
+					100
+				).toFixed(2), // Percentage by number of incomes
+			}));
+
+			// Return the structured response with calculated fields
+			return {
+				userId: data.userId,
+				year: data.year,
+				month: data.month,
+				totalMoneyEarned: data.totalMoneyEarned,
+				totalIncomes: data.totalIncomes,
+				categories: categoriesWithPercentages, // Add percentage-calculated categories here
+			};
+		});
 	} catch (error) {
 		logError(`Failed to retrieve income financial data: ${error.message}`);
 		throw error;

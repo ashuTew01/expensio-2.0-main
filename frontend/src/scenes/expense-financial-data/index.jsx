@@ -249,13 +249,18 @@ const ExpenseFinancialData = () => {
 							}}
 						>
 							{data[0].cognitiveTriggers.map(
-								({ cognitiveTriggerName, numExpenses, totalAmountSpent }) => (
+								({
+									cognitiveTriggerName,
+									numExpenses,
+									totalAmountSpent,
+									percentageByAmount,
+								}) => (
 									<CustomCard
 										key={cognitiveTriggerName}
 										name={cognitiveTriggerName}
 										count={numExpenses}
 										totalAmount={totalAmountSpent}
-										percentage={30}
+										percentage={percentageByAmount}
 									/>
 								)
 							)}
@@ -312,12 +317,18 @@ const ExpenseFinancialData = () => {
 							}}
 						>
 							{data[0].categories.map(
-								({ categoryName, numExpenses, totalAmountSpent }) => (
+								({
+									categoryName,
+									numExpenses,
+									totalAmountSpent,
+									percentageByAmount,
+								}) => (
 									<CustomCard
 										key={categoryName} // Use a unique identifier for the key prop
 										name={categoryName}
 										count={numExpenses}
 										totalAmount={totalAmountSpent}
+										percentage={percentageByAmount}
 									/>
 								)
 							)}
@@ -371,14 +382,22 @@ const ExpenseFinancialData = () => {
 								"& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
 							}}
 						>
-							{data[0].moods.map(({ mood, numExpenses, totalAmountSpent }) => (
-								<CustomCard
-									key={mood}
-									name={mood}
-									count={numExpenses}
-									totalAmount={totalAmountSpent}
-								/>
-							))}
+							{data[0].moods.map(
+								({
+									mood,
+									numExpenses,
+									totalAmountSpent,
+									percentageByAmount,
+								}) => (
+									<CustomCard
+										key={mood}
+										name={mood}
+										count={numExpenses}
+										totalAmount={totalAmountSpent}
+										percentage={percentageByAmount}
+									/>
+								)
+							)}
 						</Box>
 					</Box>
 				</>

@@ -9,7 +9,7 @@ import {
 	Avatar,
 	ConversationHeader,
 } from "@chatscope/chat-ui-kit-react";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
@@ -84,34 +84,121 @@ const ChatBot = () => {
 	const toggleChatWindow = () => {
 		setIsOpen(!isOpen);
 	};
-	console.log(messages);
+
 	return (
 		<Box className="chatbot-container">
-			<IconButton className="chat-toggle-btn" onClick={toggleChatWindow}>
-				{isOpen ? <CloseIcon /> : <ChatIcon />}
+			<IconButton
+				className="chat-toggle-btn"
+				size="large"
+				onClick={toggleChatWindow}
+				sx={{
+					padding: "0.5rem 1.5rem", // Adjusted padding for rectangle shape
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "space-around",
+					background:
+						"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)", // Flowing multicolor gradient
+					backgroundSize: "400% 400%", // Ensure background moves
+					animation: "gradient-flow 8s ease infinite", // Animation for the flow
+					borderRadius: "30px", // Adjusted border radius for a rectangle
+					flexDirection: "row", // Icon and text aligned horizontally
+					width: isOpen ? "80px" : "auto", // Define a fixed width to make it a rectangle
+					boxShadow: 3, // Adds a slight shadow for a more polished look
+					mb: isOpen ? "0.4rem" : 0, // Adjusted margin for spacing
+					transition: "background 0.3s ease", // Smooth transition for hover effect
+					"&:hover": {
+						animationDuration: "4s", // Faster animation on hover
+						boxShadow: "0 4px 12px rgba(0,0,0,0.8)", // Enhance shadow on hover
+					},
+				}}
+			>
+				{isOpen ? (
+					<CloseIcon
+						sx={{
+							fontSize: "2rem",
+							color: "#ffffff", // White for contrast on gradient
+						}}
+					/>
+				) : (
+					<>
+						<ChatIcon
+							sx={{
+								fontSize: "2rem",
+								color: "#ffffff", // White for contrast on gradient
+								marginRight: "0.5rem", // Spacing between icon and text
+							}}
+						/>
+						<Typography
+							sx={{
+								fontSize: "18px",
+								color: "#ffffff", // White for contrast on gradient
+								fontWeight: "bold",
+							}}
+						>
+							SMART AI
+						</Typography>
+					</>
+				)}
 			</IconButton>
+
 			{isOpen && (
-				<Box className="chat-window">
+				<Box
+					className="chat-window"
+					sx={{ boxShadow: 3, borderRadius: "10px" }}
+				>
 					<MainContainer>
 						<ChatContainer>
 							<ConversationHeader>
 								<Avatar
-									name="Emily"
+									name="SMART AI"
 									src="https://chatscope.io/storybook/react/assets/emily-xzL8sDL2.svg"
 								/>
 								<ConversationHeader.Content
-									info="Active 10 mins ago"
-									userName="Emily"
+									info="Get your Financial Queries Resolved!"
+									userName="SMART AI"
 								/>
 							</ConversationHeader>
+
+							{/* Conditionally render a message when there are no messages */}
 							<MessageList>
-								{messages.map((msg, index) => (
-									<Message
-										key={index}
-										model={{ message: msg.message, direction: msg.direction }}
-									/>
-								))}
+								{messages.length === 0 ? (
+									<Box
+										sx={{
+											display: "flex",
+											justifyContent: "center",
+											alignItems: "center",
+											height: "80%", // Ensure it's centered within the chat window
+											textAlign: "center",
+											padding: "1rem",
+										}}
+									>
+										<Typography
+											variant="h6"
+											sx={{
+												color: "#666",
+												fontWeight: "bold",
+												fontSize: "1.2rem",
+											}}
+										>
+											Welcome to SMART AI! <br />
+											Ask me anything about your finances. <br />I can help you
+											track expenses, add income, and provide financial insights
+											on the go. Let's get started!
+										</Typography>
+									</Box>
+								) : (
+									messages.map((msg, index) => (
+										<Message
+											key={index}
+											model={{
+												message: msg.message,
+												direction: msg.direction,
+											}}
+										/>
+									))
+								)}
 							</MessageList>
+
 							<MessageInput
 								placeholder="Type your message here..."
 								value={inputMessage}

@@ -1,7 +1,5 @@
 import React from "react";
 import { Box, CircularProgress, Alert } from "@mui/material";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useTheme } from "@emotion/react";
 import LoadingIndicator from "./LoadingIndicator";
 import ShowMarkDown from "./ShowMarkDown";
