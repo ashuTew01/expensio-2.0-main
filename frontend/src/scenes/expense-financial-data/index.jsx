@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
+import NoDataMessage from "../../components/NoDataMessage";
 
 const ExpenseFinancialData = () => {
 	const theme = useTheme();
@@ -44,8 +45,8 @@ const ExpenseFinancialData = () => {
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>
 				<Header
-					title="EXPENSE DATA"
-					subtitle="See your detailed relationship with money here."
+					title="EXPENSE FINANCIAL DATA"
+					subtitle="See where you're spending most of your money on."
 					variant="h1"
 				/>
 
@@ -83,7 +84,7 @@ const ExpenseFinancialData = () => {
 			{isLoading && <LoadingIndicator />}
 
 			{data && data.length === 0 && (
-				<p style={{ color: "red" }}>NO EXPENSE DATA FOUND</p>
+				<NoDataMessage text="No expenses are available for this month. Start adding expenses to analyze them here." />
 			)}
 
 			{data && data.length > 0 && (
@@ -122,10 +123,10 @@ const ExpenseFinancialData = () => {
 						>
 							<Box>
 								<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-									Track Every Penny,
+									You have spent a total of ₹ {data[0].totalMoneySpent}
 								</Typography>
 								<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-									Shape A Brighter Tommorow
+									on {data[0].totalExpenses} expenses on selected date.
 								</Typography>
 								<Box height="10px"></Box>
 							</Box>
@@ -137,12 +138,50 @@ const ExpenseFinancialData = () => {
 							</Box>
 						</Box>
 					</Box>
+					<Box mt="5rem"></Box>
+
+					<Box
+						sx={{
+							// backgroundColor: theme.palette.background.alt,
+							borderRadius: "8px",
+							p: "0.1rem",
+							// boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+							// overflow: "hidden",
+							gridColumn: "span 12", // occupies the full width
+							gridRow: "span 4",
+							overflow: "auto",
+							"&::-webkit-scrollbar": {
+								width: "6px",
+							},
+							"&::-webkit-scrollbar-track": {
+								background: theme.palette.background.default,
+							},
+							"&::-webkit-scrollbar-thumb": {
+								background: theme.palette.secondary.main,
+								borderRadius: "3px",
+							},
+							mb: "2.5rem",
+						}}
+					>
+						<Header
+							title="COGNITIVE TRIGGER ANALYSIS"
+							subtitle="See what causes you to spend the most!"
+							variant="h2"
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								// color: "blue",
+							}}
+							titleFontColor="#02d487"
+						/>
+					</Box>
 
 					<Box mt="20px">
 						{/* Cognitive Trigger Section */}
-						<Header title="Cognitive Triggers" variant="h4" />
+
 						<Box
-							mt="20px"
+							my="2rem"
 							display="grid"
 							gridTemplateColumns="repeat(4, minmax(0, 1fr))"
 							justifyContent="space-between"
@@ -159,12 +198,51 @@ const ExpenseFinancialData = () => {
 										name={cognitiveTriggerName}
 										count={numExpenses}
 										totalAmount={totalAmountSpent}
+										percentage={30}
 									/>
 								)
 							)}
 						</Box>
+						<Box mt="5rem"></Box>
+						<Box
+							sx={{
+								// backgroundColor: theme.palette.background.alt,
+								borderRadius: "8px",
+								p: "0.1rem",
+								// boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+								// overflow: "hidden",
+								gridColumn: "span 12", // occupies the full width
+								gridRow: "span 4",
+								overflow: "auto",
+								"&::-webkit-scrollbar": {
+									width: "6px",
+								},
+								"&::-webkit-scrollbar-track": {
+									background: theme.palette.background.default,
+								},
+								"&::-webkit-scrollbar-thumb": {
+									background: theme.palette.secondary.main,
+									borderRadius: "3px",
+								},
+								mb: "2.5rem",
+							}}
+						>
+							<Header
+								title="CATEGORY ANALYSIS"
+								subtitle="See where you spend the most money on!"
+								variant="h2"
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "space-between",
+									// color: "blue",
+								}}
+								titleFontColor="#7a7dff"
+							/>
+						</Box>
+
 						{/* Categories Section */}
-						<Header title="Categories" variant="h4" style={{ mt: "2rem" }} />
+						{/* <Header title="Categories" variant="h4" style={{ mt: "2rem" }} /> */}
 						<Box
 							mt="20px"
 							display="grid"
@@ -187,13 +265,44 @@ const ExpenseFinancialData = () => {
 								)
 							)}
 						</Box>
-
+						<Box mt="5rem"></Box>
+						<Box
+							sx={{
+								// backgroundColor: theme.palette.background.alt,
+								borderRadius: "8px",
+								p: "0.1rem",
+								// boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+								// overflow: "hidden",
+								gridColumn: "span 12", // occupies the full width
+								gridRow: "span 4",
+								overflow: "auto",
+								"&::-webkit-scrollbar": {
+									width: "6px",
+								},
+								"&::-webkit-scrollbar-track": {
+									background: theme.palette.background.default,
+								},
+								"&::-webkit-scrollbar-thumb": {
+									background: theme.palette.secondary.main,
+									borderRadius: "3px",
+								},
+								mb: "2.5rem",
+							}}
+						>
+							<Header
+								title="MOOD ANALYSIS"
+								subtitle="How do you feel after spending money?"
+								variant="h2"
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "space-between",
+									// color: "blue",
+								}}
+								titleFontColor="#F5BD02"
+							/>
+						</Box>
 						{/* Mood Section */}
-						<Header
-							title="Mood Wise Expenses"
-							variant="h4"
-							style={{ mt: "2rem" }}
-						/>
 						<Box
 							mt="20px"
 							display="grid"

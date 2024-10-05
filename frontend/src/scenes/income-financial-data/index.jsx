@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
+import NoDataMessage from "../../components/NoDataMessage";
 
 const IncomeFinancialData = () => {
 	const theme = useTheme();
@@ -45,7 +46,7 @@ const IncomeFinancialData = () => {
 			<FlexBetween>
 				<Header
 					title="INCOME FINANCIAL DATA"
-					subtitle="See your detailed relationship with money here."
+					subtitle="Analyze your overall income and sources."
 					variant="h1"
 				/>
 
@@ -83,7 +84,7 @@ const IncomeFinancialData = () => {
 			{isLoading && <LoadingIndicator />}
 
 			{data && data.length === 0 && (
-				<p style={{ color: "red" }}>No Income Financial Data Found</p>
+				<NoDataMessage text="No Incomes are available for this month. Start adding incomes to analyze them here." />
 			)}
 
 			{data && data.length > 0 && (
@@ -137,10 +138,46 @@ const IncomeFinancialData = () => {
 							</Box>
 						</Box>
 					</Box>
+					<Box mt="5rem"></Box>
 
+					<Box
+						sx={{
+							// backgroundColor: theme.palette.background.alt,
+							borderRadius: "8px",
+							p: "0.1rem",
+							// boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+							// overflow: "hidden",
+							gridColumn: "span 12", // occupies the full width
+							gridRow: "span 4",
+							overflow: "auto",
+							"&::-webkit-scrollbar": {
+								width: "6px",
+							},
+							"&::-webkit-scrollbar-track": {
+								background: theme.palette.background.default,
+							},
+							"&::-webkit-scrollbar-thumb": {
+								background: theme.palette.secondary.main,
+								borderRadius: "3px",
+							},
+							mb: "2.5rem",
+						}}
+					>
+						<Header
+							title="CATEGORY ANALYSIS"
+							subtitle="Analyze your sources of income!"
+							variant="h2"
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								// color: "blue",
+							}}
+							titleFontColor="#7a7dff"
+						/>
+					</Box>
 					<Box mt="20px">
 						{/* Categories Section */}
-						<Header title="Categories" variant="h4" style={{ mt: "2rem" }} />
 						<Box
 							mt="20px"
 							display="grid"
