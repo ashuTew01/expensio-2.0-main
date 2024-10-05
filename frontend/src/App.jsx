@@ -30,6 +30,8 @@ import ExpenseScreen from "./scenes/expense/screen";
 import IncomeListScreen from "./scenes/income/list";
 import AddIncomeScreen from "./scenes/income/add";
 import SummaryScreen from "./scenes/summary";
+import ExpenseFinancialData from "./scenes/expense-financial-data";
+import IncomeFinancialData from "./scenes/income-financial-data";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -60,6 +62,14 @@ function App() {
 							<Route path="/income/add" element={<AddIncomeScreen />} />
 							{/* Summary routes */}
 							<Route path="/user/summary" element={<SummaryScreen />} />
+							<Route
+								path="/user/expense-financial-data"
+								element={<ExpenseFinancialData />}
+							/>
+							<Route
+								path="/user/income-financial-data"
+								element={<IncomeFinancialData />}
+							/>
 							{/* goals */}
 							{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
 							{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}

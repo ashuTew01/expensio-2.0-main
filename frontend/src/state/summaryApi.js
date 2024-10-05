@@ -29,4 +29,8 @@ export const summaryApi = createApi({
 	}),
 });
 
-export const { useGetSummaryQuery, useBuildSummaryMutation } = summaryApi;
+export const {
+	useGetSummaryQuery,
+	useBuildSummaryMutation,
+	useLazyGetSummaryQuery,
+} = summaryApi;

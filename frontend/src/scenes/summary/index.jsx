@@ -12,7 +12,7 @@ import {
 	InputLabel,
 } from "@mui/material";
 import {
-	useGetSummaryQuery,
+	useLazyGetSummaryQuery,
 	useBuildSummaryMutation,
 } from "../../state/summaryApi";
 import FlexBetween from "../../components/FlexBetween";
@@ -29,21 +29,18 @@ const SummaryScreen = () => {
 	const [financialSummary, setFinancialSummary] = useState(null); // To store financial summary
 	const [error, setError] = useState(null); // To handle error state
 
-	const {
-		data: summaryData,
-		error: summaryError,
-		isLoading: isFetchingSummary,
-		refetch,
-	} = useGetSummaryQuery({ timePeriod, year, month });
+	// Lazy query for manual fetching of summary
+	const [
+		triggerGetSummary,
+		{ data: summaryData, error: summaryError, isLoading: isLazyFetching },
+	] = useLazyGetSummaryQuery();
 
 	const [buildSummary, { isLoading: isBuildingSummary }] =
 		useBuildSummaryMutation();
 
-	// Handler for fetching the summary
+	// Handler for fetching the summary when button is clicked
 	const handleGetSummary = () => {
-		// setFinancialSummary(null);
-		// setError(null);
-		refetch(); // Trigger the query to fetch summary
+		triggerGetSummary({ timePeriod, year, month }); // Manually trigger fetch
 	};
 
 	// Handle the Build Summary action if summary is unavailable
@@ -55,7 +52,7 @@ const SummaryScreen = () => {
 		}
 	};
 
-	// useEffect to handle both summaryError and summaryData changes
+	// Handle both summaryError and summaryData changes
 	useEffect(() => {
 		if (
 			summaryError?.status === 404 &&
@@ -137,24 +134,10 @@ const SummaryScreen = () => {
 						Get Summary
 					</Button>
 				</Box>
-
-				{/* <Box>
-					<Button
-						sx={{
-							backgroundColor: theme.palette.secondary.light,
-							color: theme.palette.background.alt,
-							fontSize: "14px",
-							fontWeight: "bold",
-							padding: "10px 20px",
-						}}
-					>
-						EXPENSIO
-					</Button>
-				</Box> */}
 			</FlexBetween>
 
 			{/* Loader for fetching or building summary */}
-			{(isFetchingSummary || isBuildingSummary) && (
+			{(isLazyFetching || isBuildingSummary) && (
 				<Box mt="2rem" display="flex" justifyContent="center">
 					<CircularProgress />
 				</Box>
@@ -185,7 +168,7 @@ const SummaryScreen = () => {
 			)}
 
 			{/* Error or other cases */}
-			{!isFetchingSummary &&
+			{!isLazyFetching &&
 				!isBuildingSummary &&
 				summaryError?.status === 404 && (
 					<Box mt="2rem">

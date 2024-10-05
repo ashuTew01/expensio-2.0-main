@@ -24,6 +24,9 @@ import {
 	Summarize,
 	Analytics,
 	ListAlt,
+	PaidOutlined,
+	AccountBalanceWallet,
+	Paid,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,14 +44,19 @@ const navItems = [
 		icon: <Summarize />,
 	},
 	{
+		text: "Expense Financial Data",
+		route: "user/expense-financial-data",
+		icon: <AccountBalanceWallet />,
+	},
+	{
+		text: "Income Financial Data",
+		route: "user/income-financial-data",
+		icon: <Paid />,
+	},
+	{
 		text: "Expenses",
 		icon: null,
 	},
-	// {
-	//   text: "Overview",
-	//   route: "expense/overview",
-	//   icon: <Analytics />,
-	// },
 	{
 		text: "List",
 		route: "expense/list",

@@ -181,11 +181,10 @@ const Dashboard = () => {
 					borderRadius="0.55rem"
 				>
 					<Typography
-						variant="h3"
+						variant="h2"
 						sx={{
 							color: theme.palette.secondary[100],
 							fontWeight: "bold",
-							textAlign: "center",
 						}}
 					>
 						Monthly Expense by Category
@@ -211,11 +210,10 @@ const Dashboard = () => {
 					borderRadius="0.55rem"
 				>
 					<Typography
-						variant="h3"
+						variant="h2"
 						sx={{
 							color: theme.palette.secondary[100],
 							fontWeight: "bold",
-							textAlign: "center",
 						}}
 					>
 						Monthly Expense by Psychology Type

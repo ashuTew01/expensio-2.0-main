@@ -84,7 +84,7 @@ const ChatBot = () => {
 	const toggleChatWindow = () => {
 		setIsOpen(!isOpen);
 	};
-
+	console.log(messages);
 	return (
 		<Box className="chatbot-container">
 			<IconButton className="chat-toggle-btn" onClick={toggleChatWindow}>

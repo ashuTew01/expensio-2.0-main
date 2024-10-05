@@ -163,6 +163,22 @@ export const api = createApi({
 				};
 			},
 		}),
+		getExpenseFinancialData: build.mutation({
+			query: (data) => ({
+				url: `financial-data/expense`,
+				method: "POST",
+				body: data,
+				headers: DEFAULT_HEADERS,
+			}),
+		}),
+		getIncomeFinancialData: build.mutation({
+			query: (data) => ({
+				url: `financial-data/income`,
+				method: "POST",
+				body: data,
+				headers: DEFAULT_HEADERS,
+			}),
+		}),
 		// PUT GOALS QUERIES HERE
 		saveGoal: build.mutation({
 			query: (data) => ({
@@ -210,6 +226,10 @@ export const {
 	useGetExpenseByIdQuery,
 	useGetUserSummaryQuery,
 	useGetAllExpensesQuery,
+
+	// financial data
+	useGetExpenseFinancialDataMutation,
+	useGetIncomeFinancialDataMutation,
 
 	useGetAllIncomeQuery,
 	useGetAllIncomeCategoriesQuery,
