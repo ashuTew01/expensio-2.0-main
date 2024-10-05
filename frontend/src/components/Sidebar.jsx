@@ -31,6 +31,7 @@ import {
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
+import { useSelector } from "react-redux";
 
 const navItems = [
 	{
@@ -93,13 +94,14 @@ const Sidebar = ({
 	const [active, setActive] = useState(""); //what page we are currently at.
 	const navigate = useNavigate();
 	const theme = useTheme();
+	const { userInfo } = useSelector((state) => state.auth);
 
 	// const userInfo = JSON.parse(localStorage.getItem("userInfoExpensio"));
 	// const { image: userImage, name: userName } = userInfo;
 	// const { data: userInfo, isLoading } = useGetUserQuery();
 	// const user = userInfo?.user;
 	const userImage = "";
-	const userName = "ANUBHAV";
+	const userName = userInfo.first_name;
 
 	useEffect(() => {
 		setActive(pathname.substring(1));
