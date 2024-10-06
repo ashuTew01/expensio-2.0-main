@@ -1,33 +1,17 @@
-/* chatbot.css */
+/* index.css */
 
 /* Main chatbot container - Floating in the bottom-right corner */
 .chatbot-container {
 	position: fixed;
 	display: flex;
 	flex-direction: column;
+	align-items: flex-end; /* Align items to the right */
 	bottom: 20px;
 	right: 20px;
 	z-index: 1000; /* Ensures the chatbot stays on top of other elements */
-	/* color: white; */
 }
 
-/* Bounce animation keyframes */
-@keyframes bounce {
-	0%,
-	20%,
-	50%,
-	80%,
-	100% {
-		transform: translateY(0); /* Default position */
-	}
-	40% {
-		transform: translateY(-5px); /* Move up slightly */
-	}
-	60% {
-		transform: translateY(-5px); /* Move up slightly less */
-	}
-}
-
+/* Gradient flow animation */
 @keyframes gradient-flow {
 	0% {
 		background-position: 0% 50%;
@@ -40,8 +24,13 @@
 	}
 }
 
-/* Chat window styles - Handles the size, background, and layout */
-.chat-window {
+/* Ensure no global styles affect the SMART AI button */
+.chat-toggle-btn {
+	/* No styles here to prevent overrides */
+}
+
+/* Chat window styles */
+.chatbot-container .chat-window {
 	width: 450px;
 	height: 600px;
 	background-color: #ffffff; /* White background for the chat window */
@@ -51,96 +40,237 @@
 	display: flex;
 	flex-direction: column; /* Flexbox for layout, column-wise */
 	justify-content: space-between; /* Space between header and input */
+	margin-top: 10px; /* Space between button and chat window */
 }
 
-/* Chat toggle button - Circular button to open/close the chat window */
-
-/* Hover effect for chat toggle button - enlarges and adds more shadow */
-
-/* Chat header (name, avatar, status) */
-.chat-window .cs-conversation-header {
+/* Message list styling */
+.chatbot-container .message-list .cs-message-list {
 	padding: 10px;
-	border-bottom: 1px solid #e0e0e0; /* Subtle separator line */
-	font-weight: bold; /* Bold text for header */
-}
-
-/* Chat messages list container - Scrollable with light padding */
-.chat-window .cs-message-list {
-	padding: 10px;
-	flex-grow: 1; /* Takes up available space between header and input */
-	overflow-y: auto; /* Enables vertical scrolling */
-	scrollbar-width: thin; /* Thin scrollbar for a clean look */
-}
-
-/* Custom scrollbar styling */
-.chat-window .cs-message-list::-webkit-scrollbar {
-	width: 6px; /* Narrow scrollbar */
-}
-
-.chat-window .cs-message-list::-webkit-scrollbar-thumb {
-	background-color: rgba(
-		0,
-		0,
-		0,
-		0.2
-	); /* Slightly transparent scrollbar thumb */
-	border-radius: 10px; /* Rounded scrollbar */
-}
-
-.chat-window .cs-message-list::-webkit-scrollbar-track {
-	background-color: #f9f9f9; /* Matches chat background */
+	padding-bottom: 50px; /* Add extra padding at the bottom */
 }
 
 /* Message bubbles styling */
-.cs-message {
-	padding: 8px 12px; /* Padding inside each message bubble */
-	border-radius: 15px; /* Rounded corners for message bubbles */
-	margin-bottom: 8px; /* Space between messages */
+.chatbot-container .message-list .cs-message {
+	padding: 0; /* Remove padding to prevent extra space */
+	margin-bottom: 10px; /* Slightly reduced spacing between messages */
 	max-width: 80%; /* Messages will not take the full width of the container */
-	font-size: 14px; /* Message font size */
+	animation: fadeIn 0.3s ease-in-out; /* Fade-in animation */
+	background: none; /* Remove any background */
+	box-shadow: none; /* Remove box shadow */
+	border: none; /* Remove border */
+}
+
+/* Fade-in animation for messages */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px); /* Slight upward movement */
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* Outgoing message (sent by user) */
-.cs-message--outgoing {
-	color: #ffffff; /* White text for contrast */
-	margin-left: auto; /* Aligns outgoing message to the right */
+.chatbot-container .message-outgoing .cs-message__content {
+	background-color: #0084ff; /* Blue background */
+	color: #ffffff; /* White text */
+	border-radius: 15px; /* Rounded corners */
+	padding: 10px 15px; /* Padding inside the message bubble */
+	align-self: flex-end; /* Align to the right */
+	margin-right: 10px; /* Space from the right edge */
 }
 
 /* Incoming message (received from bot) */
-.cs-message--incoming {
-	background-color: #e0e0e0; /* Gray background for incoming messages */
-	color: #333333; /* Dark text for legibility */
+.chatbot-container .message-incoming .cs-message__content {
+	background-color: #f1f0f0; /* Light gray background */
+	color: #333333; /* Dark text */
+	border-radius: 15px; /* Rounded corners */
+	padding: 10px 15px; /* Padding inside the message bubble */
+	align-self: flex-start; /* Align to the left */
+	margin-left: 10px; /* Space from the left edge */
 }
 
-/* Input box container at the bottom */
-.cs-message-input {
-	padding: 10px 15px; /* Padding for space inside the input box */
-	border-top: 1px solid #e0e0e0; /* Subtle top border separating input from chat */
-	background-color: #f1f1f1; /* Light gray background */
-	font-size: 14px; /* Font size inside input box */
-	display: flex;
-	align-items: center; /* Correct alignment for vertically centering content */
-	gap: 10px; /* Spacing between input and any icons (if present) */
+/* Remove any default background or border from message content */
+.chatbot-container .cs-message__content {
+	background: none;
+	box-shadow: none;
+	border: none;
+}
+
+/* Input box customization */
+.chatbot-container .cs-message-input {
+	padding: 10px;
+	border-top: 1px solid #e0e0e0;
+	background-color: #f5f5f5;
 }
 
 /* Input field styles */
-.cs-message-input input {
-	width: 100%; /* Takes the full width of the container */
-	padding: 8px; /* Padding inside the input field */
-	border-radius: 20px; /* Rounded input field for smooth design */
-	border: 1px solid #ccc; /* Light gray border */
-	outline: none; /* Removes default outline on focus */
-	text-align: left !important; /* Ensures the text and cursor are left-aligned */
-	transition: border-color 0.3s ease; /* Smooth transition on focus */
+.chatbot-container .cs-message-input input {
+	width: 100%;
+	padding: 10px;
+	border-radius: 25px;
+	border: 1px solid #ccc;
+	outline: none;
+	transition: border-color 0.3s ease;
 }
 
 /* Focused input field styling */
-.cs-message-input input:focus {
-	border-color: #007bff; /* Blue border when focused */
+.chatbot-container .cs-message-input input:focus {
+	border-color: #0084ff;
 }
 
 /* Avatar customization */
-.cs-avatar {
-	border: 2px solid #ffffff; /* White border around the avatar */
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+.chatbot-container .cs-avatar {
+	border: 2px solid #ffffff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Typing indicator styling */
+.chatbot-container .cs-typing-indicator {
+	margin-bottom: 10px;
+	margin-top: 5px; /* Add some spacing at the top */
+}
+
+/* index.css */
+
+/* Define CSS variables for consistent spacing and font sizes */
+:root {
+	--message-spacing: 12px; /* Space between messages */
+	--element-spacing: 6px; /* Space between elements within messages */
+	--font-size: 15px;
+	--line-height: 1.5;
+}
+
+/* Main chatbot container remains the same */
+
+/* Message list styling */
+.chatbot-container .message-list .cs-message-list {
+	padding: 16px;
+}
+
+/* Message bubble styling */
+.chatbot-container .message-list .cs-message {
+	margin-bottom: var(--message-spacing);
+	max-width: 80%;
+	background: none;
+	box-shadow: none;
+	border: none;
+}
+
+/* Remove margin after the last message */
+.chatbot-container .message-list .cs-message:last-child {
+	margin-bottom: 0;
+}
+
+/* Outgoing messages */
+.chatbot-container .message-outgoing .cs-message__content {
+	background-color: #0084ff;
+	color: #ffffff;
+	border-radius: 12px;
+	padding: 10px 14px;
+	align-self: flex-end;
+	margin-right: 10px;
+	font-size: var(--font-size);
+	line-height: var(--line-height);
+}
+
+/* Incoming messages */
+.chatbot-container .message-incoming .cs-message__content {
+	background-color: #f1f0f0;
+	color: #333333;
+	border-radius: 12px;
+	padding: 10px 14px;
+	align-self: flex-start;
+	margin-left: 10px;
+	font-size: var(--font-size);
+	line-height: var(--line-height);
+}
+
+/* Reset styles for elements inside messages */
+.chatbot-container .cs-message__content * {
+	margin: 0;
+	padding: 0;
+	line-height: var(--line-height);
+}
+
+/* Paragraphs */
+.chatbot-container .cs-message__content p {
+	margin-bottom: var(--element-spacing);
+}
+
+/* Headings */
+.chatbot-container .cs-message__content h1,
+.chatbot-container .cs-message__content h2,
+.chatbot-container .cs-message__content h3,
+.chatbot-container .cs-message__content h4,
+.chatbot-container .cs-message__content h5,
+.chatbot-container .cs-message__content h6 {
+	margin-bottom: var(--element-spacing);
+	font-weight: bold;
+}
+
+/* Lists */
+.chatbot-container .cs-message__content ul,
+.chatbot-container .cs-message__content ol {
+	margin-left: 20px;
+	margin-bottom: var(--element-spacing);
+}
+
+.chatbot-container .cs-message__content li {
+	margin-bottom: calc(var(--element-spacing) / 2);
+}
+
+/* Code blocks */
+.chatbot-container .cs-message__content pre {
+	background-color: #e8e8e8;
+	padding: 10px;
+	border-radius: 6px;
+	overflow-x: auto;
+	margin-bottom: var(--element-spacing);
+}
+
+/* Inline code */
+.chatbot-container .cs-message__content code {
+	background-color: #e8e8e8;
+	padding: 2px 4px;
+	border-radius: 4px;
+	font-family: monospace;
+}
+
+/* Blockquotes */
+.chatbot-container .cs-message__content blockquote {
+	border-left: 4px solid #ccc;
+	padding-left: 10px;
+	color: #555;
+	margin-bottom: var(--element-spacing);
+}
+
+/* Images */
+.chatbot-container .cs-message__content img {
+	max-width: 100%;
+	border-radius: 6px;
+	margin-bottom: var(--element-spacing);
+}
+
+/* Links */
+.chatbot-container .cs-message__content a {
+	color: #0066cc;
+	text-decoration: none;
+}
+
+.chatbot-container .cs-message__content a:hover {
+	text-decoration: underline;
+}
+
+/* Spacing between sibling elements */
+.chatbot-container .cs-message__content > * + * {
+	margin-top: var(--element-spacing);
+}
+
+/* Typing indicator styling */
+.chatbot-container .cs-typing-indicator {
+	margin-top: var(--message-spacing);
+	margin-bottom: var(--message-spacing);
 }

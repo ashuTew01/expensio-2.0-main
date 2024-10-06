@@ -8,12 +8,15 @@ import {
 	MessageInput,
 	Avatar,
 	ConversationHeader,
+	TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography, Collapse } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import "../chatbot/index.css"; // Custom styles for positioning
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const ChatBot = () => {
 	const [isOpen, setIsOpen] = useState(false); // To handle open/close state
@@ -21,6 +24,17 @@ const ChatBot = () => {
 	const [inputMessage, setInputMessage] = useState(""); // Input message state
 	const [socketConnected, setSocketConnected] = useState(false); // Socket connection state
 	const socket = useRef(null); // Using useRef to persist socket instance
+	const [isTyping, setIsTyping] = useState(false); // Typing indicator state
+
+	const messageListRef = useRef(); // Ref for MessageList to enable auto-scroll
+
+	const renderers = {
+		ol: ({ ordered, children }) => (
+			<ul className="custom-ordered-list">{children}</ul>
+		),
+		li: ({ children }) => <li>{children}</li>,
+		// You can add more custom renderers if needed
+	};
 
 	useEffect(() => {
 		// Establish socket connection
@@ -43,6 +57,7 @@ const ChatBot = () => {
 					...prev,
 					{ message: data.message, direction: "incoming" },
 				]);
+				setIsTyping(false); // Stop typing indicator when message is received
 			}
 		});
 
@@ -50,8 +65,12 @@ const ChatBot = () => {
 			const formattedData = JSON.stringify(data.message, null, 2);
 			setMessages((prev) => [
 				...prev,
-				{ message: `Financial Data:\n${formattedData}`, direction: "incoming" },
+				{
+					message: `Financial Data:\n${formattedData}`,
+					direction: "incoming",
+				},
 			]);
+			setIsTyping(false);
 		});
 
 		socket.current.on("error", (data) => {
@@ -59,6 +78,12 @@ const ChatBot = () => {
 				...prev,
 				{ message: `Error: ${data.message}`, direction: "incoming" },
 			]);
+			setIsTyping(false);
+		});
+
+		// Show typing indicator when server is processing
+		socket.current.on("typing", () => {
+			setIsTyping(true);
 		});
 
 		socket.current.on("disconnect", () => {
@@ -70,6 +95,13 @@ const ChatBot = () => {
 		};
 	}, []);
 
+	useEffect(() => {
+		// Auto-scroll to bottom when messages or typing indicator changes
+		if (messageListRef.current) {
+			messageListRef.current.scrollToBottom("smooth");
+		}
+	}, [messages, isTyping]);
+
 	const handleSend = () => {
 		if (inputMessage.trim() !== "") {
 			setMessages((prev) => [
@@ -78,6 +110,7 @@ const ChatBot = () => {
 			]);
 			socket.current.emit("chat_message", inputMessage); // Send message to server
 			setInputMessage(""); // Clear input
+			setIsTyping(true); // Start typing indicator
 		}
 	};
 
@@ -87,28 +120,30 @@ const ChatBot = () => {
 
 	return (
 		<Box className="chatbot-container">
+			{/* SMART AI Button - Width adjusted */}
 			<IconButton
 				className="chat-toggle-btn"
 				size="large"
 				onClick={toggleChatWindow}
 				sx={{
-					padding: "0.5rem 1.5rem", // Adjusted padding for rectangle shape
+					padding: "0.5rem 1.5rem",
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "space-around",
 					background:
-						"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)", // Flowing multicolor gradient
-					backgroundSize: "400% 400%", // Ensure background moves
-					animation: "gradient-flow 8s ease infinite", // Animation for the flow
-					borderRadius: "30px", // Adjusted border radius for a rectangle
-					flexDirection: "row", // Icon and text aligned horizontally
-					width: isOpen ? "80px" : "auto", // Define a fixed width to make it a rectangle
-					boxShadow: 3, // Adds a slight shadow for a more polished look
-					mb: isOpen ? "0.4rem" : 0, // Adjusted margin for spacing
-					transition: "background 0.3s ease", // Smooth transition for hover effect
+						"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)",
+					backgroundSize: "400% 400%",
+					animation: "gradient-flow 8s ease infinite",
+					borderRadius: "30px",
+					flexDirection: "row",
+					width: isOpen ? "80px" : "fit-content",
+					boxShadow: 3,
+					mb: isOpen ? "0.4rem" : 0,
+					transition: "all 0.3s ease",
 					"&:hover": {
-						animationDuration: "4s", // Faster animation on hover
-						boxShadow: "0 4px 12px rgba(0,0,0,0.8)", // Enhance shadow on hover
+						animationDuration: "3s",
+						boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
+						transform: "scale(1.01)",
 					},
 				}}
 			>
@@ -116,7 +151,7 @@ const ChatBot = () => {
 					<CloseIcon
 						sx={{
 							fontSize: "2rem",
-							color: "#ffffff", // White for contrast on gradient
+							color: "#ffffff",
 						}}
 					/>
 				) : (
@@ -124,14 +159,14 @@ const ChatBot = () => {
 						<ChatIcon
 							sx={{
 								fontSize: "2rem",
-								color: "#ffffff", // White for contrast on gradient
-								marginRight: "0.5rem", // Spacing between icon and text
+								color: "#ffffff",
+								marginRight: "0.5rem",
 							}}
 						/>
 						<Typography
 							sx={{
 								fontSize: "18px",
-								color: "#ffffff", // White for contrast on gradient
+								color: "#ffffff",
 								fontWeight: "bold",
 							}}
 						>
@@ -141,33 +176,45 @@ const ChatBot = () => {
 				)}
 			</IconButton>
 
-			{isOpen && (
+			{/* Chat Window */}
+			<Collapse in={isOpen} timeout={300}>
 				<Box
 					className="chat-window"
-					sx={{ boxShadow: 3, borderRadius: "10px" }}
+					sx={{
+						boxShadow: 3,
+						borderRadius: "10px",
+					}}
 				>
 					<MainContainer>
 						<ChatContainer>
 							<ConversationHeader>
 								<Avatar
 									name="SMART AI"
-									src="https://chatscope.io/storybook/react/assets/emily-xzL8sDL2.svg"
+									src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
 								/>
 								<ConversationHeader.Content
-									info="Get your Financial Queries Resolved!"
+									info="Your Financial Assistant"
 									userName="SMART AI"
 								/>
 							</ConversationHeader>
 
-							{/* Conditionally render a message when there are no messages */}
-							<MessageList>
+							{/* Message List */}
+							<MessageList
+								className="message-list"
+								ref={messageListRef} // Attach ref for auto-scroll
+								typingIndicator={
+									isTyping && (
+										<TypingIndicator content="SMART AI is typing..." />
+									)
+								}
+							>
 								{messages.length === 0 ? (
 									<Box
 										sx={{
 											display: "flex",
 											justifyContent: "center",
 											alignItems: "center",
-											height: "80%", // Ensure it's centered within the chat window
+											height: "80%",
 											textAlign: "center",
 											padding: "1rem",
 										}}
@@ -187,15 +234,37 @@ const ChatBot = () => {
 										</Typography>
 									</Box>
 								) : (
-									messages.map((msg, index) => (
-										<Message
-											key={index}
-											model={{
-												message: msg.message,
-												direction: msg.direction,
-											}}
-										/>
-									))
+									<>
+										{messages.map((msg, index) => (
+											<Message
+												key={index}
+												model={{
+													// message: msg.message,
+													direction: msg.direction,
+													sentTime: new Date().toLocaleTimeString([], {
+														hour: "2-digit",
+														minute: "2-digit",
+													}),
+													position: "normal",
+												}}
+												// Add a custom class to style messages
+												className={
+													msg.direction === "outgoing"
+														? "message-outgoing"
+														: "message-incoming"
+												}
+											>
+												<Message.CustomContent>
+													<ReactMarkdown
+														// components={renderers}
+														remarkPlugins={[remarkGfm]}
+													>
+														{msg.message}
+													</ReactMarkdown>
+												</Message.CustomContent>
+											</Message>
+										))}
+									</>
 								)}
 							</MessageList>
 
@@ -205,11 +274,12 @@ const ChatBot = () => {
 								onChange={(val) => setInputMessage(val)}
 								onSend={handleSend}
 								attachButton={false}
+								autoFocus
 							/>
 						</ChatContainer>
 					</MainContainer>
 				</Box>
-			)}
+			</Collapse>
 		</Box>
 	);
 };
