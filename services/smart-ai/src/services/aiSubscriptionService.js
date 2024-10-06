@@ -123,3 +123,21 @@ export const assignSubscriptionToUser = async (userId, subscriptionId) => {
 		throw new Error(`Failed to assign subscription to user: ${error.message}`);
 	}
 };
+
+/**
+ * Retrieves the AI tokens for a user.
+ * @param {number} userId - The ID of the user.
+ * @returns {Promise<Object>} - The user's AI tokens document.
+ * @throws {Error} - If there's an error fetching the user's AI tokens.
+ */
+export const getUserAiTokensDetailsService = async (userId) => {
+	try {
+		const userTokens = await UserTokens.findOne({ userId }).populate({
+			path: "aiSubscriptionId",
+			model: "AiSubscription",
+		});
+		return userTokens;
+	} catch (error) {
+		throw new Error(`Failed to get user tokens: ${error.message}`);
+	}
+};

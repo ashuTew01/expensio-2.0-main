@@ -210,6 +210,16 @@ export const api = createApi({
 				headers: DEFAULT_HEADERS,
 			}),
 		}),
+
+		getUserAiTokensDetail: build.query({
+			query: () => ({
+				url: "smart-ai/user/ai-tokens-detail",
+				method: "GET",
+				headers: DEFAULT_HEADERS,
+			}),
+			refetchOnFocus: true,
+			refetchOnReconnect: true,
+		}),
 	}),
 });
 
@@ -246,4 +256,7 @@ export const {
 
 	useSendOtpMutation,
 	useVerifyOtpMutation,
+
+	//smart ai
+	useGetUserAiTokensDetailQuery,
 } = api;
