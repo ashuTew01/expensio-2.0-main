@@ -15,7 +15,7 @@ const authSlice = createSlice({
 	initialState,
 	reducers: {
 		setUserInfo: (state, action) => {
-			console.log(action.payload);
+			// console.log(action.payload);
 			state.userInfo = action.payload;
 			localStorage.setItem("userInfoExpensio", JSON.stringify(action.payload));
 		},
@@ -24,7 +24,7 @@ const authSlice = createSlice({
 			localStorage.setItem("tokenExpensio", JSON.stringify(action.payload));
 		},
 		setIfUserExist: (state, action) => {
-			console.log(action.payload);
+			// console.log(action.payload);
 			state.userExists = action.payload;
 		},
 		removeCredentials: (state, action) => {

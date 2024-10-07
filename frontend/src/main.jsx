@@ -6,6 +6,7 @@ import App from "./App";
 import { configureStore } from "@reduxjs/toolkit";
 import globalReducer from "./state";
 import authReducer from "./state/authSlice";
+import chatReducer from "./state/chatSlice";
 import { Provider } from "react-redux";
 
 import { setupListeners } from "@reduxjs/toolkit/query";
@@ -20,6 +21,7 @@ const store = configureStore({
 		[googleAuthApi.reducerPath]: googleAuthApi.reducer,
 		[summaryApi.reducerPath]: summaryApi.reducer,
 		auth: authReducer,
+		chat: chatReducer,
 	},
 	middleware: (getDefault) =>
 		getDefault()

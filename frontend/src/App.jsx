@@ -32,61 +32,67 @@ import AddIncomeScreen from "./scenes/income/add";
 import SummaryScreen from "./scenes/summary";
 import ExpenseFinancialData from "./scenes/expense-financial-data";
 import IncomeFinancialData from "./scenes/income-financial-data";
+import FullChatPage from "./scenes/full-page-chat";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
 	const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 	return (
-		<BrowserRouter>
-			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<ToastContainer />
+		<SocketProvider>
+			<BrowserRouter>
+				<ThemeProvider theme={theme}>
+					<CssBaseline />
+					<ToastContainer />
 
-				<Routes>
-					<Route path="" element={<PrivateRoute />}>
-						<Route element={<Layout />}>
-							{" "}
-							{/* will exist on every page. Eg, navbar and sidebar. */}
-							<Route path="/dashboard" element={<Dashboard />} />
-							<Route path="/expense/add" element={<AddExpenseScreen />} />
-							{/* expense */}
-							{/* <Route path="/expense/add" element={<AddExpenseScreen />} /> */}
-							{/* <Route
+					<Routes>
+						<Route path="" element={<PrivateRoute />}>
+							<Route element={<Layout />}>
+								{" "}
+								{/* will exist on every page. Eg, navbar and sidebar. */}
+								<Route path="/dashboard" element={<Dashboard />} />
+								<Route path="/expense/add" element={<AddExpenseScreen />} />
+								{/* expense */}
+								{/* <Route path="/expense/add" element={<AddExpenseScreen />} /> */}
+								{/* <Route
                 path="/expense/add/text"
                 element={<AddExpenseThroughTextScreen />}
               /> */}
-							<Route path="/expense/:id" element={<ExpenseScreen />} />
-							<Route path="/expense/list" element={<ExpenseListScreen />} />
-							{/* income */}
-							<Route path="/income/list" element={<IncomeListScreen />} />
-							<Route path="/income/add" element={<AddIncomeScreen />} />
-							{/* Summary routes */}
-							<Route path="/user/summary" element={<SummaryScreen />} />
-							<Route
-								path="/user/expense-financial-data"
-								element={<ExpenseFinancialData />}
-							/>
-							<Route
-								path="/user/income-financial-data"
-								element={<IncomeFinancialData />}
-							/>
-							{/* goals */}
-							{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
-							{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}
+								<Route path="/expense/:id" element={<ExpenseScreen />} />
+								<Route path="/expense/list" element={<ExpenseListScreen />} />
+								{/* income */}
+								<Route path="/income/list" element={<IncomeListScreen />} />
+								<Route path="/income/add" element={<AddIncomeScreen />} />
+								{/* Summary routes */}
+								<Route path="/user/summary" element={<SummaryScreen />} />
+								<Route
+									path="/user/expense-financial-data"
+									element={<ExpenseFinancialData />}
+								/>
+								<Route
+									path="/user/income-financial-data"
+									element={<IncomeFinancialData />}
+								/>
+								{/* chat page */}
+								<Route path="/full-chat" element={<FullChatPage />} />
+								{/* goals */}
+								{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
+								{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}
+							</Route>
 						</Route>
-					</Route>
 
-					<Route>
-						<Route index path="/" element={<HomeScreen />} />
+						<Route>
+							<Route index path="/" element={<HomeScreen />} />
 
-						<Route path="/login" element={<PhoneNumberPage />} />
-						<Route path="/otp" element={<OtpPage />} />
-						<Route path="/user-data-form" element={<UserDataForm />} />
-						{/* <Route path="/register" element={<Register />} /> */}
-					</Route>
-				</Routes>
-			</ThemeProvider>
-		</BrowserRouter>
+							<Route path="/login" element={<PhoneNumberPage />} />
+							<Route path="/otp" element={<OtpPage />} />
+							<Route path="/user-data-form" element={<UserDataForm />} />
+							{/* <Route path="/register" element={<Register />} /> */}
+						</Route>
+					</Routes>
+				</ThemeProvider>
+			</BrowserRouter>
+		</SocketProvider>
 	);
 }
 

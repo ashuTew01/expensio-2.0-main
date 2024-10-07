@@ -86,7 +86,7 @@ export default function PhoneNumberPage() {
 			dispatch(setIfUserExist(response.userExists));
 
 			if (response?.otp) {
-				console.log(response?.otp);
+				// console.log(response?.otp);
 				navigate("/otp", { state: { phoneNumber, otp: response.otp } });
 			} else {
 				navigate("/otp", { state: { phoneNumber } });

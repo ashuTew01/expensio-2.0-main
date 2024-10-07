@@ -25,7 +25,7 @@ const Dashboard = () => {
 		isError: dashboardDataError,
 	} = useGetDasboardQuery();
 
-	console.log(dashboardData);
+	// console.log(dashboardData);
 
 	const expensesData = [];
 	const expensesLoading = [];
@@ -90,7 +90,7 @@ const Dashboard = () => {
 
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();
-	console.log(latestExpenses);
+	// console.log(latestExpenses);
 
 	// console.log(categoryTotals);
 
