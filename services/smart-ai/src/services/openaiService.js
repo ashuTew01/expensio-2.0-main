@@ -145,7 +145,7 @@ export const callOpenaiService = async (
 				await session.commitTransaction();
 				session.endSession();
 				logInfo(
-					`Tokens used: ${aiTokensUsed} by userId ${userId}, Tokens Left: ${userTokens.currentTokens}`
+					`Tokens used: ${aiTokensUsed.toFixed(2)} by userId ${userId}, Tokens Left: ${userTokens.currentTokens.toFixed(2)}`
 				);
 			} catch (error) {
 				await session.abortTransaction();
