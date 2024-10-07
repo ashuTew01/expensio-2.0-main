@@ -12,6 +12,9 @@ import { useGetAllExpensesQuery, useGetDasboardQuery } from "../../state/api";
 import { useSelector } from "react-redux";
 import BreakdownChart from "../../components/BreakdownChart";
 import { DataGrid } from "@mui/x-data-grid";
+import BarGraph from "../../components/BarGraph";
+import ExpenseCard from "../../components/ExpenseCard";
+import LoadingIndicator from "../../components/LoadingIndicator";
 
 const Dashboard = () => {
 	const theme = useTheme();
@@ -24,6 +27,8 @@ const Dashboard = () => {
 		isLoading: dashboardDataLoading,
 		isError: dashboardDataError,
 	} = useGetDasboardQuery();
+
+	if (dashboardDataLoading) return <LoadingIndicator />;
 
 	// console.log(dashboardData);
 
@@ -62,7 +67,7 @@ const Dashboard = () => {
 			id: expense._id,
 			title: expense.expenseDetailsId.title,
 			amount: expense.expenseDetailsId.amount,
-			expenseType: expense.expenseDetailsId.expenseType,
+			type: expense.expenseDetailsId.expenseType,
 			categoryName: expense.expenseDetailsId.categoryName,
 			cognitiveTriggers:
 				expense.expenseDetailsId.cognitiveTriggerNames.join(", "),
@@ -71,6 +76,42 @@ const Dashboard = () => {
 			).toLocaleDateString(),
 		}));
 	};
+
+	const formatLatestIncomeData = () => {
+		return dashboardData?.latestIncomes?.map((income) => ({
+			id: income.incomeDetailsId._id,
+			title: income.incomeDetailsId.title,
+			amount: income.incomeDetailsId.amount,
+			type: income.incomeDetailsId.incomeType,
+			categoryName: income.incomeDetailsId.categoryName,
+			createdAt: new Date(
+				income.incomeDetailsId.createdAt
+			).toLocaleDateString(),
+		}));
+	};
+
+	const categoryDataForBarGraph =
+		dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.length >
+		0
+			? dashboardData?.currentMonthExpenseFinancialData?.expenseCategories?.map(
+					(item, i) => ({
+						category: item.categoryName,
+						amountSpent: item.totalAmountSpent,
+						expenses: item.numExpenses,
+						color: theme.palette.secondary[((i % 9) + 1) * 100],
+					})
+				)
+			: [];
+
+	const cognitiveTriggerForBarGraph =
+		dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.map(
+			(item, i) => ({
+				category: item.cognitiveTriggerName,
+				amountSpent: item.totalAmountSpent,
+				expenses: item.numExpenses,
+				color: theme.palette.secondary[((i % 9) + 1) * 100],
+			})
+		);
 
 	// Define the columns for the DataGrid
 	const columns = [
@@ -90,6 +131,7 @@ const Dashboard = () => {
 
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();
+	const latestIncomes = formatLatestIncomeData();
 	// console.log(latestExpenses);
 
 	// console.log(categoryTotals);
@@ -205,10 +247,24 @@ const Dashboard = () => {
 					</Typography>
 				</Box>
 
+				{/* category bar graph  */}
+				<Box
+					gridColumn="span 8"
+					gridRow="span 3"
+					backgroundColor={theme.palette.background.alt}
+					p="1.5rem"
+					borderRadius="0.55rem"
+				>
+					<BarGraph
+						isDashboard={true}
+						formattedData={categoryDataForBarGraph}
+					/>
+				</Box>
+
 				{/* Psychological Pie Chart */}
 
 				<Box
-					gridColumn="span 6"
+					gridColumn="span 4"
 					gridRow="span 3"
 					backgroundColor={theme.palette.background.alt}
 					p="1.5rem"
@@ -227,14 +283,33 @@ const Dashboard = () => {
 					<Typography
 						p="0 0.6rem"
 						fontSize="0.8rem"
-						sx={{ color: theme.palette.secondary[200] }}
+						mt="15px"
+						sx={{
+							color: theme.palette.secondary[200],
+							fontSize: "15px",
+							textAlign: "center",
+						}}
 					>
 						Breakdown of monthly expenses by Psychological Types in which they
 						were generated.
 					</Typography>
 				</Box>
 
+				{/* cognitive bar graph */}
 				<Box
+					gridColumn="span 8"
+					gridRow="span 3"
+					backgroundColor={theme.palette.background.alt}
+					p="1.5rem"
+					borderRadius="0.55rem"
+				>
+					<BarGraph
+						isDashboard={true}
+						formattedData={cognitiveTriggerForBarGraph}
+					/>
+				</Box>
+
+				{/* <Box
 					gridColumn="span 8"
 					height="500px"
 					sx={{
@@ -269,9 +344,64 @@ const Dashboard = () => {
 						rows={latestExpenses || []}
 						columns={columns}
 					/>
+				</Box> */}
+
+				<Box
+					gridColumn="span 6"
+					gridRow="span 3"
+					height="500px"
+					overflow="auto"
+					flexDirection="column"
+					alignItems="center" // Center align horizontally
+					// Align cards starting from the top
+				>
+					<Box width="100%">
+						{latestExpenses &&
+							latestExpenses?.length > 0 &&
+							latestExpenses?.map((expense, i) => {
+								return (
+									<ExpenseCard
+										key={expense.id} // Add a key prop for each item
+										id={expense.id}
+										title={expense.title}
+										amount={expense.amount}
+										type={expense.type}
+										categoryName={expense.categoryName}
+										cognitiveTriggers={expense.cognitiveTriggers}
+										createdAt={expense.createdAt}
+									/>
+								);
+							})}
+					</Box>
 				</Box>
 
-				<Box gridColumn="span 4" gridRow="span 3"></Box>
+				<Box
+					gridColumn="span 6"
+					gridRow="span 3"
+					height="500px"
+					overflow="auto"
+					flexDirection="column"
+					alignItems="center" // Center align horizontally
+					// Align cards starting from the top
+				>
+					<Box width="100%">
+						{latestIncomes &&
+							latestIncomes?.length > 0 &&
+							latestIncomes?.map((income, i) => {
+								return (
+									<ExpenseCard
+										key={income.id} // Add a key prop for each item
+										id={income.id}
+										title={income.title}
+										amount={income.amount}
+										expenseType={income.type}
+										categoryName={income.categoryName}
+										createdAt={income.createdAt}
+									/>
+								);
+							})}
+					</Box>
+				</Box>
 			</Box>
 		</Box>
 	);
