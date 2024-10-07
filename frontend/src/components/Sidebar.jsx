@@ -27,6 +27,7 @@ import {
 	PaidOutlined,
 	AccountBalanceWallet,
 	Paid,
+	SupportAgent,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -38,6 +39,11 @@ const navItems = [
 		text: "Dashboard",
 		route: "dashboard",
 		icon: <HomeOutlined />,
+	},
+	{
+		text: "Smart AI",
+		route: "full-chat",
+		icon: <SupportAgent />,
 	},
 	{
 		text: "Financial Summary",

@@ -20,7 +20,7 @@ const ExpenseScreen = () => {
 	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
 	const { id } = useParams();
-	console.log(id);
+	// console.log(id);
 	// const [expenses, setExpenses] = useState([]);
 	const {
 		data,

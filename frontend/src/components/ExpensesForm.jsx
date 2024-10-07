@@ -89,7 +89,7 @@ const ExpensesForm = ({
 						!(Array.isArray(value) && value.length === 0)
 				)
 			);
-			console.log(filteredExpenseData);
+			// console.log(filteredExpenseData);
 
 			const response = await saveExpenses([filteredExpenseData]);
 

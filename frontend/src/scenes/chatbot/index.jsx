@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { io } from "socket.io-client";
 import {
 	MainContainer,
 	ChatContainer,
@@ -12,91 +11,101 @@ import {
 } from "@chatscope/chat-ui-kit-react";
 import { Box, IconButton, Typography, Collapse } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import CloseIcon from "@mui/icons-material/Close";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import "../chatbot/index.css"; // Custom styles for positioning
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+	addMessage,
+	setTyping,
+	setSocketConnected,
+} from "../../state/chatSlice";
+import { useNavigate } from "react-router-dom"; // For redirecting to full chat page
+import { useSocket } from "../../context/SocketContext";
+import LoadingIndicator from "../../components/LoadingIndicator";
+
 const ChatBot = () => {
 	const [isOpen, setIsOpen] = useState(false); // To handle open/close state
-	const [messages, setMessages] = useState([]); // Messages state
 	const [inputMessage, setInputMessage] = useState(""); // Input message state
-	const [socketConnected, setSocketConnected] = useState(false); // Socket connection state
-	const socket = useRef(null); // Using useRef to persist socket instance
-	const [isTyping, setIsTyping] = useState(false); // Typing indicator state
-
+	const socket = useSocket(); // Get the socket from the context
 	const messageListRef = useRef(); // Ref for MessageList to enable auto-scroll
+	const [isLoading, setIsLoading] = useState(true); // Loading state for socket setup
 
-	const renderers = {
-		ol: ({ ordered, children }) => (
-			<ul className="custom-ordered-list">{children}</ul>
-		),
-		li: ({ children }) => <li>{children}</li>,
-		// You can add more custom renderers if needed
-	};
+	const { messages, isTyping, socketConnected } = useSelector(
+		(state) => state.chat
+	);
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
 
+	// Add logging for debugging purposes
 	useEffect(() => {
-		// Establish socket connection
-		const token = JSON.parse(localStorage.getItem("tokenExpensio"));
-		socket.current = io("http://expensio.com", {
-			path: "/ws/smart-chat",
-			query: {
-				token: `Bearer ${token}`,
-			},
+		// Wait until the socket is initialized
+		if (!socket) {
+			console.log("Socket not initialized yet");
+			return;
+		}
+
+		console.log("Socket is being set up...");
+
+		// Register socket event listeners
+		socket.on("connect", () => {
+			console.log("isloading before", isLoading); //printing true
+			console.log("socket setup :- inside connect listener");
+			dispatch(setSocketConnected(true));
+			console.log(`Connected with id: ${socket.id}`);
+			setIsLoading(false); // Set isLoading to false once setup is complete
+			console.log("socket setup completed");
+			console.log("isloading after", isLoading); //printing true
 		});
 
-		socket.current.on("connect", () => {
-			setSocketConnected(true);
-			console.log(`Connected with id: ${socket.current.id}`);
-		});
-
-		socket.current.on("response", (data) => {
+		socket.on("response", (data) => {
 			if (data.message) {
-				setMessages((prev) => [
-					...prev,
-					{ message: data.message, direction: "incoming" },
-				]);
-				setIsTyping(false); // Stop typing indicator when message is received
+				dispatch(addMessage({ message: data.message, direction: "incoming" }));
+				dispatch(setTyping(false));
 			}
 		});
 
-		socket.current.on("financial-data", (data) => {
+		socket.on("financial-data", (data) => {
 			const formattedData = JSON.stringify(data.message, null, 2);
-			setMessages((prev) => [
-				...prev,
-				{
+			dispatch(
+				addMessage({
 					message: `Financial Data:\n${formattedData}`,
 					direction: "incoming",
-				},
-			]);
-			setIsTyping(false);
+				})
+			);
+			dispatch(setTyping(false));
 		});
 
-		socket.current.on("error", (data) => {
-			setMessages((prev) => [
-				...prev,
-				{ message: `Error: ${data.message}`, direction: "incoming" },
-			]);
-			setIsTyping(false);
+		socket.on("error", (data) => {
+			dispatch(
+				addMessage({ message: `Error: ${data.message}`, direction: "incoming" })
+			);
+			dispatch(setTyping(false));
 		});
 
 		// Show typing indicator when server is processing
-		socket.current.on("typing", () => {
-			setIsTyping(true);
+		socket.on("typing", () => {
+			dispatch(setTyping(true));
 		});
 
-		socket.current.on("disconnect", () => {
-			setSocketConnected(false);
-		});
-
+		// Clean up event listeners when component unmounts
 		return () => {
-			if (socket.current) socket.current.disconnect();
+			if (socket) {
+				socket.off("connect");
+				socket.off("response");
+				socket.off("financial-data");
+				socket.off("typing");
+				socket.off("error");
+			}
 		};
-	}, []);
+	}, [socket, dispatch]);
 
+	// Auto-scroll to the bottom when messages or typing indicator changes
 	useEffect(() => {
-		// Auto-scroll to bottom when messages or typing indicator changes
 		if (messageListRef.current) {
 			messageListRef.current.scrollToBottom("smooth");
 		}
@@ -104,13 +113,10 @@ const ChatBot = () => {
 
 	const handleSend = () => {
 		if (inputMessage.trim() !== "") {
-			setMessages((prev) => [
-				...prev,
-				{ message: inputMessage, direction: "outgoing" },
-			]);
-			socket.current.emit("chat_message", inputMessage); // Send message to server
-			setInputMessage(""); // Clear input
-			setIsTyping(true); // Start typing indicator
+			dispatch(addMessage({ message: inputMessage, direction: "outgoing" }));
+			socket.emit("chat_message", inputMessage);
+			setInputMessage("");
+			dispatch(setTyping(true));
 		}
 	};
 
@@ -118,63 +124,133 @@ const ChatBot = () => {
 		setIsOpen(!isOpen);
 	};
 
-	return (
-		<Box className="chatbot-container">
-			{/* SMART AI Button - Width adjusted */}
-			<IconButton
-				className="chat-toggle-btn"
-				size="large"
-				onClick={toggleChatWindow}
+	const expandToFullPage = () => {
+		setIsOpen(!isOpen);
+		navigate("/full-chat"); // Redirect to full chat page
+	};
+
+	// If socket is still null (not initialized), show a loader
+	if (!socket) {
+		return (
+			<Box
 				sx={{
-					padding: "0.5rem 1.5rem",
 					display: "flex",
+					justifyContent: "center",
 					alignItems: "center",
-					justifyContent: "space-around",
-					background:
-						"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)",
-					backgroundSize: "400% 400%",
-					animation: "gradient-flow 8s ease infinite",
-					borderRadius: "30px",
-					flexDirection: "row",
-					width: isOpen ? "80px" : "fit-content",
-					boxShadow: 3,
-					mb: isOpen ? "0.4rem" : 0,
-					transition: "all 0.3s ease",
-					"&:hover": {
-						animationDuration: "3s",
-						boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
-						transform: "scale(1.01)",
-					},
+					height: "300px",
+					flexDirection: "column",
 				}}
 			>
-				{isOpen ? (
-					<CloseIcon
-						sx={{
-							fontSize: "2rem",
-							color: "#ffffff",
-						}}
-					/>
-				) : (
-					<>
-						<ChatIcon
+				<LoadingIndicator />
+				<Typography variant="h6" sx={{ marginTop: "1rem", color: "#666" }}>
+					Connecting to SMART AI...
+				</Typography>
+			</Box>
+		);
+	}
+
+	return (
+		<Box
+			className="chatbot-container"
+			style={isOpen ? { display: "flex", flexDirection: "column" } : {}}
+		>
+			{/* SMART AI Button - Width adjusted */}
+			<Box
+				style={
+					isOpen
+						? {
+								display: "flex",
+								justifyContent: "space-between",
+								width: "100%",
+							}
+						: {}
+				}
+			>
+				<IconButton
+					className="chat-toggle-btn"
+					onClick={toggleChatWindow}
+					sx={{
+						padding: "0.5rem 1.5rem",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-around",
+						background:
+							"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)",
+						backgroundSize: "400% 400%",
+						animation: "gradient-flow 8s ease infinite",
+						borderRadius: "30px",
+						flexDirection: "row",
+						width: isOpen ? "80px" : "fit-content",
+						boxShadow: 3,
+						mb: isOpen ? "0.4rem" : 0,
+						transition: "all 0.3s ease",
+						"&:hover": {
+							animationDuration: "3s",
+							boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
+							transform: "scale(1.01)",
+						},
+					}}
+				>
+					{isOpen ? (
+						<CloseIcon
 							sx={{
+								fontSize: "2rem",
+								color: "#ffffff",
+							}}
+						/>
+					) : (
+						<>
+							<ChatIcon
+								sx={{
+									fontSize: "2rem",
+									color: "#ffffff",
+									marginRight: "0.5rem",
+								}}
+							/>
+							<Typography
+								sx={{
+									fontSize: "18px",
+									color: "#ffffff",
+									fontWeight: "bold",
+								}}
+							>
+								SMART AI
+							</Typography>
+						</>
+					)}
+				</IconButton>
+
+				{/* Button to navigate to full chat page */}
+				{isOpen && (
+					<IconButton
+						className="chat-toggle-btn"
+						onClick={expandToFullPage}
+						style={{
+							padding: "0.5rem 1.5rem",
+							background:
+								"linear-gradient(270deg, #b33a1f, #b37614, #008fb3, #2e5633)",
+							backgroundSize: "400% 400%",
+							animation: "gradient-flow 8s ease infinite",
+							borderRadius: "30px",
+							boxShadow: "3",
+							transition: "all 0.3s ease",
+							"&:hover": {
+								animationDuration: "3s",
+								boxShadow: "0 4px 12px rgba(0,0,0,0.8)",
+								transform: "scale(1.01)",
+							},
+						}}
+					>
+						<OpenInFullIcon
+							style={{
 								fontSize: "2rem",
 								color: "#ffffff",
 								marginRight: "0.5rem",
 							}}
 						/>
-						<Typography
-							sx={{
-								fontSize: "18px",
-								color: "#ffffff",
-								fontWeight: "bold",
-							}}
-						>
-							SMART AI
-						</Typography>
-					</>
+					</IconButton>
 				)}
-			</IconButton>
+			</Box>
 
 			{/* Chat Window */}
 			<Collapse in={isOpen} timeout={300}>
@@ -239,7 +315,6 @@ const ChatBot = () => {
 											<Message
 												key={index}
 												model={{
-													// message: msg.message,
 													direction: msg.direction,
 													sentTime: new Date().toLocaleTimeString([], {
 														hour: "2-digit",
@@ -255,10 +330,7 @@ const ChatBot = () => {
 												}
 											>
 												<Message.CustomContent>
-													<ReactMarkdown
-														// components={renderers}
-														remarkPlugins={[remarkGfm]}
-													>
+													<ReactMarkdown remarkPlugins={[remarkGfm]}>
 														{msg.message}
 													</ReactMarkdown>
 												</Message.CustomContent>

@@ -26,7 +26,7 @@ const Layout = () => {
 					setIsSidebarOpen={setIsSidebarOpen}
 				/>
 				<Outlet />
-				<ChatBot />
+				{/* <ChatBot /> */}
 			</Box>
 		</Box>
 	);
