@@ -33,6 +33,7 @@ import SummaryScreen from "./scenes/summary";
 import ExpenseFinancialData from "./scenes/expense-financial-data";
 import IncomeFinancialData from "./scenes/income-financial-data";
 import FullChatPage from "./scenes/full-page-chat";
+
 import { SocketProvider } from "./context/SocketContext";
 
 function App() {

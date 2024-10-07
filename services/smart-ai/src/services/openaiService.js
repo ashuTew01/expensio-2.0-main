@@ -4,7 +4,7 @@ import UserTokens from "../models/UserTokens.js"; // Import UserTokens model
 import mongoose from "mongoose"; // For transactions
 import { validModels } from "../utils/openaiApiModels.js";
 import { calculateAiTokens } from "../utils/calculateAiTokens.js";
-import AiSubscription from "../models/AiSubscription.js";
+import AiSubscription from "../models/AiSubscription.js"; //DONT REMOVE, POPULATE WILL BREAK! Code will not immediately break, but will break next month.
 
 const validRoles = ["user"];
 
@@ -145,7 +145,7 @@ export const callOpenaiService = async (
 				await session.commitTransaction();
 				session.endSession();
 				logInfo(
-					`Tokens used: ${aiTokensUsed} by userId ${userId}, Tokens Left: ${userTokens.currentTokens}`
+					`Tokens used: ${aiTokensUsed.toFixed(2)} by userId ${userId}, Tokens Left: ${userTokens.currentTokens.toFixed(2)}`
 				);
 			} catch (error) {
 				await session.abortTransaction();
