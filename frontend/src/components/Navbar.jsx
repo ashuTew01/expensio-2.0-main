@@ -5,6 +5,8 @@ import {
 	Menu as MenuIcon,
 	Search,
 	ArrowDropDownOutlined,
+	// LocalAtm, // Importing the LocalAtm icon for AI Tokens
+	MonetizationOn,
 } from "@mui/icons-material";
 import FlexBetween from "../components/FlexBetween";
 import { useDispatch } from "react-redux";
@@ -12,6 +14,7 @@ import { setMode } from "../state";
 // import { useGetUserQuery } from "state/api";
 import { removeCredentials } from "../state/authSlice";
 // import { useLogoutMutation } from "state/api";
+import aiTokenIcon from "../assets/ai_tokens.svg";
 
 import {
 	AppBar,
@@ -23,9 +26,11 @@ import {
 	Toolbar,
 	Menu,
 	MenuItem,
+	Tooltip, // Importing Tooltip for hover text
 	useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useGetUserAiTokensDetailQuery } from "../state/api";
 
 const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 	const dispatch = useDispatch();
@@ -41,6 +46,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 	const isOpen = Boolean(anchorEl);
 	const handleClick = (event) => setAnchorEl(event.currentTarget);
 
+	const { data: userAiTokensDetail, isLoading: isLoadingUserAiTokens } =
+		useGetUserAiTokensDetailQuery();
+	const aiTokens = userAiTokensDetail?.data?.currentTokens;
+
 	// const { data: userInfo, isLoading } = useGetUserQuery();
 	// const user = userInfo?.user;
 	const navigate = useNavigate();
@@ -53,8 +62,8 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 			dispatch(removeCredentials());
 			navigate("/login");
 		} catch (error) {
-			// console.log(error);
-			// toast.error("Coudn't log you out. Try again!");
+			console.log(error);
+			// toast.error("Couldn't log you out. Try again!");
 		}
 		setAnchorEl(null);
 	};
@@ -98,10 +107,53 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 							<LightModeOutlined sx={{ fontSize: "25px" }} />
 						)}
 					</IconButton>
-					{/* <IconButton>
-						<SettingsOutlined sx={{ fontSize: "25px" }} />
-					</IconButton> */}
 
+					{/* AI Tokens Button */}
+					<Tooltip title="AI Tokens" placement="bottom">
+						<Box>
+							<Button
+								variant="contained"
+								sx={{
+									backgroundColor: theme.palette.secondary.light, // Light secondary color for elegance
+									color: theme.palette.primary.dark, // Ensures icon and text are visible
+									borderRadius: "50px", // Fully rounded for a pill shape
+									py: "0.5rem", // Adequate padding
+									px: "1.5rem", // Adequate padding
+									minWidth: "50px", // Ensures the button isn't too small
+									height: "50px", // Ensures consistent height
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									gap: "0.5rem", // Space between icon and number
+									boxShadow: "none", // Removes default shadow
+									"&:hover": {
+										backgroundColor: theme.palette.secondary.main, // Slight color change on hover
+										boxShadow: "none",
+									},
+								}}
+								// disabled // Button is not clickable yet
+							>
+								<img
+									src={aiTokenIcon}
+									alt="AI Tokens"
+									style={{ width: "25px", height: "25px" }}
+								/>{" "}
+								{/* Icon */}
+								<Typography
+									variant="h4"
+									sx={{
+										fontWeight: "bold",
+										color: theme.palette.primary.dark,
+									}}
+								>
+									{aiTokens ? Math.floor(Number(aiTokens)) : "0"}
+									{/* Display integer AI Tokens */}
+								</Typography>
+							</Button>
+						</Box>
+					</Tooltip>
+
+					{/* User Profile Section */}
 					<FlexBetween>
 						<Button
 							onClick={handleClick}

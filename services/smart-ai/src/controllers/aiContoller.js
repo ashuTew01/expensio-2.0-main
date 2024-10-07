@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { callOpenaiService } from "../services/openaiService.js";
 import { ValidationError } from "@expensio/sharedlib";
+import { getUserAiTokensDetailsService } from "../services/aiSubscriptionService.js";
 
 export const callAiController = async (req, res, next) => {
 	try {
@@ -28,6 +29,18 @@ export const callAiController = async (req, res, next) => {
 		);
 
 		res.status(200).json({ aiResponse: aiResponse, message: "OK" });
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getUserAiTokensDetailsController = async (req, res, next) => {
+	try {
+		const userId = req.user.id;
+
+		const aiUserTokensDocument = await getUserAiTokensDetailsService(userId);
+
+		res.status(200).json({ data: aiUserTokensDocument, message: "OK" });
 	} catch (error) {
 		next(error);
 	}
