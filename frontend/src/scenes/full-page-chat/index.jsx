@@ -113,7 +113,7 @@ const FullChatPage = () => {
 	};
 
 	return (
-		<Box m="1.5rem 2.5rem">
+		<Box m="1.5rem 2.5rem" height="100vh">
 			{/* Header */}
 			<Box
 				sx={{
@@ -144,10 +144,10 @@ const FullChatPage = () => {
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
-					padding: "20px", // Padding around chat
+					// padding: "20px", // Padding around chat
 					background: "#111827", // Dark background for chat area
 					borderRadius: "12px",
-					boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for chat area
+					// boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for chat area
 					backgroundColor: "transparent",
 				}}
 			>
@@ -156,109 +156,120 @@ const FullChatPage = () => {
 					ref={messageListRef}
 					sx={{
 						overflowY: "auto",
-						padding: "10px", // More padding for messages
+						padding: "30px", // More padding for messages
 						flexGrow: 1, // Allow the message area to grow
-						marginBottom: "3px",
+						// marginBottom: "3px",
 						backgroundColor: "transparent",
 					}}
 				>
-					<List>
-						{messages.map((msg, index) => (
-							<ListItem
-								key={index}
-								sx={{
-									display: "flex",
-									justifyContent:
-										msg.direction === "outgoing" ? "flex-end" : "flex-start",
-									marginBottom: "15px",
-									backgroundColor: "transparent",
-								}}
-							>
-								{msg.direction === "incoming" && (
-									<Box sx={{ marginRight: "10px" }}>
-										{/* Incoming Message - AI Image */}
-										<img
-											src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
-											alt="AI"
-											style={{
-												width: "40px",
-												height: "40px",
-												borderRadius: "50%",
-											}}
-										/>
-									</Box>
-								)}
-
-								<Box
+					{messages.length > 0 && (
+						<List>
+							{messages.map((msg, index) => (
+								<ListItem
+									key={index}
 									sx={{
-										backgroundColor:
-											msg.direction === "outgoing"
-												? theme.palette.background.alt
-												: "transparent", // No background for incoming messages
-										color: msg.direction === "outgoing" ? "#fff" : "#fff", // White text for outgoing, default text color for incoming
-										padding: "0px 15px",
-										borderRadius: "25px",
-										maxWidth: "60%",
-										wordWrap: "break-word",
-										boxShadow:
-											msg.direction === "outgoing"
-												? "0px 4px 10px rgba(0, 0, 0, 0.1)"
-												: "none", // Shadow for outgoing messages only
+										display: "flex",
+										justifyContent:
+											msg.direction === "outgoing" ? "flex-end" : "flex-start",
+										marginBottom: "15px",
+										backgroundColor: theme.palette.background.default,
 									}}
 								>
-									{msg.direction === "incoming" ? (
-										// Render incoming message as markdown
-										<ReactMarkdown remarkPlugins={[remarkGfm]}>
-											{msg.message}
-										</ReactMarkdown>
-									) : (
-										// Render outgoing message as plain text
-										<ListItemText
-											primary={msg.message}
-											secondary={new Date().toLocaleTimeString([], {
-												hour: "2-digit",
-												minute: "2-digit",
-											})}
-											sx={{
-												"& .MuiListItemText-secondary": {
-													color: "rgba(255, 255, 255, 0.7)", // Lighter text color for time
-												},
-											}}
-										/>
+									{msg.direction === "incoming" && (
+										<Box sx={{ marginRight: "10px" }}>
+											{/* Incoming Message - AI Image */}
+											<img
+												src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
+												alt="AI"
+												style={{
+													width: "40px",
+													height: "40px",
+													borderRadius: "50%",
+												}}
+											/>
+										</Box>
 									)}
-								</Box>
 
-								{msg.direction === "outgoing" && (
-									<Box sx={{ marginLeft: "10px" }}>
-										{/* Outgoing Message - User Image */}
-										<img
-											src="/user.png"
-											alt="User"
-											style={{
-												width: "40px",
-												height: "40px",
-												borderRadius: "50%",
-											}}
-										/>
+									<Box
+										sx={{
+											backgroundColor:
+												msg.direction === "outgoing"
+													? theme.palette.background.alt
+													: "transparent", // No background for incoming messages
+											color: msg.direction === "outgoing" ? "#fff" : "#fff", // White text for outgoing, default text color for incoming
+											padding: "0px 15px",
+											borderRadius: "25px",
+											maxWidth: "60%",
+											wordWrap: "break-word",
+											fontFamily: '"Inter", sans-serif', // Apply Inter font
+											fontSize: "1rem", // Default font size for messages
+											lineHeight: "1.5", // Improve readability with line height
+											// boxShadow:
+											// 	msg.direction === "outgoing"
+											// 		? "0px 4px 10px rgba(0, 0, 0, 0.1)"
+											// 		: "none", // Shadow for outgoing messages only
+										}}
+									>
+										{msg.direction === "incoming" ? (
+											// Render incoming message as markdown
+											<ReactMarkdown remarkPlugins={[remarkGfm]}>
+												{msg.message}
+											</ReactMarkdown>
+										) : (
+											// Render outgoing message as plain text
+											<ListItemText
+												primary={msg.message}
+												secondary={new Date().toLocaleTimeString([], {
+													hour: "2-digit",
+													minute: "2-digit",
+												})}
+												sx={{
+													"& .MuiListItemText-primary": {
+														fontFamily: '"Inter", sans-serif', // Apply Inter font
+														fontSize: "1rem", // Default font size for messages
+														lineHeight: "1.5",
+														marginBottom: "2px",
+													},
+													"& .MuiListItemText-secondary": {
+														color: "rgba(255, 255, 255, 0.7)", // Lighter text color for time
+													},
+												}}
+											/>
+										)}
 									</Box>
-								)}
-							</ListItem>
-						))}
-					</List>
+
+									{msg.direction === "outgoing" && (
+										<Box sx={{ marginLeft: "10px" }}>
+											{/* Outgoing Message - User Image */}
+											<img
+												src="/user.png"
+												alt="User"
+												style={{
+													width: "40px",
+													height: "40px",
+													borderRadius: "50%",
+												}}
+											/>
+										</Box>
+									)}
+								</ListItem>
+							))}
+						</List>
+					)}
 				</Box>
 			</Box>
 
 			{/* Input Area */}
 			<Box
 				display="flex"
-				padding="10px"
+				// padding="10px"
 				position="fixed"
-				width="79%"
-				bottom="0"
+				bottom="10px"
+				width="100%"
 				transform="translateX(-50%)" // Center the input box
-				backgroundColor="#1f2937" // Match background color of input with the header
+				// backgroundColor="#1f2937" // Match background color of input with the header
 				borderRadius="10px"
-				boxShadow="0 4px 12px rgba(0, 0, 0, 0.2)" // Soft shadow for input
+				// boxShadow="0 4px 12px rgba(0, 0, 0, 0.2)" // Soft shadow for input
 			>
 				{/* TextField to take full width */}
 				<Box sx={{ flexGrow: 1, marginRight: "15px" }}>
@@ -274,6 +285,7 @@ const FullChatPage = () => {
 							borderRadius: "25px",
 							"& .MuiOutlinedInput-root": {
 								color: "#fff", // White text color
+								fontFamily: '"Inter", sans-serif',
 							},
 							"& .MuiOutlinedInput-notchedOutline": {
 								borderColor: "#4A5568", // Border color for input

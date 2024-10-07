@@ -23,12 +23,12 @@ const BreakdownChart = ({
 	return (
 		<Box
 			height={beSmall ? "40px" : "350px"}
-			width={undefined}
-			minHeight={isDashboard ? "325px" : undefined}
+			minHeight={isDashboard ? "300px" : undefined}
 			minWidth={isDashboard ? "325px" : undefined}
 			position="relative"
 		>
 			<ResponsivePie
+				height={320}
 				data={formattedData}
 				theme={{
 					axis: {
@@ -71,7 +71,7 @@ const BreakdownChart = ({
 				sortByValue={true}
 				innerRadius={0.4}
 				activeOuterRadiusOffset={6}
-				enableArcLinkLabels={true} // Enable line arcs (arc links)
+				enableArcLinkLabels={false} // Enable line arcs (arc links)
 				arcLinkLabelsSkipAngle={10} // Show links for slices with angle > 10 degrees
 				arcLinkLabelsTextColor={theme.palette.secondary[200]} // Text color for arc labels
 				arcLinkLabelsThickness={2} // Thickness of the link lines

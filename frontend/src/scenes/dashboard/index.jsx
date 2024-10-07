@@ -174,7 +174,7 @@ const Dashboard = () => {
 
 				{/* category pie chart */}
 				<Box
-					gridColumn="span 6"
+					gridColumn="span 4"
 					gridRow="span 3"
 					backgroundColor={theme.palette.background.alt}
 					p="1.5rem"
@@ -191,9 +191,14 @@ const Dashboard = () => {
 					</Typography>
 					<BreakdownChart categories={categoryTotals} isDashboard={true} />
 					<Typography
-						p="0 0.6rem"
+						mt="15px"
+						// p="0 0.6rem"
 						fontSize="0.8rem"
-						sx={{ color: theme.palette.secondary[200] }}
+						sx={{
+							color: theme.palette.secondary[200],
+							fontSize: "15px",
+							textAlign: "center",
+						}}
 					>
 						Breakdown of monthly expenses by Category in which they were
 						generated.
@@ -216,7 +221,7 @@ const Dashboard = () => {
 							fontWeight: "bold",
 						}}
 					>
-						Monthly Expense by Psychology Type
+						Monthly Expense by Cognitive Trigger
 					</Typography>
 					<BreakdownChart categories={psychologicalTotals} isDashboard={true} />
 					<Typography

@@ -124,7 +124,10 @@ export default function OtpPage() {
 					</Grid>
 					<Grid item xs={12} textAlign="center">
 						<Paper elevation={0}>
-							<Typography variant="h6">
+							<Typography
+								variant="h6"
+								backgroundColor={theme.palette.background.default}
+							>
 								Please enter the verification code sent to your mobile
 							</Typography>
 						</Paper>
