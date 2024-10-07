@@ -22,6 +22,8 @@ import {
 	setSocketConnected,
 } from "../../state/chatSlice"; // Redux actions
 import { useTheme } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const FullChatPage = () => {
 	const theme = useTheme();
@@ -103,18 +105,23 @@ const FullChatPage = () => {
 		navigate(-1); // Navigate back to the previous page
 	};
 
+	const handleKeyDown = (event) => {
+		if (event.key === "Enter") {
+			event.preventDefault(); // Prevents a new line from being added
+			handleSend(); // Calls the handleSend function
+		}
+	};
+
 	return (
 		<Box m="1.5rem 2.5rem">
 			{/* Header */}
 			<Box
-				component={Paper}
-				elevation={3}
 				sx={{
 					display: "flex",
 					alignItems: "center",
 					padding: "16px",
 					color: "#fff",
-					backgroundColor: "#1f2937", // Darker background
+					backgroundColor: theme.palette.background.alt, // Darker background
 					borderRadius: "12px", // Rounded corners for header
 					boxShadow: "0 4px 12px rgba(0,0,0,0.15)", // Subtle shadow for depth
 				}}
@@ -133,7 +140,7 @@ const FullChatPage = () => {
 			{/* Chat Area */}
 			<Box
 				sx={{
-					height: "calc(100vh - 100px)", // Subtracting more for proper height
+					// Subtracting more for proper height
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
@@ -141,6 +148,7 @@ const FullChatPage = () => {
 					background: "#111827", // Dark background for chat area
 					borderRadius: "12px",
 					boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for chat area
+					backgroundColor: "transparent",
 				}}
 			>
 				{/* Message Area */}
@@ -148,9 +156,10 @@ const FullChatPage = () => {
 					ref={messageListRef}
 					sx={{
 						overflowY: "auto",
-						padding: "0px 10px", // More padding for messages
+						padding: "10px", // More padding for messages
 						flexGrow: 1, // Allow the message area to grow
-						borderRadius: "12px",
+						marginBottom: "3px",
+						backgroundColor: "transparent",
 					}}
 				>
 					<List>
@@ -161,34 +170,78 @@ const FullChatPage = () => {
 									display: "flex",
 									justifyContent:
 										msg.direction === "outgoing" ? "flex-end" : "flex-start",
-									marginBottom: "15px", // Increased spacing between messages
+									marginBottom: "15px",
+									backgroundColor: "transparent",
 								}}
 							>
+								{msg.direction === "incoming" && (
+									<Box sx={{ marginRight: "10px" }}>
+										{/* Incoming Message - AI Image */}
+										<img
+											src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
+											alt="AI"
+											style={{
+												width: "40px",
+												height: "40px",
+												borderRadius: "50%",
+											}}
+										/>
+									</Box>
+								)}
+
 								<Box
 									sx={{
 										backgroundColor:
-											msg.direction === "outgoing" ? "#34D399" : "#2563EB", // Outgoing: Green, Incoming: Blue
-										color: "#fff",
-										padding: "0px 15px", // Better padding inside message bubbles
-										borderRadius: "25px", // More rounded corners for bubbles
+											msg.direction === "outgoing"
+												? theme.palette.background.alt
+												: "transparent", // No background for incoming messages
+										color: msg.direction === "outgoing" ? "#fff" : "#fff", // White text for outgoing, default text color for incoming
+										padding: "0px 15px",
+										borderRadius: "25px",
 										maxWidth: "60%",
 										wordWrap: "break-word",
-										boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", // Soft shadow for message bubbles
+										boxShadow:
+											msg.direction === "outgoing"
+												? "0px 4px 10px rgba(0, 0, 0, 0.1)"
+												: "none", // Shadow for outgoing messages only
 									}}
 								>
-									<ListItemText
-										primary={msg.message}
-										secondary={new Date().toLocaleTimeString([], {
-											hour: "2-digit",
-											minute: "2-digit",
-										})}
-										sx={{
-											"& .MuiListItemText-secondary": {
-												color: "rgba(255, 255, 255, 0.7)", // Lighter text color for the time
-											},
-										}}
-									/>
+									{msg.direction === "incoming" ? (
+										// Render incoming message as markdown
+										<ReactMarkdown remarkPlugins={[remarkGfm]}>
+											{msg.message}
+										</ReactMarkdown>
+									) : (
+										// Render outgoing message as plain text
+										<ListItemText
+											primary={msg.message}
+											secondary={new Date().toLocaleTimeString([], {
+												hour: "2-digit",
+												minute: "2-digit",
+											})}
+											sx={{
+												"& .MuiListItemText-secondary": {
+													color: "rgba(255, 255, 255, 0.7)", // Lighter text color for time
+												},
+											}}
+										/>
+									)}
 								</Box>
+
+								{msg.direction === "outgoing" && (
+									<Box sx={{ marginLeft: "10px" }}>
+										{/* Outgoing Message - User Image */}
+										<img
+											src="/user.png"
+											alt="User"
+											style={{
+												width: "40px",
+												height: "40px",
+												borderRadius: "50%",
+											}}
+										/>
+									</Box>
+								)}
 							</ListItem>
 						))}
 					</List>
@@ -198,11 +251,10 @@ const FullChatPage = () => {
 			{/* Input Area */}
 			<Box
 				display="flex"
-				alignItems="center"
 				padding="10px"
 				position="fixed"
-				width="80%"
-				bottom="15px"
+				width="79%"
+				bottom="0"
 				transform="translateX(-50%)" // Center the input box
 				backgroundColor="#1f2937" // Match background color of input with the header
 				borderRadius="10px"
@@ -215,6 +267,7 @@ const FullChatPage = () => {
 						fullWidth
 						value={inputMessage}
 						onChange={(e) => setInputMessage(e.target.value)}
+						onKeyDown={handleKeyDown}
 						variant="outlined"
 						sx={{
 							// Dark background for input field
