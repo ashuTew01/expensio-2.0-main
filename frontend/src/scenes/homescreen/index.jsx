@@ -2,6 +2,7 @@ import { Button } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import LandingPage from "../landingPage/index.jsx";
 // import { useExpenseTestQuery } from "../../state/api";
 
 const HomeScreen = () => {
@@ -52,32 +53,15 @@ const HomeScreen = () => {
 		handleAuthentication();
 	}, [location, navigate, dispatch, userInfo]);
 
-	const redirectToLogin = () => {
-		navigate("/login");
+	const redirectToLandingPage = () => {
+		navigate("/");
 	};
 
 	// const redirectToRegister = () => {
 	//   navigate("/register");
 	// };
 	// !isLoading && console.log(data);
-	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-			}}
-		>
-			to
-			<h1>EXPENSIO</h1>
-			<Button variant="contained" onClick={redirectToLogin}>
-				Login
-			</Button>
-			{/* <Button variant="contained" onClick={redirectToRegister}>
-        Register
-      </Button> */}
-		</div>
-	);
+	return <LandingPage />;
 };
 
 export default HomeScreen;
