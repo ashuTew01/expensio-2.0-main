@@ -6,6 +6,8 @@ const __dirname = path.dirname(__filename);
 const logDirectory = path.join(__dirname, "..", "logs");
 initLogger(logDirectory);
 
+import { showLogo } from "@expensio/sharedlib";
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -56,6 +58,10 @@ const app = express();
 
 import { startKafka } from "./config/startKafka.js";
 const startServices = async () => {
+	showLogo();
+	console.log(
+		`${process.env.SERVICE_NAME.toUpperCase()} Service is BOOTING UP...`
+	);
 	try {
 		await startKafka();
 	} catch (error) {
@@ -78,6 +84,7 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
 	// console.log(EVENTS);
+
 	logInfo(`User Service is running on port ${PORT}`);
 
 	// sendEmail({

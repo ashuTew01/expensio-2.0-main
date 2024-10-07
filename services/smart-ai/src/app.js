@@ -6,6 +6,7 @@ import {
 	initLogger,
 	logError,
 	logInfo,
+	showLogo,
 } from "@expensio/sharedlib";
 import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
@@ -46,6 +47,10 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 const startServices = async () => {
+	showLogo();
+	console.log(
+		`${process.env.SERVICE_NAME.toUpperCase()} Service is BOOTING UP...`
+	);
 	try {
 		await startKafka();
 		initializeWebSocket(server); // Initialize WebSocket when services start
