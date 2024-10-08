@@ -2,6 +2,7 @@
 import React from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const CallToActionSection = () => {
 	const navigate = useNavigate();
@@ -11,79 +12,94 @@ const CallToActionSection = () => {
 
 	return (
 		<Box
+			id="contact-section"
 			sx={{
+				position: "relative",
 				py: { xs: 12, md: 20 },
 				textAlign: "center",
-				backgroundColor: "#0D0D0D",
 				color: "#FFFFFF",
-				backgroundImage: "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)",
+				overflow: "hidden",
 			}}
 		>
+			{/* Background Image */}
+			<Box
+				sx={{
+					position: "absolute",
+					top: 0,
+					left: 0,
+					width: "100%",
+					height: "100%",
+					backgroundImage:
+						"url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+					filter: "brightness(40%)",
+					zIndex: -1,
+				}}
+			></Box>
+
 			<Container maxWidth="md">
-				<Typography
-					variant="h3"
-					sx={{
-						mb: 4,
-						fontWeight: "700",
-						letterSpacing: "1px",
-						color: "#1E90FF",
-						animation: "fadeIn 1s ease-in-out",
-					}}
+				<motion.div
+					initial={{ opacity: 0, y: 30 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true }}
+					transition={{ duration: 0.8 }}
 				>
-					Ready to Take Control of Your Finances?
-				</Typography>
-				<Typography
-					variant="h6"
-					sx={{
-						mb: 6,
-						color: "#B0B0B0",
-						lineHeight: "1.6",
-						animation: "fadeIn 1s ease-in-out 0.5s",
-						opacity: 0,
-					}}
-				>
-					Join Expensio today and gain unparalleled insights into your financial
-					behavior. Manage your expenses, set financial goals, and interact with
-					our Smart Chat Assistant for real-time assistance.
-				</Typography>
-				<Button
-					variant="contained"
-					size="large"
-					sx={{
-						backgroundColor: "#DC3545",
-						color: "#FFFFFF",
-						fontWeight: "bold",
-						paddingX: 4,
-						paddingY: 1.5,
-						borderRadius: "50px",
-						boxShadow: "0px 4px 15px rgba(220, 53, 69, 0.4)",
-						transition: "background-color 0.3s, transform 0.3s",
-						"&:hover": {
-							backgroundColor: "#C82333",
-							transform: "scale(1.05)",
-							boxShadow: "0px 6px 20px rgba(220, 53, 69, 0.6)",
-						},
-					}}
-					onClick={handleStartNow}
-				>
-					Start Now
-				</Button>
+					<Typography
+						variant="h2"
+						sx={{
+							mb: 4,
+							fontWeight: "bold",
+							letterSpacing: "1px",
+							color: "#FFFFFF",
+							textTransform: "uppercase",
+						}}
+					>
+						Ready to Transform Your Financial Journey?
+					</Typography>
+					<Typography
+						variant="h5"
+						sx={{
+							mb: 6,
+							color: "#FFFFFF",
+							lineHeight: "1.6",
+							maxWidth: "700px",
+							margin: "0 auto",
+						}}
+					>
+						Join{" "}
+						<span style={{ color: "#1E90FF", fontWeight: "bold" }}>
+							Expensio
+						</span>{" "}
+						today and unlock the power of advanced financial management. Dive
+						deep into your spending habits, set ambitious goals, and let our
+						intelligent assistant guide you every step of the way.
+					</Typography>
+					<Box height="25px" />
+					<Button
+						variant="contained"
+						size="large"
+						sx={{
+							backgroundColor: "#1E90FF",
+							color: "#FFFFFF",
+							fontWeight: "bold",
+							paddingX: 5,
+							paddingY: 1.8,
+							borderRadius: "50px",
+							boxShadow: "0px 4px 15px rgba(30, 144, 255, 0.4)",
+							transition: "background-color 0.3s, transform 0.3s",
+							"&:hover": {
+								backgroundColor: "#63B3ED",
+								transform: "scale(1.05)",
+								boxShadow: "0px 6px 20px rgba(30, 144, 255, 0.6)",
+							},
+						}}
+						onClick={handleStartNow}
+					>
+						Get Started Now
+					</Button>
+				</motion.div>
 			</Container>
-			{/* Keyframes for animations */}
-			<style>
-				{`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-			</style>
 		</Box>
 	);
 };

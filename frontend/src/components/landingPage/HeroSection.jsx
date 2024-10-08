@@ -2,69 +2,105 @@
 import React from "react";
 import { Container, Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Typewriter } from "react-simple-typewriter";
 
 const HeroSection = () => {
 	const navigate = useNavigate();
+
 	const handleGetStartedButtonClick = () => {
 		navigate("/login");
 	};
+
 	return (
 		<Box
+			id="hero-section"
 			sx={{
-				backgroundColor: "#0D0D0D",
+				position: "relative",
 				color: "#FFFFFF",
-				py: { xs: 12, md: 20 },
 				textAlign: "center",
-				backgroundImage: "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)",
-				mt: 8, // To offset the fixed header
+				mt: { xs: 8, md: 0 }, // Offset for fixed header on mobile
+				height: "100vh",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				overflow: "hidden",
 			}}
 		>
-			<Container maxWidth="lg">
+			{/* Background Image */}
+			<Box
+				sx={{
+					position: "absolute",
+					top: 0,
+					left: 0,
+					width: "100%",
+					height: "100%",
+					backgroundImage:
+						"url('https://images.unsplash.com/photo-1561414927-6d86591d0c4f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')",
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+					filter: "brightness(50%)",
+					zIndex: -1,
+				}}
+			></Box>
+
+			<Container maxWidth="md">
 				<Typography
-					variant="h2"
+					// variant="h1"
 					sx={{
 						mb: 4,
 						fontWeight: "bold",
-						letterSpacing: "1px",
+						fontSize: { xs: "2rem", md: "3rem" },
+						letterSpacing: "2px",
 						lineHeight: "1.2",
+						textTransform: "uppercase",
 						animation: "fadeInDown 1s ease-in-out",
 					}}
 				>
-					Empower Your Financial Future with Expensio
+					Empower Your Financial Future with{" "}
+					<span style={{ color: "#1E90FF" }}>Expensio</span>
 				</Typography>
 				<Typography
-					variant="h5"
+					variant="h4"
 					sx={{
 						mb: 6,
-						color: "#B0B0B0",
-						maxWidth: "700px",
-						margin: "0 auto",
+						color: "#FFFFFF",
 						lineHeight: "1.6",
 						animation: "fadeInUp 1s ease-in-out 0.5s forwards",
-						opacity: 0,
 					}}
 				>
-					Track your expenses, set financial goals, and gain deep insights into
-					your spending behavior with our state-of-the-art financial management
-					platform.
+					<Typewriter
+						words={[
+							"Advanced Microservices Architecture.",
+							"Kafka-Driven Event Bus.",
+							"Smart AI Chat Assistant.",
+							"Real-time Financial Insights.",
+							"Secure OTP Authentication.",
+						]}
+						loop={true}
+						cursor
+						cursorStyle="_"
+						typeSpeed={70}
+						deleteSpeed={50}
+						delaySpeed={1000}
+					/>
 				</Typography>
-				<Box height={"20px"}></Box>
+				{/* <Box height={"10px"}></Box> */}
 				<Button
 					variant="contained"
 					size="large"
 					sx={{
-						backgroundColor: "#28A745",
+						backgroundColor: "#1E90FF",
 						color: "#FFFFFF",
 						fontWeight: "bold",
 						paddingX: 4,
 						paddingY: 1.5,
 						borderRadius: "50px",
-						boxShadow: "0px 4px 15px rgba(40, 167, 69, 0.4)",
+						boxShadow: "0px 4px 15px rgba(30, 0, 0, 0.4)",
 						transition: "background-color 0.3s, transform 0.3s",
 						"&:hover": {
-							backgroundColor: "#218838",
+							backgroundColor: "#63B3ED",
 							transform: "scale(1.05)",
-							boxShadow: "0px 6px 20px rgba(40, 167, 69, 0.6)",
+							boxShadow: "0px 6px 20px rgba(30, 144, 255, 0.6)",
 						},
 					}}
 					onClick={handleGetStartedButtonClick}
@@ -72,6 +108,7 @@ const HeroSection = () => {
 					Get Started
 				</Button>
 			</Container>
+
 			{/* Keyframes for animations */}
 			<style>
 				{`
