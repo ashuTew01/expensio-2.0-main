@@ -7,8 +7,8 @@ import {
 	logInfo,
 } from "@expensio/sharedlib";
 const transporter = nodemailer.createTransport({
-	host: "smtp.zoho.in",
-	port: 587,
+	host: process.env.SMTP_HOST,
+	port: Number(process.env.SMTP_PORT) || 587,
 	secure: false,
 	auth: {
 		user: process.env.EMAIL_FOR_SMTP,
@@ -24,7 +24,7 @@ const sendEmail = async ({ from, to, subject, html }) => {
 			subject,
 			html,
 		});
-		logInfo("Email sent: %s", info.messageId);
+		logInfo(`Email "${subject}" sent to ${info.accepted[0]}`);
 	} catch (error) {
 		throw new OtpSendingError("Error sending email.");
 	}
@@ -49,7 +49,7 @@ const sendVerificationEmailService = async (userId) => {
 	const emailVerificationLink = `${isProd ? "https" : "http"}://${isProd ? process.env.PROD_DOMAIN : `localhost:${process.env.PORT}`}/api/users/verify-email?token=${emailVerificationToken}`;
 
 	await sendEmail({
-		from: `"Expensio" <${process.env.EMAIL_FOR_SMTP}>`,
+		from: `"Expensio" <krishwave66@gmail.com>`,
 		to: user.email,
 		subject: "Please verify your email",
 		html: `

@@ -38,6 +38,14 @@ export const findUserByPhoneService = async (phone) => {
 	}
 };
 
+export const findUserByEmailService = async (email) => {
+	try {
+		return await userModel.findUserByEmailModel(email);
+	} catch (error) {
+		throw new NotFoundError("User not found by email.");
+	}
+};
+
 export const updateUserProfileService = async (userId, updates) => {
 	try {
 		const updatedUserDetails = await userModel.updateUserProfileModel(

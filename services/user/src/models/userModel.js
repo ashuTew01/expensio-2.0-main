@@ -57,15 +57,51 @@ export const findUserByPhoneModel = async (phone, client = pool) => {
 	}
 };
 
-export const findIfUserExistsByPhoneModel = async (phone, client = pool) => {
+export const findUserByEmailModel = async (email, client = pool) => {
 	const query = `
-        SELECT id FROM users WHERE phone = $1;
-    `;
+		SELECT id, phone, first_name, last_name, username, email, profile_picture_url, bio, date_of_birth FROM users WHERE email = $1;
+	`;
 	try {
-		const { rows } = await client.query(query, [phone]);
+		const { rows } = await client.query(query, [email]);
+		if (rows.length === 0) {
+			throw new NotFoundError("User not found.");
+		}
+		return rows[0];
+	} catch (error) {
+		throw new DatabaseError("Failed to find user by email.");
+	}
+};
+
+export const findIfUserExistsByPhoneOrEmailModel = async (
+	phone,
+	email,
+	client = pool
+) => {
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, query by email
+		query = `
+			SELECT id FROM users WHERE email = $1;
+		`;
+		values = [email];
+	} else if (phone) {
+		// If email is not provided, query by phone
+		query = `
+			SELECT id FROM users WHERE phone = $1;
+		`;
+		values = [phone];
+	} else {
+		// If neither email nor phone is provided, throw an error
+		throw new Error("Either phone or email must be provided.");
+	}
+
+	try {
+		const { rows } = await client.query(query, values);
 		return rows.length !== 0;
 	} catch (error) {
-		throw new DatabaseError("Failed to find user by phone.");
+		throw new DatabaseError("Failed to find user by phone or email.");
 	}
 };
 
@@ -109,12 +145,31 @@ export const deleteUserModel = async (userId, client = pool) => {
 	}
 };
 
-export const deleteUserByPhoneModel = async (phone, client = pool) => {
-	const query = "DELETE FROM users WHERE phone = $1";
+export const deleteUserByPhoneOrEmailModel = async (
+	phone,
+	email,
+	client = pool
+) => {
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, delete based on email
+		query = "DELETE FROM users WHERE email = $1";
+		values = [email];
+	} else if (phone) {
+		// If email is not provided, delete based on phone
+		query = "DELETE FROM users WHERE phone = $1";
+		values = [phone];
+	} else {
+		// If neither phone nor email is provided, throw an error
+		throw new Error("Either phone or email must be provided.");
+	}
+
 	try {
-		await client.query(query, [phone]);
+		await client.query(query, values);
 	} catch (error) {
-		throw new DatabaseError("Failed to delete user.");
+		throw new DatabaseError("Failed to delete user by phone or email.");
 	}
 };
 

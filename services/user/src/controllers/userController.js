@@ -9,14 +9,16 @@ import { ValidationError } from "@expensio/sharedlib";
 
 // POST @ /send-otp PUBLIC
 const sendOTPController = async (req, res, next) => {
-	const { phone } = req.body;
+	const { phone, email } = req.body;
 	// console.log(phone);
-	// if(!phone) {
-	// 	throw ValidationError("Please provide a valid phone number.")
-	// }
+	if (!phone && !email) {
+		throw ValidationError("Please provide a valid phone number or email.");
+	}
 	try {
-		const { message, userExists, otp } =
-			await otpService.handleSendOTPService(phone);
+		const { message, userExists, otp } = await otpService.handleSendOTPService(
+			phone,
+			email
+		);
 		res.status(200).json({ message, userExists, otp });
 	} catch (error) {
 		// res.status(error.statusCode || 400).json({ error: error.message });
@@ -26,10 +28,18 @@ const sendOTPController = async (req, res, next) => {
 
 // POST @ /verify-otp PUBLIC
 const verifyOTPController = async (req, res, next) => {
-	const { phone, otp, userData } = req.body;
+	const { phone, email, otp, userData } = req.body;
+	if (!phone && !email) {
+		throw ValidationError("Please provide a valid phone number or email.");
+	}
+	if (!otp) {
+		throw ValidationError("Please provide an OTP.");
+	}
+
 	try {
 		const result = await otpService.handleVerifyOTPService(
 			phone,
+			email,
 			otp,
 			userData
 		);

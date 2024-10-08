@@ -28,6 +28,8 @@ const requiredEnvVars = [
 	"DB_HOST",
 	"DB_PORT",
 	"DB_NAME",
+	"SMTP_HOST",
+	"SMTP_PORT",
 	"KAFKA_BROKER_URL",
 	// "DB_AIVEN_POSTGRES_CERT",
 ];
@@ -83,16 +85,7 @@ app.use(errorHandlingMiddleware);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-	// console.log(EVENTS);
-
 	logInfo(`User Service is running on port ${PORT}`);
-
-	// sendEmail({
-	// 	from: `"Test Server" <${process.env.EMAIL_FOR_SMTP}>`, // Replace with your actual email
-	// 	to: "krishwave66@gmail.com",
-	// 	subject: "Test Email from Node Server",
-	// 	html: "<h1>Hello World!</h1><p>This is a test email sent automatically from the server.</p>",
-	// });
 });
 
 process.on("SIGINT", () => {

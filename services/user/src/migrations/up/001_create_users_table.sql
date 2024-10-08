@@ -2,7 +2,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     deleted BOOLEAN DEFAULT FALSE,
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100) UNIQUE NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50),
     profile_picture_url TEXT,

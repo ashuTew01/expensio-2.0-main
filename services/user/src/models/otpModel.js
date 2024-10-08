@@ -11,6 +11,34 @@ export const findOtpRequestByPhoneModel = async (phone, client = pool) => {
 	}
 };
 
+export const findOtpRequestByEmailModel = async (email, client = pool) => {
+	const query = `SELECT * FROM otp_requests WHERE email = $1;`;
+	try {
+		const { rows } = await client.query(query, [email]);
+		return rows[0];
+	} catch (error) {
+		throw new DatabaseError(
+			"Failed to retrieve OTP requests from the database"
+		);
+	}
+};
+
+export const updateOtpRequestPhoneAndEmailModel = async (
+	phone,
+	email,
+	client = pool
+) => {
+	const query = `UPDATE otp_requests SET phone = $1, email = $2 RETURNING *;`;
+	try {
+		const { rows } = await client.query(query, [phone, email]);
+		return rows[0];
+	} catch (error) {
+		throw new DatabaseError(
+			"Failed to update OTP requests' phone and email in the database"
+		);
+	}
+};
+
 export const deleteOtpRequestsByPhoneModel = async (
 	userPhone,
 	client = pool
@@ -31,17 +59,37 @@ export const deleteOtpRequestsByPhoneModel = async (
 };
 
 export const createOrUpdateOtpRequestModel = async (
-	{ phone, otp, last_request_time, otp_expiry, request_count },
+	{ phone, email, otp, last_request_time, otp_expiry, request_count },
 	client = pool
 ) => {
-	const query = `
-			INSERT INTO otp_requests (phone, otp, last_request_time, otp_expiry, request_count)
-			VALUES ($1, $2, $3, $4, $5)
-			ON CONFLICT (phone) DO UPDATE
-			SET otp = EXCLUDED.otp, last_request_time = EXCLUDED.last_request_time, otp_expiry = EXCLUDED.otp_expiry, request_count = EXCLUDED.request_count
-			RETURNING *;
-	`;
-	const values = [phone, otp, last_request_time, otp_expiry, request_count];
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, use it for insert/update
+		query = `
+		INSERT INTO otp_requests (email, otp, last_request_time, otp_expiry, request_count)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (email) DO UPDATE
+		SET otp = EXCLUDED.otp, last_request_time = EXCLUDED.last_request_time, otp_expiry = EXCLUDED.otp_expiry, request_count = EXCLUDED.request_count
+		RETURNING *;
+	  `;
+		values = [email, otp, last_request_time, otp_expiry, request_count];
+	} else if (phone) {
+		// If email is not provided, fallback to phone
+		query = `
+		INSERT INTO otp_requests (phone, otp, last_request_time, otp_expiry, request_count)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (phone) DO UPDATE
+		SET otp = EXCLUDED.otp, last_request_time = EXCLUDED.last_request_time, otp_expiry = EXCLUDED.otp_expiry, request_count = EXCLUDED.request_count
+		RETURNING *;
+	  `;
+		values = [phone, otp, last_request_time, otp_expiry, request_count];
+	} else {
+		// If neither email nor phone is provided, throw an error
+		throw new Error("Either phone or email must be provided.");
+	}
+
 	try {
 		const { rows } = await client.query(query, values);
 		return rows[0];
@@ -54,18 +102,37 @@ export const createOrUpdateOtpRequestModel = async (
 
 export const updateOtpRequestModel = async (
 	phone,
+	email,
 	{ is_blocked_until, request_count },
 	client = pool
 ) => {
-	const query = `
-			UPDATE otp_requests SET is_blocked_until = $1, request_count = $2 WHERE phone = $3;
-	`;
-	const values = [is_blocked_until, request_count, phone];
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, update based on email
+		query = `
+		UPDATE otp_requests 
+		SET is_blocked_until = $1, request_count = $2 
+		WHERE email = $3;
+	  `;
+		values = [is_blocked_until, request_count, email];
+	} else if (phone) {
+		// If no email, update based on phone
+		query = `
+		UPDATE otp_requests 
+		SET is_blocked_until = $1, request_count = $2 
+		WHERE phone = $3;
+	  `;
+		values = [is_blocked_until, request_count, phone];
+	} else {
+		throw new Error("Either email or phone must be provided");
+	}
 	try {
 		const { rowCount } = await client.query(query, values);
 		if (rowCount === 0) {
 			throw new NotFoundError(
-				`No OTP request found for phone ${phone} to update.`
+				`No OTP request found for given phone/email to update.`
 			);
 		}
 	} catch (error) {
@@ -73,14 +140,32 @@ export const updateOtpRequestModel = async (
 	}
 };
 
-export const markUserExistsModel = async (phone, client = pool) => {
-	const query = `
+export const markUserExistsModel = async (phone, email, client = pool) => {
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, update based on email
+		query = `
+			UPDATE otp_requests SET user_exists = TRUE WHERE email = $1 RETURNING *;
+		`;
+		values = [email];
+	} else if (phone) {
+		// If email is not provided, update based on phone
+		query = `
 			UPDATE otp_requests SET user_exists = TRUE WHERE phone = $1 RETURNING *;
-	`;
-	const result = await client.query(query, [phone]);
+		`;
+		values = [phone];
+	} else {
+		// If neither phone nor email is provided, throw an error
+		throw new Error("Either phone or email must be provided.");
+	}
+
+	const result = await client.query(query, values);
+
 	if (result.rowCount === 0) {
 		throw new NotFoundError(
-			`No OTP request found for phone ${phone} to update.`
+			`No OTP request found for ${email ? "email " + email : "phone " + phone} to update.`
 		);
 	}
 };
@@ -97,16 +182,36 @@ export const markUserDoesNotExistsModel = async (phone, client = pool) => {
 	}
 };
 
-export const resetOtpRequestModel = async (phone, client = pool) => {
-	const query = `
+export const resetOtpRequestModel = async (phone, email, client = pool) => {
+	let query;
+	let values;
+
+	if (email) {
+		// If email is provided, reset OTP request based on email
+		query = `
+			UPDATE otp_requests
+			SET otp = '0', request_count = 0, is_blocked_until = NULL
+			WHERE email = $1 RETURNING *;
+		`;
+		values = [email];
+	} else if (phone) {
+		// If email is not provided, reset OTP request based on phone
+		query = `
 			UPDATE otp_requests
 			SET otp = '0', request_count = 0, is_blocked_until = NULL
 			WHERE phone = $1 RETURNING *;
-	`;
-	const result = await client.query(query, [phone]);
+		`;
+		values = [phone];
+	} else {
+		// If neither phone nor email is provided, throw an error
+		throw new Error("Either phone or email must be provided.");
+	}
+
+	const result = await client.query(query, values);
+
 	if (result.rowCount === 0) {
 		throw new NotFoundError(
-			`No OTP request found for phone ${phone} to reset.`
+			`No OTP request found for ${email ? "email " + email : "phone " + phone} to reset.`
 		);
 	}
 };

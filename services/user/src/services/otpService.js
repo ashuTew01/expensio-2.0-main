@@ -12,16 +12,23 @@ import {
 	InternalServerError,
 } from "@expensio/sharedlib";
 import {
-	deleteUserByPhoneModel,
-	findIfUserExistsByPhoneModel,
+	deleteUserByPhoneOrEmailModel,
+	findIfUserExistsByPhoneOrEmailModel,
 } from "../models/userModel.js";
+import { sendEmail } from "./emailService.js";
+import { otpMailHtmlTemplate } from "../utils/otpMailHtmlTemplate.js";
 
 const generateOTP = () => {
 	return crypto.randomInt(100000, 999999).toString(); // 6 digit otp
 };
 
-export const handleSendOTPService = async (phone) => {
-	const otpRequest = await otpModel.findOtpRequestByPhoneModel(phone);
+export const handleSendOTPService = async (phone, email) => {
+	let otpRequest;
+	if (email) {
+		otpRequest = await otpModel.findOtpRequestByEmailModel(email);
+	} else {
+		otpRequest = await otpModel.findOtpRequestByPhoneModel(phone);
+	}
 
 	if (otpRequest) {
 		const now = new Date();
@@ -30,9 +37,12 @@ export const handleSendOTPService = async (phone) => {
 				`User is blocked from receiving OTPs. Try again after ${otpRequest.is_blocked_until}`
 			);
 		}
-		if (otpRequest.request_count >= 50) {
+		if (
+			otpRequest.request_count >=
+			(process.env.NODE_ENV === "development" ? 50 : 3)
+		) {
 			// reset request_count to avoid permanent block
-			await otpModel.updateOtpRequestModel(phone, {
+			await otpModel.updateOtpRequestModel(phone, email, {
 				is_blocked_until: new Date(now.getTime() + 60 * 60 * 1000), // Block for 1 hour
 				request_count: 0, // to avoid permanent blocking
 			});
@@ -49,6 +59,7 @@ export const handleSendOTPService = async (phone) => {
 	// update or create OTP request record
 	const result = await otpModel.createOrUpdateOtpRequestModel({
 		phone,
+		email,
 		otp,
 		last_request_time: new Date(),
 		otp_expiry: otpExpiry,
@@ -56,16 +67,26 @@ export const handleSendOTPService = async (phone) => {
 	});
 
 	const environment = process.env.NODE_ENV;
+	if (email) {
+		await sendEmail({
+			from: `"Expensio" <krishwave66@gmail.com>`,
+			to: email,
+			subject: "Expensio: OTP for Login",
+			html: otpMailHtmlTemplate(otp),
+		});
+	}
 	if (environment !== "development") {
 		// Send OTP via SMS using Twilio
 		try {
-			await twilioClient.messages.create({
-				to: phone,
-				from: process.env.TWILIO_PHONE_NUMBER,
-				body: `Your OTP is: ${otp}`,
-			});
+			if (phone) {
+				await twilioClient.messages.create({
+					to: phone,
+					from: process.env.TWILIO_PHONE_NUMBER,
+					body: `Your OTP is: ${otp}`,
+				});
+			}
 		} catch (error) {
-			throw new OtpSendingError("Failed to send OTP via SMS");
+			throw new OtpSendingError("Failed to send OTP.");
 		}
 	}
 
@@ -76,12 +97,18 @@ export const handleSendOTPService = async (phone) => {
 	};
 };
 
-export const handleVerifyOTPService = async (phone, otp, userData) => {
+export const handleVerifyOTPService = async (phone, email, otp, userData) => {
 	const client = await pool.connect();
 	try {
 		await client.query("BEGIN");
+		let otpRequest;
 
-		const otpRequest = await otpModel.findOtpRequestByPhoneModel(phone, client);
+		if (email) {
+			otpRequest = await otpModel.findOtpRequestByEmailModel(email, client);
+		} else {
+			otpRequest = await otpModel.findOtpRequestByPhoneModel(phone, client);
+		}
+
 		if (
 			!otpRequest ||
 			otpRequest.otp !== otp ||
@@ -95,14 +122,15 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 
 		if (!userExistsInOtpRequestTable) {
 			// Check if the user exists in the users table (including soft-deleted users)
-			const userExistsInUserTable = await findIfUserExistsByPhoneModel(
+			const userExistsInUserTable = await findIfUserExistsByPhoneOrEmailModel(
 				phone,
+				email,
 				client
 			);
 
 			// If the user exists in the users table, delete the entry to prepare for re-creation
 			if (userExistsInUserTable) {
-				await deleteUserByPhoneModel(phone, client);
+				await deleteUserByPhoneOrEmailModel(phone, email, client);
 
 				// NOTE::::: Commit the transaction after deletion to release locks
 				await client.query("COMMIT");
@@ -111,31 +139,61 @@ export const handleVerifyOTPService = async (phone, otp, userData) => {
 				await client.query("BEGIN");
 			}
 
+			// ************* WARNING ********************************************************************
+			// BLUNDER WARNING::: If user registers via Email first to send the OTP, and provides a number
+			// with his registration to verify OTP, that number wont be verified.
+			// Same goes for vice versa.
+			// SO CURRENTLY, MOBILE NUMBER WONT BE VERIFIED FOR OBVIOUS REASONS.
+			// *******************************************************************************************
+
 			if (
 				!userData ||
 				!userData.firstName ||
 				!userData.username ||
 				!userData.phone ||
-				userData.phone !== phone
+				!userData.email ||
+				(!phone && !email) ||
+				(phone && userData.phone !== phone) ||
+				(email && userData.email !== email)
 			) {
 				throw new ValidationError(
-					"Missing/invalid required user data fields: firstName, username, and phone are required."
+					"Missing/invalid required user data fields: firstName, username, email and phone are required."
 				);
 			}
+
+			if (!otpRequest.phone || !otpRequest.email) {
+				await otpModel.updateOtpRequestPhoneAndEmailModel(
+					userData.phone,
+					userData.email,
+					client
+				);
+			}
+
+			//IF EMAIL IS PROVIDED FOR VERIFICATION, YOU SHOULD VERIFY THE PHONE HERE, OR VICE VERSA.
+			//
+			//
 
 			// Create a new user and mark them as existing in the otp_requests table
 			user = await userService.createUserService(userData, client);
 
-			await otpModel.markUserExistsModel(phone, client);
+			await otpModel.markUserExistsModel(phone, email, client);
 		} else {
 			// If the user exists in the otp_requests table, find the user in the users table
-			user = await userService.findUserByPhoneService(phone, client);
+			if (email) {
+				user = await userService.findUserByEmailService(email, client);
+			} else {
+				user = await userService.findUserByPhoneService(phone, client);
+			}
 		}
 
-		const token = generateToken({ id: user.id, phone: user.phone });
+		const token = generateToken({
+			id: user.id,
+			phone: user.phone,
+			email: user.email,
+		});
 
 		// Reset the OTP request to avoid reuse
-		await otpModel.resetOtpRequestModel(phone, client);
+		await otpModel.resetOtpRequestModel(phone, email, client);
 
 		await client.query("COMMIT");
 
