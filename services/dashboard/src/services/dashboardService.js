@@ -41,7 +41,7 @@ export const addExpenseToDashboardService = async (expenseData) => {
 
 		// Check if the user already has 10 expenses stored in ExpenseDetails
 		const expenseCount = await ExpenseDetails.countDocuments({ userId });
-		if (expenseCount >= 10) {
+		while (expenseCount >= 10) {
 			// Find and remove the oldest expense for this user
 			const oldestExpense = await ExpenseDetails.findOne({ userId }).sort({
 				createdAt: 1,
