@@ -52,6 +52,16 @@ spec:
                 secretKeyRef:
                   name: user-secret
                   key: EMAIL_FOR_SMTP
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-secret
+                  key: SMTP_PORT
             - name: PROD_DOMAIN
               valueFrom:
                 secretKeyRef:
