@@ -42,7 +42,7 @@ const navItems = [
 	},
 	{
 		text: "Smart AI",
-		route: "full-chat",
+		route: "smart-ai-chat",
 		icon: <SupportAgent />,
 	},
 	{
@@ -50,19 +50,15 @@ const navItems = [
 		route: "user/summary",
 		icon: <Summarize />,
 	},
+
+	{
+		text: "Expenses",
+		icon: null,
+	},
 	{
 		text: "Expense Financial Data",
 		route: "user/expense-financial-data",
 		icon: <AccountBalanceWallet />,
-	},
-	{
-		text: "Income Financial Data",
-		route: "user/income-financial-data",
-		icon: <Paid />,
-	},
-	{
-		text: "Expenses",
-		icon: null,
 	},
 	{
 		text: "List",
@@ -77,6 +73,11 @@ const navItems = [
 	{
 		text: "Income",
 		icon: null,
+	},
+	{
+		text: "Income Financial Data",
+		route: "user/income-financial-data",
+		icon: <Paid />,
 	},
 	{
 		text: "List Income",
@@ -106,8 +107,8 @@ const Sidebar = ({
 	// const { image: userImage, name: userName } = userInfo;
 	// const { data: userInfo, isLoading } = useGetUserQuery();
 	// const user = userInfo?.user;
-	const userImage = "";
-	const userName = userInfo.first_name;
+	const userImage = "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
+	const userName = userInfo.first_name + " " + (userInfo?.last_name || "");
 
 	useEffect(() => {
 		setActive(pathname.substring(1));
@@ -231,7 +232,6 @@ const Sidebar = ({
 									fontSize="0.9rem"
 									sx={{ color: theme.palette.secondary[100] }}
 								>
-									{/* {user?.fname} */}
 									{userName}
 								</Typography>
 								{/* <Typography

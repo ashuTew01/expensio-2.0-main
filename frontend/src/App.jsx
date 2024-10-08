@@ -75,7 +75,7 @@ function App() {
 									element={<IncomeFinancialData />}
 								/>
 								{/* chat page */}
-								<Route path="/full-chat" element={<FullChatPage />} />
+								<Route path="/smart-ai-chat" element={<FullChatPage />} />
 								{/* goals */}
 								{/* <Route path="/goal/add" element={<AddGoalScreen />} /> */}
 								{/* <Route path="/user/summary" element={<SummaryScreen />} /> */}

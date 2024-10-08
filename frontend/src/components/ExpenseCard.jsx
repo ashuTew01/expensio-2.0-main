@@ -21,7 +21,6 @@ const ExpenseCard = ({
 	cognitiveTriggers,
 	createdAt,
 }) => {
-	console.log(categoryName);
 	const theme = useTheme();
 	const navigate = useNavigate();
 

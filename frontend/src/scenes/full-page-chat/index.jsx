@@ -113,7 +113,7 @@ const FullChatPage = () => {
 	};
 
 	return (
-		<Box m="1.5rem 2.5rem" height="100vh">
+		<Box m="1.5rem 2.5rem" height="90vh" display="flex" flexDirection="column">
 			{/* Header */}
 			<Box
 				sx={{
@@ -143,12 +143,15 @@ const FullChatPage = () => {
 					// Subtracting more for proper height
 					display: "flex",
 					flexDirection: "column",
-					justifyContent: "space-between",
+					justifyContent: "flex-start",
+					flexGrow: 1,
+					padding: "20px",
 					// padding: "20px", // Padding around chat
 					background: "#111827", // Dark background for chat area
 					borderRadius: "12px",
 					// boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for chat area
 					backgroundColor: "transparent",
+					overflow: "auto",
 				}}
 			>
 				{/* Message Area */}
@@ -173,6 +176,22 @@ const FullChatPage = () => {
 											msg.direction === "outgoing" ? "flex-end" : "flex-start",
 										marginBottom: "15px",
 										backgroundColor: theme.palette.background.default,
+										padding: "10px",
+
+										// Smooth transition for message appearance
+										opacity: 0,
+										transform: "translateY(10px)",
+										animation: `fadeInUp 0.5s ease forwards`, // Custom animation
+										"@keyframes fadeInUp": {
+											"0%": {
+												opacity: 0,
+												transform: "translateY(10px)",
+											},
+											"100%": {
+												opacity: 1,
+												transform: "translateY(0)",
+											},
+										},
 									}}
 								>
 									{msg.direction === "incoming" && (
@@ -242,7 +261,7 @@ const FullChatPage = () => {
 										<Box sx={{ marginLeft: "10px" }}>
 											{/* Outgoing Message - User Image */}
 											<img
-												src="/user.png"
+												src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
 												alt="User"
 												style={{
 													width: "40px",
@@ -262,14 +281,14 @@ const FullChatPage = () => {
 			{/* Input Area */}
 			<Box
 				display="flex"
-				// padding="10px"
-				position="fixed"
-				bottom="10px"
+				padding="10px"
 				width="100%"
-				transform="translateX(-50%)" // Center the input box
-				// backgroundColor="#1f2937" // Match background color of input with the header
-				borderRadius="10px"
-				// boxShadow="0 4px 12px rgba(0, 0, 0, 0.2)" // Soft shadow for input
+				sx={{
+					backgroundColor: theme.palette.background.alt,
+					borderRadius: "10px",
+					position: "sticky",
+					bottom: "0",
+				}}
 			>
 				{/* TextField to take full width */}
 				<Box sx={{ flexGrow: 1, marginRight: "15px" }}>
@@ -305,6 +324,9 @@ const FullChatPage = () => {
 						onClick={handleSend}
 						sx={{
 							backgroundColor: "#3B82F6", // Lighter blue for send button
+							"&:hover": {
+								backgroundColor: "#2563EB", // Darker blue on hover
+							},
 							"&:hover": {
 								backgroundColor: "#2563EB", // Darker blue on hover
 							},

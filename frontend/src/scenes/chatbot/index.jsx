@@ -126,7 +126,7 @@ const ChatBot = () => {
 
 	const expandToFullPage = () => {
 		setIsOpen(!isOpen);
-		navigate("/full-chat"); // Redirect to full chat page
+		navigate("smart-ai-chat"); // Redirect to full chat page
 	};
 
 	// If socket is still null (not initialized), show a loader

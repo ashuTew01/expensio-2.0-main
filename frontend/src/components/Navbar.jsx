@@ -140,9 +140,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 								/>{" "}
 								{/* Icon */}
 								<Typography
-									variant="h4"
+									// variant="h5"
 									sx={{
 										fontWeight: "bold",
+										fontSize: "1.15rem",
 										color: theme.palette.primary.dark,
 									}}
 								>
@@ -168,7 +169,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 							<Box
 								component="img"
 								alt="profile"
-								src={userImage}
+								src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
 								height="32px"
 								width="32px"
 								borderRadius="50%"

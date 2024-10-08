@@ -10,7 +10,7 @@ const Layout = () => {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const location = useLocation();
 
-	const isFullChatPage = location.pathname === "/full-chat";
+	const isFullChatPage = location.pathname === "/smart-ai-chat";
 	// const userId = useSelector((state) => state.global.userId);
 
 	return (

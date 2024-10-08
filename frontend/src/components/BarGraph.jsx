@@ -1,11 +1,9 @@
 import React from "react";
 import { ResponsiveBar } from "@nivo/bar";
-import { Box, useTheme, Typography } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 
 const BarGraph = ({ isDashboard = false, formattedData, beSmall = true }) => {
 	const theme = useTheme();
-
-	console.log("format", formattedData);
 
 	return (
 		<Box
@@ -21,56 +19,77 @@ const BarGraph = ({ isDashboard = false, formattedData, beSmall = true }) => {
 				keys={["amountSpent"]}
 				// The key to use for indexing the data (category in this case)
 				indexBy="category"
-				// Height of the graph set to 400px
 				height="400"
 				// Margins around the chart area for labels, axes, etc.
 				margin={{ top: 50, right: 130, bottom: 70, left: 60 }}
 				// Padding between bars, makes the bars look spaced
 				padding={0.4}
-				// Assigning custom colors from the data, typically passed with the formattedData
+				// Colors are now correctly applied from formattedData
 				colors={({ data }) => data.color}
-				// Border color of each bar, slightly darker than the bar color
-				borderColor={{
-					from: "color", // Takes the color from each bar's color
-					modifiers: [["darker", 1.6]], // Darkens the border by 60%
-				}}
-				// Axis top is disabled as it's not needed
-				axisTop={null}
-				// Axis right is disabled as well
-				axisRight={null}
-				// Axis bottom settings (for category labels and legends)
+				// Rounded corners for a smoother appearance
+				borderRadius={6}
+				// Add axis bottom and left (X and Y axes) explicitly
 				axisBottom={{
-					tickSize: 5, // Size of the tick marks
-					tickPadding: 5, // Padding between ticks and axis
-					tickRotation: 0, // No rotation of the tick labels
-					legend: "Category",
-					legendPosition: "middle", // Legend is positioned in the middle
-					legendOffset: 50, // Distance of the legend from the axis
+					tickSize: 5,
+					tickPadding: 5,
+					tickRotation: 0,
+					legend: "Category", // Label for the X-axis
+					legendPosition: "middle",
+					legendOffset: 40,
+					tickColor: "#FFFFFF",
+					tickTextColor: "#FFFFFF", // Ensure white color for labels
+					legendTextColor: "#FFFFFF", // White color for legend
 				}}
-				// Axis left settings (for the 'Amount Spent' axis)
 				axisLeft={{
-					tickSize: 5, // Size of the tick marks
-					tickPadding: 5, // Padding between ticks and axis
-					tickRotation: 0, // No rotation of the tick labels
-					legend: "Amount Spent", // Label for the left axis
-					legendPosition: "middle", // Legend is positioned in the middle
-					legendOffset: -50, // Distance of the legend from the axis
+					tickSize: 5,
+					tickPadding: 5,
+					tickRotation: 0,
+					legend: "Amount Spent", // Label for the Y-axis
+					legendPosition: "middle",
+					legendOffset: -50,
+					tickColor: "#FFFFFF",
+					tickTextColor: "#FFFFFF", // Ensure white color for labels
+					legendTextColor: "#FFFFFF", // White color for legend
 				}}
-				// Label settings for the bar values
-				labelSkipWidth={12} // Skip labels for bars with a width less than 12px
-				labelSkipHeight={12} // Skip labels for bars with a height less than 12px
-				labelTextColor="grey"
-				// Animation settings for smooth transitions
+				// Disable grid lines to make the chart cleaner
+				enableGridY={false}
+				enableGridX={false}
+				// Skip labels for small bars
+				labelSkipWidth={12}
+				labelSkipHeight={12}
+				// Labels on bars (inside the bars)
+				labelTextColor="white"
+				// Customize tooltip to show details in a nice box
+				tooltip={({ id, value, color, data }) => (
+					<div
+						style={{
+							padding: "10px",
+							background: "#222",
+							color: "#fff",
+							borderRadius: "4px",
+							boxShadow: "0 3px 6px rgba(0,0,0,0.1)",
+						}}
+					>
+						<strong>{data.category}</strong>: ${value}
+					</div>
+				)}
+				// Add animation for a smoother appearance
 				animate={true}
-				motionStiffness={90} // Controls the stiffness of the transition animations
-				motionDamping={15} // Controls the damping (smoothness) of the animations
-				// Custom theme settings for the axis ticks and text color
-
+				motionStiffness={90}
+				motionDamping={15}
+				// Custom theme to enhance axis labels and styling
 				theme={{
 					axis: {
 						ticks: {
 							text: {
-								fill: theme.palette.secondary[200], // Axis tick text color based on theme's primary text color
+								fill: "#FFFFFF", // White color for axis ticks
+								fontSize: "14px", // Larger font for better readability
+							},
+						},
+						legend: {
+							text: {
+								fill: "#FFFFFF", // White color for legend text
+								fontSize: "16px", // Make legend more readable
 							},
 						},
 					},
