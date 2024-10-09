@@ -64,15 +64,15 @@ const Dashboard = () => {
 	// Helper function to format the latest expenses from dashboardData
 	const formatLatestExpensesData = () => {
 		return dashboardData?.latestExpenses?.map((expense) => ({
-			id: expense._id,
-			title: expense.expenseDetailsId.title,
-			amount: expense.expenseDetailsId.amount,
-			type: expense.expenseDetailsId.expenseType,
-			categoryName: expense.expenseDetailsId.categoryName,
+			id: expense.expenseDetailsId?._id,
+			title: expense.expenseDetailsId?.title,
+			amount: expense.expenseDetailsId?.amount,
+			type: expense.expenseDetailsId?.expenseType,
+			categoryName: expense.expenseDetailsId?.categoryName,
 			cognitiveTriggers:
-				expense.expenseDetailsId.cognitiveTriggerNames.join(", "),
+				expense.expenseDetailsId?.cognitiveTriggerNames.join(", "),
 			createdAt: new Date(
-				expense.expenseDetailsId.createdAt
+				expense.expenseDetailsId?.createdAt
 			).toLocaleDateString(),
 		}));
 	};
