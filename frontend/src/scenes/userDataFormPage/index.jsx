@@ -1,84 +1,126 @@
-import * as React from "react";
-import { useState } from "react";
+// src/pages/auth/UserDataForm.jsx
+import React from "react";
+import {
+	Container,
+	CssBaseline,
+	Box,
+	Typography,
+	Button,
+	TextField,
+	Grid,
+	Link,
+} from "@mui/material";
+import { styled } from "@mui/system";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import CssBaseline from "@mui/material/CssBaseline";
-import Grid from "@mui/material/Grid";
-import * as yup from "yup";
-import { Formik, Field, Form } from "formik";
 import { useVerifyOtpMutation } from "../../state/api";
-import { setUserInfo, setToken } from "../../state/authSlice";
 import { useDispatch } from "react-redux";
-import { styled } from "@mui/material/styles";
+import { setUserInfo, setToken } from "../../state/authSlice";
+import { toast, ToastContainer } from "react-toastify";
+import { motion } from "framer-motion";
+import { Formik, Form } from "formik";
+import * as yup from "yup";
+import "react-toastify/dist/ReactToastify.css";
+import backgroundImage from "/auth-background.jpg"; // Replace with your image path
 
-// Form validation schema using yup
-const formSchema = yup.object().shape({
-	firstName: yup.string().required("This is a required field."),
-	lastName: yup.string(),
-	username: yup.string().required("This is a required field."),
-	email: yup
-		.string()
-		.email("Invalid email entered")
-		.required("This is a required field."),
-	bio: yup.string(),
-	dateOfBirth: yup.date().nullable(),
-	phone: yup
-		.string()
-		.matches(
-			/^\+91[789]\d{9}$/,
-			"Invalid phone number. Must start with +91 followed by 10 digits starting with 7, 8, or 9."
-		)
-		.required("This is a required field."),
+const BackgroundContainer = styled(Box)({
+	minHeight: "100vh",
+	backgroundImage: `url(${backgroundImage})`,
+	backgroundSize: "cover",
+	backgroundPosition: "center",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
 });
 
-const currentDate = new Date().toISOString().split("T")[0];
-
-// Replace makeStyles with styled components
-const PaperContainer = styled("div")(({ theme }) => ({
-	marginTop: theme.spacing(8),
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
+const GlassCard = styled(Box)(({ theme }) => ({
+	backdropFilter: "blur(10px)",
+	backgroundColor: "rgba(255, 255, 255, 0.1)",
+	padding: theme.spacing(6),
+	borderRadius: theme.spacing(2),
+	boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+	maxWidth: 600,
+	width: "100%",
 }));
 
-const SubmitButton = styled(Button)(({ theme }) => ({
-	margin: theme.spacing(3, 0, 2),
-	backgroundColor: "black",
+const StyledButton = styled(Button)(({ theme }) => ({
+	marginTop: theme.spacing(4),
+	padding: theme.spacing(1.5),
+	fontSize: "1.2rem",
+	fontWeight: "bold",
+	borderRadius: theme.spacing(1),
+	backgroundColor: "#238efa",
 }));
 
-const GridContainer = styled(Grid)(({ theme }) => ({
-	height: "50vh",
-	textAlign: "center",
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	"& .MuiInputBase-input": {
+		color: "#fff",
+	},
+	"& label": {
+		color: "#aaa",
+	},
+	"& label.Mui-focused": {
+		color: "#fff",
+	},
+	"& .MuiInput-underline:after": {
+		borderBottomColor: "#fff",
+	},
+	"& .MuiOutlinedInput-root": {
+		"& fieldset": {
+			borderColor: "#aaa",
+		},
+		"&:hover fieldset": {
+			borderColor: "#fff",
+		},
+		"&.Mui-focused fieldset": {
+			borderColor: "#fff",
+		},
+	},
 }));
 
-export default function UserDataForm() {
+const UserDataForm = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
-	const [otp] = useState(location.state?.otp || "");
-	const phone = location.state?.phoneNumber || ""; // Extract phone number from location.state
-	const [verifyOtp, { isLoading, error }] = useVerifyOtpMutation();
+	const email = location.state?.email || "";
+	const initialOtp = location.state?.otp || "";
+	const [verifyOtp] = useVerifyOtpMutation();
 
-	// Use Formik to handle form state and submission
+	const formSchema = yup.object().shape({
+		firstName: yup.string().required("This is a required field."),
+		lastName: yup.string(),
+		username: yup.string().required("This is a required field."),
+		bio: yup.string(),
+		dateOfBirth: yup.date().nullable(),
+		phone: yup
+			.string()
+			.matches(
+				/^\+91[789]\d{9}$/,
+				"Invalid phone number. Must start with +91 followed by 10 digits starting with 7, 8, or 9."
+			)
+			.required("This is a required field."),
+		otp: yup
+			.string()
+			.length(6, "OTP must be 6 digits")
+			.required("OTP is required"),
+	});
+
+	const currentDate = new Date().toISOString().split("T")[0];
+
 	const handleSubmit = async (values, { setSubmitting }) => {
 		try {
 			const response = await verifyOtp({
-				phone: values.phone,
-				otp,
-				userData: values,
+				email,
+				otp: values.otp,
+				userData: { ...values, email },
 			}).unwrap();
+
 			if (response.token) {
 				dispatch(setUserInfo(response.user));
 				dispatch(setToken(response.token));
 				toast.success(response.message);
-				navigate("/dashboard"); // Redirect to home or another page
+				navigate("/dashboard");
 			} else {
-				toast.error(response.message || "Failed to verify OTP");
+				toast.error(response.message || "Failed to complete registration");
 			}
 		} catch (err) {
 			console.error(err);
@@ -89,172 +131,190 @@ export default function UserDataForm() {
 	};
 
 	return (
-		<Container component="main" maxWidth="sm">
+		<BackgroundContainer>
 			<CssBaseline />
-			<PaperContainer>
-				<GridContainer
-					container
-					justifyContent="center"
-					alignItems="center"
-					spacing={3}
+			<ToastContainer />
+			<GlassCard
+				component={motion.div}
+				initial={{ opacity: 0, y: 50 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 1 }}
+			>
+				<Typography
+					variant="h4"
+					align="center"
+					gutterBottom
+					sx={{ color: "#fff" }}
 				>
-					<Grid item container justifyContent="center">
-						<Grid item container alignItems="center" direction="column">
-							<Grid item>
-								<Typography component="h1" variant="h5">
-									User Information
-								</Typography>
+					Complete Your Profile
+				</Typography>
+				<Formik
+					initialValues={{
+						firstName: "",
+						lastName: "",
+						username: "",
+						bio: "",
+						dateOfBirth: currentDate,
+						phone: "",
+						otp: initialOtp,
+					}}
+					validationSchema={formSchema}
+					onSubmit={handleSubmit}
+				>
+					{({
+						errors,
+						touched,
+						handleChange,
+						handleBlur,
+						values,
+						isSubmitting,
+					}) => (
+						<Form>
+							<Grid container spacing={2}>
+								<Grid item xs={12} sm={6}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="First Name"
+										name="firstName"
+										value={values.firstName}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.firstName && !!errors.firstName}
+										helperText={touched.firstName && errors.firstName}
+									/>
+								</Grid>
+								<Grid item xs={12} sm={6}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Last Name"
+										name="lastName"
+										value={values.lastName}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.lastName && !!errors.lastName}
+										helperText={touched.lastName && errors.lastName}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Username"
+										name="username"
+										value={values.username}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.username && !!errors.username}
+										helperText={touched.username && errors.username}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Email"
+										name="email"
+										value={email}
+										disabled
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Phone Number"
+										name="phone"
+										placeholder="+917XXXXXXXXX"
+										value={values.phone}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.phone && !!errors.phone}
+										helperText={touched.phone && errors.phone}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Date of Birth"
+										name="dateOfBirth"
+										type="date"
+										value={values.dateOfBirth}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										InputLabelProps={{
+											shrink: true,
+										}}
+										error={touched.dateOfBirth && !!errors.dateOfBirth}
+										helperText={touched.dateOfBirth && errors.dateOfBirth}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										label="Bio"
+										name="bio"
+										multiline
+										rows={4}
+										value={values.bio}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.bio && !!errors.bio}
+										helperText={touched.bio && errors.bio}
+									/>
+								</Grid>
+								<Grid item xs={12}>
+									<Typography variant="h6" sx={{ color: "#fff", mb: 1 }}>
+										Enter OTP
+									</Typography>
+									<StyledTextField
+										variant="outlined"
+										fullWidth
+										name="otp"
+										value={values.otp}
+										onChange={handleChange}
+										onBlur={handleBlur}
+										error={touched.otp && !!errors.otp}
+										helperText={touched.otp && errors.otp}
+										InputProps={{
+											style: {
+												letterSpacing: "0.5rem",
+												fontSize: "1.5rem",
+												textAlign: "center",
+												color: "#fff",
+											},
+										}}
+									/>
+								</Grid>
 							</Grid>
-						</Grid>
-					</Grid>
-					<Grid item xs={12}>
-						<Paper elevation={0}>
-							<Typography variant="h6">
-								Please provide your details to complete registration
-							</Typography>
-						</Paper>
-					</Grid>
-					<Grid
-						item
-						xs={12}
-						container
-						justifyContent="center"
-						alignItems="center"
-						direction="column"
-					>
-						<Grid item>
-							<Formik
-								initialValues={{
-									firstName: "",
-									lastName: "",
-									username: "",
-									email: "",
-									bio: "",
-									dateOfBirth: currentDate,
-									phone: phone, // Set phone number from location.state
-								}}
-								validationSchema={formSchema}
-								onSubmit={handleSubmit}
+							<StyledButton
+								type="submit"
+								fullWidth
+								variant="contained"
+								color="primary"
+								disabled={isSubmitting}
+								component={motion.button}
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
 							>
-								{({
-									errors,
-									touched,
-									handleChange,
-									handleBlur,
-									values,
-									isSubmitting,
-								}) => (
-									<Form>
-										<Field
-											as={TextField}
-											name="firstName"
-											label="First Name"
-											fullWidth
-											margin="normal"
-											value={values.firstName}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.firstName && !!errors.firstName}
-											helperText={touched.firstName && errors.firstName}
-											required
-										/>
-										<Field
-											as={TextField}
-											name="lastName"
-											label="Last Name"
-											fullWidth
-											margin="normal"
-											value={values.lastName}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.lastName && !!errors.lastName}
-											helperText={touched.lastName && errors.lastName}
-										/>
-										<Field
-											as={TextField}
-											name="username"
-											label="Username"
-											fullWidth
-											margin="normal"
-											value={values.username}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.username && !!errors.username}
-											helperText={touched.username && errors.username}
-											required
-										/>
-										<Field
-											as={TextField}
-											name="email"
-											label="Email"
-											type="email"
-											fullWidth
-											margin="normal"
-											value={values.email}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.email && !!errors.email}
-											helperText={touched.email && errors.email}
-											required
-										/>
-										<Field
-											as={TextField}
-											name="phoneNumber"
-											label="Phone Number"
-											fullWidth
-											margin="normal"
-											value={values.phone}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.phone && !!errors.phone}
-											helperText={touched.phone && errors.phone}
-											required
-											disabled
-										/>
-										<Field
-											as={TextField}
-											name="dateOfBirth"
-											label="Date of Birth"
-											type="date"
-											fullWidth
-											margin="normal"
-											value={values.dateOfBirth}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.dateOfBirth && !!errors.dateOfBirth}
-											helperText={touched.dateOfBirth && errors.dateOfBirth}
-										/>
-										<Field
-											as={TextField}
-											name="bio"
-											label="Bio"
-											multiline
-											rows={4}
-											fullWidth
-											margin="normal"
-											value={values.bio}
-											onChange={handleChange}
-											onBlur={handleBlur}
-											error={touched.bio && !!errors.bio}
-											helperText={touched.bio && errors.bio}
-										/>
-										<SubmitButton
-											type="submit"
-											fullWidth
-											variant="contained"
-											color="primary"
-											disabled={isSubmitting || isLoading}
-										>
-											Submit
-										</SubmitButton>
-										{error && toast.error("Failed to verify OTP")}
-									</Form>
-								)}
-							</Formik>
-						</Grid>
+								Submit
+							</StyledButton>
+						</Form>
+					)}
+				</Formik>
+				<Grid container justifyContent="center" sx={{ mt: 2 }}>
+					<Grid item>
+						<Link href="/login" variant="body2" sx={{ color: "#fff" }}>
+							{"Back to Login"}
+						</Link>
 					</Grid>
-				</GridContainer>
-			</PaperContainer>
-		</Container>
+				</Grid>
+			</GlassCard>
+		</BackgroundContainer>
 	);
-}
+};
+
+export default UserDataForm;

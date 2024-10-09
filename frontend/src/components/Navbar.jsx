@@ -60,7 +60,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 		try {
 			// await logoutApiCall().unwrap();
 			dispatch(removeCredentials());
-			navigate("/login");
+			navigate("/");
 		} catch (error) {
 			console.log(error);
 			// toast.error("Couldn't log you out. Try again!");

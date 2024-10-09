@@ -10,6 +10,7 @@ import {
 	OtpSendingError,
 	ValidationError,
 	InternalServerError,
+	logError,
 } from "@expensio/sharedlib";
 import {
 	deleteUserByPhoneOrEmailModel,
@@ -161,8 +162,14 @@ export const handleVerifyOTPService = async (phone, email, otp, userData) => {
 				);
 			}
 
-			if (!otpRequest.phone || !otpRequest.email) {
-				await otpModel.updateOtpRequestPhoneAndEmailModel(
+			if (!otpRequest.phone) {
+				await otpModel.updateOtpRequestPhoneModel(
+					userData.phone,
+					userData.email,
+					client
+				);
+			} else if (!otpRequest.email) {
+				await otpModel.updateOtpRequestEmailModel(
 					userData.phone,
 					userData.email,
 					client
@@ -204,6 +211,7 @@ export const handleVerifyOTPService = async (phone, email, otp, userData) => {
 		return { user, token, message };
 	} catch (error) {
 		await client.query("ROLLBACK");
+		logError(error);
 		throw new InternalServerError(
 			"Failed to verify OTP and handle user registration/login."
 		);

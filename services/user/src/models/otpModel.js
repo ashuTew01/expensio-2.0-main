@@ -1,5 +1,5 @@
 import pool from "../config/db.js";
-import { DatabaseError, NotFoundError } from "@expensio/sharedlib";
+import { DatabaseError, logError, NotFoundError } from "@expensio/sharedlib";
 
 export const findOtpRequestByPhoneModel = async (phone, client = pool) => {
 	const query = `SELECT * FROM otp_requests WHERE phone = $1;`;
@@ -23,18 +23,46 @@ export const findOtpRequestByEmailModel = async (email, client = pool) => {
 	}
 };
 
-export const updateOtpRequestPhoneAndEmailModel = async (
+export const updateOtpRequestPhoneModel = async (
 	phone,
 	email,
 	client = pool
 ) => {
-	const query = `UPDATE otp_requests SET phone = $1, email = $2 RETURNING *;`;
+	const query = `
+        UPDATE otp_requests 
+        SET phone = $1 
+        WHERE email = $2 
+        RETURNING *;
+    `;
 	try {
 		const { rows } = await client.query(query, [phone, email]);
 		return rows[0];
 	} catch (error) {
+		logError(error);
 		throw new DatabaseError(
-			"Failed to update OTP requests' phone and email in the database"
+			"Failed to update OTP requests' phone in the database using email"
+		);
+	}
+};
+
+export const updateOtpRequestEmailModel = async (
+	phone,
+	email,
+	client = pool
+) => {
+	const query = `
+        UPDATE otp_requests 
+        SET email = $1 
+        WHERE phone = $2 
+        RETURNING *;
+    `;
+	try {
+		const { rows } = await client.query(query, [email, phone]);
+		return rows[0];
+	} catch (error) {
+		logError(error);
+		throw new DatabaseError(
+			"Failed to update OTP requests' phone in the database using phone"
 		);
 	}
 };

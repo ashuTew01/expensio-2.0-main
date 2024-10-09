@@ -18,14 +18,10 @@ import HomeScreen from "./scenes/homescreen";
 import Dashboard from "./scenes/dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./scenes/layout";
-import PhoneNumberPage from "./scenes/phoneNumberPage";
 import OtpPage from "./scenes/otpPage";
 import UserDataForm from "./scenes/userDataFormPage";
 import AddExpenseScreen from "./scenes/expense/add";
-// import AddGoalScreen from "scenes/addGoal";
 import ExpenseListScreen from "./scenes/expense/list";
-// import AddExpenseThroughTextScreen from "scenes/expense/addText";
-// import SummaryScreen from "scenes/summary";
 import ExpenseScreen from "./scenes/expense/screen";
 import IncomeListScreen from "./scenes/income/list";
 import AddIncomeScreen from "./scenes/income/add";
@@ -35,6 +31,7 @@ import IncomeFinancialData from "./scenes/income-financial-data";
 import FullChatPage from "./scenes/full-page-chat";
 
 import { SocketProvider } from "./context/SocketContext";
+import EmailLoginPage from "./scenes/email-login-page";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -85,10 +82,9 @@ function App() {
 						<Route>
 							<Route index path="/" element={<HomeScreen />} />
 
-							<Route path="/login" element={<PhoneNumberPage />} />
+							<Route path="/login" element={<EmailLoginPage />} />
 							<Route path="/otp" element={<OtpPage />} />
 							<Route path="/user-data-form" element={<UserDataForm />} />
-							{/* <Route path="/register" element={<Register />} /> */}
 						</Route>
 					</Routes>
 				</ThemeProvider>

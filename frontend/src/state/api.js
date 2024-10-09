@@ -3,12 +3,17 @@ import { v4 as uuidv4 } from "uuid"; // Import UUID generator
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
-const DEFAULT_HEADERS = {
-	Authorization: `Bearer ${JSON.parse(localStorage.getItem("tokenExpensio"))}`,
-};
-
 export const api = createApi({
-	baseQuery: fetchBaseQuery({ baseUrl: reactAppBaseUrl }),
+	baseQuery: fetchBaseQuery({
+		baseUrl: reactAppBaseUrl,
+		prepareHeaders: (headers, { getState }) => {
+			const token = getState().auth.token; // Access the token from Redux store
+			if (token) {
+				headers.set("Authorization", `Bearer ${token}`);
+			}
+			return headers;
+		},
+	}),
 	reducerPath: "adminApi",
 	tagTypes: ["User", "Dashboard"],
 	endpoints: (build) => ({
@@ -16,7 +21,7 @@ export const api = createApi({
 			query: () => ({
 				url: "expense/test",
 				method: "GET",
-				headers: DEFAULT_HEADERS,
+				// headers: DEFAULT_HEADERS,
 			}),
 		}),
 		saveExpenses: build.mutation({
@@ -27,7 +32,6 @@ export const api = createApi({
 					method: "POST",
 					body: data,
 					headers: {
-						...DEFAULT_HEADERS, // Spread any default headers you have
 						"Idempotency-Key": idempotencyKey, // Add the idempotency key to the headers
 					},
 				};
@@ -38,9 +42,6 @@ export const api = createApi({
 				url: `expense/add/text`,
 				method: "POST",
 				body: data,
-				headers: {
-					DEFAULT_HEADERS,
-				},
 			}),
 		}),
 		transcribeAudio: build.mutation({
@@ -48,10 +49,6 @@ export const api = createApi({
 				url: "general/audio-to-text",
 				method: "POST",
 				body: audioFile,
-				// Do not manually set Content-Type for FormData; let the browser handle it
-				headers: {
-					...DEFAULT_HEADERS,
-				},
 			}),
 		}),
 		getAllCategories: build.query({
@@ -64,7 +61,6 @@ export const api = createApi({
 			query: () => ({
 				url: `event/all`,
 				method: "GET",
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 
@@ -72,7 +68,6 @@ export const api = createApi({
 			query: () => ({
 				url: `general/summary`,
 				method: "GET",
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 
@@ -113,7 +108,6 @@ export const api = createApi({
 					...(pageSize && { pageSize }),
 					...(id && { id }),
 				},
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		getExpenseById: build.query({
@@ -121,7 +115,6 @@ export const api = createApi({
 				url: `expense`,
 				method: "GET",
 				params: { id },
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		// income
@@ -146,7 +139,6 @@ export const api = createApi({
 					...(pageSize && { pageSize }),
 					...(id && { id }),
 				},
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		saveIncome: build.mutation({
@@ -157,7 +149,6 @@ export const api = createApi({
 					method: "POST",
 					body: data,
 					headers: {
-						...DEFAULT_HEADERS, // Spread any default headers you have
 						"Idempotency-Key": idempotencyKey, // Add the idempotency key to the headers
 					},
 				};
@@ -168,7 +159,6 @@ export const api = createApi({
 				url: `financial-data/expense`,
 				method: "POST",
 				body: data,
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		getIncomeFinancialData: build.mutation({
@@ -176,7 +166,6 @@ export const api = createApi({
 				url: `financial-data/income`,
 				method: "POST",
 				body: data,
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		// PUT GOALS QUERIES HERE
@@ -185,7 +174,6 @@ export const api = createApi({
 				url: `goal/add`,
 				method: "POST",
 				body: data,
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		sendOtp: build.mutation({
@@ -193,7 +181,6 @@ export const api = createApi({
 				url: `user/send-otp`,
 				method: "POST",
 				body: data,
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 		verifyOtp: build.mutation({
@@ -207,7 +194,6 @@ export const api = createApi({
 			query: () => ({
 				url: "dashboard",
 				method: "GET",
-				headers: DEFAULT_HEADERS,
 			}),
 		}),
 
@@ -215,7 +201,6 @@ export const api = createApi({
 			query: () => ({
 				url: "smart-ai/user/ai-tokens-detail",
 				method: "GET",
-				headers: DEFAULT_HEADERS,
 			}),
 			refetchOnFocus: true,
 			refetchOnReconnect: true,

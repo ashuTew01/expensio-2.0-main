@@ -1,67 +1,73 @@
-import * as React from "react";
-import { useState } from "react";
+// src/pages/auth/OtpPage.jsx
+import React, { useState } from "react";
+import {
+	Container,
+	CssBaseline,
+	Box,
+	Typography,
+	Button,
+	Grid,
+	Link,
+} from "@mui/material";
+import { styled } from "@mui/system";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
-import OtpInput from "react-otp-input";
-import Paper from "@mui/material/Paper";
-import { styled } from "@mui/material/styles";
-
-import { useTheme } from "@mui/material/styles"; // Still using MUI's useTheme
-
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Grid from "@mui/material/Grid";
 import { useVerifyOtpMutation } from "../../state/api";
 import { useDispatch, useSelector } from "react-redux";
 import { setToken, setUserInfo } from "../../state/authSlice";
+import { toast, ToastContainer } from "react-toastify";
+import { motion } from "framer-motion";
+import "react-toastify/dist/ReactToastify.css";
+import OtpInput from "react-otp-input";
+import backgroundImage from "/auth-background.jpg"; // Replace with your image path
 
-// Styled components instead of makeStyles
-const GridContainer = styled(Grid)`
-	height: 50vh;
-	text-align: center;
-`;
-
-const StyledAvatar = styled(Avatar)`
-	margin: ${(props) => props.theme.spacing(1)};
-`;
-
-const SubmitButton = styled(Button)`
-	margin: ${(props) => props.theme.spacing(3, 0, 2)};
-	background-color: black;
-`;
-
-const PaperContainer = styled("div")(({ theme }) => ({
-	marginTop: theme.spacing(8),
+const BackgroundContainer = styled(Box)({
+	minHeight: "100vh",
+	backgroundImage: `url(${backgroundImage})`,
+	backgroundSize: "cover",
+	backgroundPosition: "center",
 	display: "flex",
-	flexDirection: "column",
 	alignItems: "center",
+	justifyContent: "center",
+});
+
+const GlassCard = styled(Box)(({ theme }) => ({
+	backdropFilter: "blur(10px)",
+	backgroundColor: "rgba(255, 255, 255, 0.1)",
+	padding: theme.spacing(6),
+	borderRadius: theme.spacing(2),
+	boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+	maxWidth: 500,
+	width: "100%",
 }));
 
-export default function OtpPage() {
-	const theme = useTheme();
+const StyledButton = styled(Button)(({ theme }) => ({
+	marginTop: theme.spacing(4),
+	padding: theme.spacing(1.5),
+	fontSize: "1.2rem",
+	fontWeight: "bold",
+	borderRadius: theme.spacing(1),
+	backgroundColor: "#238efa",
+}));
+
+const OtpPage = () => {
+	const [otp, setOtp] = useState("");
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
 
+	const email = location.state?.email || "";
 	const userExists = useSelector((state) => state.auth.userExists);
-	const [verifyOtp, { isLoading, error }] = useVerifyOtpMutation();
-
-	const [otp, setOtp] = useState("");
-	const [phoneNumber] = useState(location.state?.phoneNumber || "");
+	const [verifyOtp] = useVerifyOtpMutation();
 
 	const onClickHandler = async () => {
 		try {
 			if (otp.length === 6) {
 				// Assuming OTP length is 6
 				if (!userExists) {
-					navigate("/user-data-form", { state: { phoneNumber, otp } });
+					navigate("/user-data-form", { state: { email, otp } });
 				} else {
 					const response = await verifyOtp({
-						phone: phoneNumber,
+						email,
 						otp,
 					}).unwrap();
 
@@ -83,90 +89,88 @@ export default function OtpPage() {
 		}
 	};
 
-	const renderInput = (props) => (
-		<input
-			{...props}
-			style={{
-				width: "3rem",
-				height: "3rem",
-				margin: "0 1rem",
-				fontSize: "2rem",
-				borderRadius: 4,
-				border: "1px solid rgba(0,0,0,0.3)",
-				textAlign: "center",
-			}}
-		/>
-	);
+	// Styles for the OTP input fields
+	const inputStyle = {
+		width: "3rem",
+		height: "3rem",
+		margin: "0 0.5rem",
+		fontSize: "2rem",
+		borderRadius: "8px",
+		border: "1px solid rgba(255, 255, 255, 0.3)",
+		backgroundColor: "rgba(255, 255, 255, 0.1)",
+		color: "#fff",
+		textAlign: "center",
+		outline: "none",
+	};
+
+	const containerStyle = {
+		display: "flex",
+		justifyContent: "center",
+		marginBottom: "2rem",
+	};
+
+	// Provide a default renderInput function
+	const renderInput = (props, index) => {
+		return <input {...props} key={index} />;
+	};
 
 	return (
-		<Container component="main" maxWidth="sm">
+		<BackgroundContainer>
 			<CssBaseline />
-			<PaperContainer>
-				<GridContainer
-					container
-					justify="center"
-					alignItems="center"
-					spacing={3}
+			<ToastContainer />
+			<GlassCard
+				component={motion.div}
+				initial={{ opacity: 0, y: 50 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 1 }}
+			>
+				<Typography
+					variant="h4"
+					align="center"
+					gutterBottom
+					sx={{ color: "#fff" }}
 				>
-					<Grid item container justify="center">
-						<Grid item container alignItems="center" direction="column">
-							<Grid item>
-								<StyledAvatar>
-									<LockOutlinedIcon />
-								</StyledAvatar>
-							</Grid>
-							<Grid item>
-								<Typography component="h1" variant="h5">
-									Verification Code
-								</Typography>
-							</Grid>
-						</Grid>
+					Verify Your Email
+				</Typography>
+				<Typography
+					variant="body1"
+					align="center"
+					sx={{ color: "#ccc", mb: 4 }}
+				>
+					Enter the 6-digit code sent to your email
+				</Typography>
+				<OtpInput
+					value={otp}
+					onChange={setOtp}
+					numInputs={6}
+					isInputNum
+					shouldAutoFocus
+					inputStyle={inputStyle}
+					containerStyle={containerStyle}
+					renderInput={renderInput} // Added this line
+				/>
+				<StyledButton
+					type="button"
+					fullWidth
+					variant="contained"
+					color="primary"
+					onClick={onClickHandler}
+					component={motion.button}
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+				>
+					Verify OTP
+				</StyledButton>
+				<Grid container justifyContent="center" sx={{ mt: 2 }}>
+					<Grid item>
+						<Link href="/login" variant="body2" sx={{ color: "#fff" }}>
+							{"Back to Login"}
+						</Link>
 					</Grid>
-					<Grid item xs={12} textAlign="center">
-						<Paper elevation={0}>
-							<Typography
-								variant="h6"
-								backgroundColor={theme.palette.background.default}
-							>
-								Please enter the verification code sent to your mobile
-							</Typography>
-						</Paper>
-					</Grid>
-					<Grid
-						item
-						xs={12}
-						container
-						justify="center"
-						alignItems="center"
-						direction="column"
-					>
-						<Grid container item spacing={3} justify="center">
-							<OtpInput
-								value={otp}
-								onChange={(otp) => setOtp(otp)}
-								numInputs={6}
-								renderInput={renderInput}
-								separator={
-									<span>
-										<strong>.</strong>
-									</span>
-								}
-							/>
-						</Grid>
-						<Grid item>
-							<SubmitButton
-								type="submit"
-								fullWidth
-								variant="contained"
-								color="primary"
-								onClick={onClickHandler}
-							>
-								Next
-							</SubmitButton>
-						</Grid>
-					</Grid>
-				</GridContainer>
-			</PaperContainer>
-		</Container>
+				</Grid>
+			</GlassCard>
+		</BackgroundContainer>
 	);
-}
+};
+
+export default OtpPage;
