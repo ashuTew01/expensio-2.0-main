@@ -8,19 +8,22 @@ import {
 	useTheme,
 	useMediaQuery,
 } from "@mui/material";
-import { useGetAllExpensesQuery, useGetDasboardQuery } from "../../state/api";
-import { useSelector } from "react-redux";
-import BreakdownChart from "../../components/BreakdownChart";
-import { DataGrid } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
+import { useGetDasboardQuery } from "../../state/api";
 import BarGraph from "../../components/BarGraph";
-import ExpenseCard from "../../components/ExpenseCard";
 import LoadingIndicator from "../../components/LoadingIndicator";
+import LatestExpenses from "../../components/dashboard/LatestExpenses";
+import ExpenseCard from "../../components/ExpenseCard";
+import LatestIncomes from "../../components/dashboard/LatestIncomes";
+import BreakdownPieChart from "../../components/dashboard/BreakdownPieChart";
+import Hero from "../../components/dashboard/Hero";
+import BigTitle from "../../components/dashboard/BigTitle";
+import DisplayBarGraph from "../../components/dashboard/DisplayBarGraph";
 
 const Dashboard = () => {
 	const theme = useTheme();
+	const navigate = useNavigate();
 	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
-
-	const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
 	const {
 		data: dashboardData,
@@ -30,20 +33,27 @@ const Dashboard = () => {
 
 	if (dashboardDataLoading) return <LoadingIndicator />;
 
-	// console.log(dashboardData);
-
-	const expensesData = [];
-	const expensesLoading = [];
-
 	// calculations to format data for pie chart of category
-	const categoryTotals = {};
+	const expenseCategoryTotals = {};
 	dashboardData?.currentMonthExpenseFinancialData?.expenseCategories?.forEach(
 		(expense) => {
 			const { categoryName, totalAmountSpent } = expense;
-			if (categoryName in categoryTotals) {
-				categoryTotals[categoryName] += totalAmountSpent;
+			if (categoryName in expenseCategoryTotals) {
+				expenseCategoryTotals[categoryName] += totalAmountSpent;
 			} else {
-				categoryTotals[categoryName] = totalAmountSpent;
+				expenseCategoryTotals[categoryName] = totalAmountSpent;
+			}
+		}
+	);
+
+	const incomeCategoryTotals = {};
+	dashboardData?.currentMonthIncomeFinancialData?.incomeCategories?.forEach(
+		(income) => {
+			const { categoryName, totalAmountEarned } = income;
+			if (categoryName in incomeCategoryTotals) {
+				incomeCategoryTotals[categoryName] += totalAmountEarned;
+			} else {
+				incomeCategoryTotals[categoryName] = totalAmountEarned;
 			}
 		}
 	);
@@ -64,7 +74,7 @@ const Dashboard = () => {
 	// Helper function to format the latest expenses from dashboardData
 	const formatLatestExpensesData = () => {
 		return dashboardData?.latestExpenses?.map((expense) => ({
-			id: expense.expenseDetailsId?._id,
+			id: expense.expenseDetailsId?.expenseId,
 			title: expense.expenseDetailsId?.title,
 			amount: expense.expenseDetailsId?.amount,
 			type: expense.expenseDetailsId?.expenseType,
@@ -79,18 +89,18 @@ const Dashboard = () => {
 
 	const formatLatestIncomeData = () => {
 		return dashboardData?.latestIncomes?.map((income) => ({
-			id: income.incomeDetailsId._id,
-			title: income.incomeDetailsId.title,
-			amount: income.incomeDetailsId.amount,
-			type: income.incomeDetailsId.incomeType,
-			categoryName: income.incomeDetailsId.categoryName,
+			id: income.incomeDetailsId?.incomeId,
+			title: income.incomeDetailsId?.title,
+			amount: income.incomeDetailsId?.amount,
+			type: income.incomeDetailsId?.incomeType,
+			categoryName: income.incomeDetailsId?.categoryName,
 			createdAt: new Date(
 				income.incomeDetailsId.createdAt
 			).toLocaleDateString(),
 		}));
 	};
 
-	const categoryDataForBarGraph =
+	const expenseCategoryDataForBarGraph =
 		dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.length >
 		0
 			? dashboardData?.currentMonthExpenseFinancialData?.expenseCategories?.map(
@@ -98,6 +108,17 @@ const Dashboard = () => {
 						category: item.categoryName,
 						amountSpent: item.totalAmountSpent,
 						expenses: item.numExpenses,
+						color: theme.palette.secondary[((i % 9) + 1) * 100],
+					})
+				)
+			: [];
+	const incomeCategoryDataForBarGraph =
+		dashboardData?.currentMonthIncomeFinancialData
+			? dashboardData?.currentMonthIncomeFinancialData?.incomeCategories?.map(
+					(item, i) => ({
+						category: item.categoryName,
+						amountSpent: item.totalAmountEarned,
+						expenses: item.numIncomes,
 						color: theme.palette.secondary[((i % 9) + 1) * 100],
 					})
 				)
@@ -132,10 +153,12 @@ const Dashboard = () => {
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();
 	const latestIncomes = formatLatestIncomeData();
-	// console.log(latestExpenses);
 
-	// console.log(categoryTotals);
-
+	const totalMoneyEarned =
+		dashboardData?.currentMonthIncomeFinancialData?.totalMoneyEarned;
+	const totalMoneySpent =
+		dashboardData?.currentMonthExpenseFinancialData?.totalMoneySpent;
+	// console.log(totalMoneyEarned, totalMoneySpent);
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>
@@ -143,15 +166,18 @@ const Dashboard = () => {
 
 				<Box>
 					<Button
+						variant="contained"
 						sx={{
 							backgroundColor: theme.palette.secondary.light,
 							color: theme.palette.background.alt,
-							fontSize: "14px",
+							fontSize: "12px",
 							fontWeight: "bold",
 							padding: "10px 20px",
+							"&:hover": { backgroundColor: "#afafaf" },
 						}}
+						onClick={() => navigate("/user/expense-financial-data")}
 					>
-						EXPENSIO
+						Detailed Financial Data
 					</Button>
 				</Box>
 			</FlexBetween>
@@ -166,137 +192,65 @@ const Dashboard = () => {
 					"& > div": { gridColumn: isNonMediumScreens ? undefined : "span 12" },
 				}}
 			>
-				<Box
-					gridColumn="span 4"
-					gridRow="span 2"
-					backgroundColor="transparent"
-					p="1rem"
-					borderRadius="0.55rem"
-					display="flex"
-					justifyContent="space-between"
-				>
-					<Box
-						component="img"
-						sx={{
-							height: 330,
-							width: 330,
-							// maxHeight: { xs: 233, md: 167 },
-							// maxWidth: { xs: 350, md: 250 },
-						}}
-						alt={"Love Earth"}
-						src={"/dashboard.png"}
-					/>
-				</Box>
-				<Box
-					gridColumn="span 8"
-					gridRow="span 2"
-					backgroundColor="transparent"
-					p="1rem"
-					borderRadius="0.55rem"
-					display="flex"
-					flexDirection="column"
-					mt="7rem"
-				>
-					<Box>
-						<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-							Uncover Your Financial Story,
-						</Typography>
-						<Typography variant="h1" sx={{ fontWeight: "bold" }}>
-							Shape Your Future
-						</Typography>
-						<Box height="10px"></Box>
-					</Box>
-					<Box width="38rem">
-						<Typography variant="h4" sx={{ fontSize: "0.2 rem" }}>
-							Empowering you to make informed decisions and achieve your
-							financial dreams.
-						</Typography>
-					</Box>
-				</Box>
+				<Hero
+					totalMoneyEarned={totalMoneyEarned}
+					totalMoneySpent={totalMoneySpent}
+				/>
 
-				{/* category pie chart */}
-				<Box
-					gridColumn="span 4"
-					gridRow="span 3"
-					backgroundColor={theme.palette.background.alt}
-					p="1.5rem"
-					borderRadius="0.55rem"
-				>
-					<Typography
-						variant="h2"
-						sx={{
-							color: theme.palette.secondary[100],
-							fontWeight: "bold",
-						}}
-					>
-						Monthly Expense by Category
-					</Typography>
-					<BreakdownChart categories={categoryTotals} isDashboard={true} />
-					<Typography
-						mt="15px"
-						// p="0 0.6rem"
-						fontSize="0.8rem"
-						sx={{
-							color: theme.palette.secondary[200],
-							fontSize: "15px",
-							textAlign: "center",
-						}}
-					>
-						Breakdown of monthly expenses by Category in which they were
-						generated.
-					</Typography>
-				</Box>
+				<BigTitle
+					title="EXPENDITURE ANALYSIS"
+					subtitle={"Analyze your spendings!"}
+					titleFontColor={"#028fe0"}
+				/>
 
-				{/* category bar graph  */}
-				<Box
-					gridColumn="span 8"
-					gridRow="span 3"
-					backgroundColor={theme.palette.background.alt}
-					p="1.5rem"
-					borderRadius="0.55rem"
-				>
-					<BarGraph
-						isDashboard={true}
-						formattedData={categoryDataForBarGraph}
-					/>
-				</Box>
+				<BreakdownPieChart
+					title="Category Breakdown"
+					formattedData={expenseCategoryTotals}
+					text={`Looking into where you spend most of your money, can help you keep your expenses in control.`}
+				/>
 
-				{/* Psychological Pie Chart */}
+				{/* Category Bar Graph */}
+				<DisplayBarGraph
+					title="Category Analysis"
+					formattedData={expenseCategoryDataForBarGraph}
+					yAxis="Amount Spent"
+					currency="₹"
+				/>
 
-				<Box
-					gridColumn="span 4"
-					gridRow="span 3"
-					backgroundColor={theme.palette.background.alt}
-					p="1.5rem"
-					borderRadius="0.55rem"
-				>
-					<Typography
-						variant="h2"
-						sx={{
-							color: theme.palette.secondary[100],
-							fontWeight: "bold",
-						}}
-					>
-						Monthly Expense by Cognitive Trigger
-					</Typography>
-					<BreakdownChart categories={psychologicalTotals} isDashboard={true} />
-					<Typography
-						p="0 0.6rem"
-						fontSize="0.8rem"
-						mt="15px"
-						sx={{
-							color: theme.palette.secondary[200],
-							fontSize: "15px",
-							textAlign: "center",
-						}}
-					>
-						Breakdown of monthly expenses by Psychological Types in which they
-						were generated.
-					</Typography>
-				</Box>
+				<LatestExpenses latestExpenses={latestExpenses} />
+				<BreakdownPieChart
+					title="Understand Your Cognitive Triggers"
+					formattedData={psychologicalTotals}
+					text={`Knowing what causes you to spend the most, can help you control desires, and hence spendings.`}
+				/>
 
-				{/* cognitive bar graph */}
-				<Box
+				<BigTitle
+					title="INCOME ANALYSIS"
+					subtitle={"Unserstand you Income Sources!"}
+					titleFontColor={"#028fe0"}
+				/>
+				<BreakdownPieChart
+					title="Category Breakdown"
+					formattedData={incomeCategoryTotals}
+					text={`Multiplying Income Sources can help you stay ahead of 99% of people.`}
+				/>
+				<DisplayBarGraph
+					title="Category Analysis"
+					formattedData={incomeCategoryDataForBarGraph}
+					yAxis="Amount Earned"
+					currency="₹"
+				/>
+				<LatestIncomes latestIncomes={latestIncomes} />
+			</Box>
+		</Box>
+	);
+};
+
+export default Dashboard;
+
+// LEGACY
+/* cognitive bar graph */
+/* <Box
 					gridColumn="span 8"
 					gridRow="span 3"
 					backgroundColor={theme.palette.background.alt}
@@ -307,104 +261,4 @@ const Dashboard = () => {
 						isDashboard={true}
 						formattedData={cognitiveTriggerForBarGraph}
 					/>
-				</Box>
-
-				{/* <Box
-					gridColumn="span 8"
-					height="500px"
-					sx={{
-						"& .MuiDataGrid-root": {
-							border: "none",
-							borderRadius: "5rem",
-						},
-						"& .MuiDataGrid-cell": {
-							borderBottom: "none",
-						},
-						"& .MuiDataGrid-columnHeaders": {
-							backgroundColor: theme.palette.background.alt,
-							color: theme.palette.secondary[100],
-							borderBottom: "none",
-						},
-						"& .MuiDataGrid-virtualScroller": {
-							backgroundColor: theme.palette.background.alt,
-						},
-						"& .MuiDataGrid-footerContainer": {
-							backgroundColor: theme.palette.background.alt,
-							color: theme.palette.secondary[100],
-							borderTop: "none",
-						},
-						"& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-							color: `${theme.palette.secondary[200]} !important`,
-						},
-					}}
-				>
-					<DataGrid
-						loading={dashboardDataLoading || !latestExpenses}
-						getRowId={(row) => row.id}
-						rows={latestExpenses || []}
-						columns={columns}
-					/>
-				</Box> */}
-
-				<Box
-					gridColumn="span 6"
-					gridRow="span 3"
-					height="500px"
-					overflow="auto"
-					flexDirection="column"
-					alignItems="center" // Center align horizontally
-					// Align cards starting from the top
-				>
-					<Box width="100%">
-						{latestExpenses &&
-							latestExpenses?.length > 0 &&
-							latestExpenses?.map((expense, i) => {
-								return (
-									<ExpenseCard
-										key={expense.id} // Add a key prop for each item
-										id={expense.id}
-										title={expense.title}
-										amount={expense.amount}
-										type={expense.type}
-										categoryName={expense.categoryName}
-										cognitiveTriggers={expense.cognitiveTriggers}
-										createdAt={expense.createdAt}
-									/>
-								);
-							})}
-					</Box>
-				</Box>
-
-				<Box
-					gridColumn="span 6"
-					gridRow="span 3"
-					height="500px"
-					overflow="auto"
-					flexDirection="column"
-					alignItems="center" // Center align horizontally
-					// Align cards starting from the top
-				>
-					<Box width="100%">
-						{latestIncomes &&
-							latestIncomes?.length > 0 &&
-							latestIncomes?.map((income, i) => {
-								return (
-									<ExpenseCard
-										key={income.id} // Add a key prop for each item
-										id={income.id}
-										title={income.title}
-										amount={income.amount}
-										expenseType={income.type}
-										categoryName={income.categoryName}
-										createdAt={income.createdAt}
-									/>
-								);
-							})}
-					</Box>
-				</Box>
-			</Box>
-		</Box>
-	);
-};
-
-export default Dashboard;
+				</Box> */

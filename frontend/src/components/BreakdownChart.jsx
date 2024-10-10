@@ -22,7 +22,7 @@ const BreakdownChart = ({
 
 	return (
 		<Box
-			height={beSmall ? "40px" : "350px"}
+			height={"350px"}
 			minHeight={isDashboard ? "300px" : undefined}
 			minWidth={isDashboard ? "325px" : undefined}
 			position="relative"
@@ -63,11 +63,12 @@ const BreakdownChart = ({
 						},
 					},
 				}}
-				margin={
-					isDashboard
-						? { top: 40, right: 80, bottom: 40, left: 50 }
-						: { top: 40, right: 80, bottom: 40, left: 80 }
-				}
+				// margin={
+				// 	isDashboard
+				// 		? { top: 40, right: 80, bottom: 40, left: 50 }
+				// 		: { top: 40, right: 80, bottom: 40, left: 80 }
+				// }
+				margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
 				sortByValue={true}
 				innerRadius={0.4}
 				activeOuterRadiusOffset={6}
@@ -91,7 +92,7 @@ const BreakdownChart = ({
 				// 	// Keeping your commented code
 				// 	{
 				// 		anchor: "top-left",
-				// 		direction: "column",
+				// 		direction: "row",
 				// 		justify: false,
 				// 		translateX: 0,
 				// 		translateY: 0,
