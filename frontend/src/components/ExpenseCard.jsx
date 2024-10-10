@@ -20,6 +20,7 @@ const ExpenseCard = ({
 	categoryName,
 	cognitiveTriggers,
 	createdAt,
+	cardType = "expense",
 }) => {
 	const theme = useTheme();
 	const navigate = useNavigate();
@@ -50,7 +51,7 @@ const ExpenseCard = ({
 	const cardStyles = {
 		root: {
 			backgroundColor: theme.palette.background.alt, // Light background\
-			width: "90%",
+			width: "100%",
 			display: "flex",
 			flexDirection: "column",
 			borderRadius: theme.shape.borderRadius, // Rounded corners
@@ -66,6 +67,7 @@ const ExpenseCard = ({
 			display: "flex",
 			justifyContent: "space-between",
 			alignItems: "center",
+			pb: "0.5rem",
 		},
 		amount: {
 			color: theme.palette.success.main,
@@ -98,7 +100,7 @@ const ExpenseCard = ({
 			alignItems: "center",
 			justifyContent: "flex-end",
 			// marginTop: theme.spacing(2),
-			color: theme.palette.primary.main,
+			// color: theme.palette.primary.main,
 			fontWeight: "bold",
 		},
 		date: {
@@ -107,7 +109,7 @@ const ExpenseCard = ({
 	};
 
 	const handleCardClick = () => {
-		navigate(`/expense/${id}`);
+		navigate(`/${cardType === "income" ? "income" : "expense"}/${id}`);
 	};
 
 	return (
@@ -120,7 +122,7 @@ const ExpenseCard = ({
 						<Typography variant="h6" sx={{ fontWeight: "bold" }}>
 							{title}
 						</Typography>
-						<Box sx={cardStyles.type}>{type}</Box>
+						{/* <Box sx={cardStyles.type}>{type}</Box> */}
 					</Box>
 
 					{/* Amount Display */}
@@ -138,11 +140,7 @@ const ExpenseCard = ({
 					<Box sx={cardStyles.info}>
 						<Typography variant="body2">{categoryName}</Typography>
 						<Typography variant="body2" sx={cardStyles.date}>
-							{new Date(createdAt).toLocaleDateString()} -{" "}
-							{new Date(createdAt).toLocaleTimeString([], {
-								hour: "2-digit",
-								minute: "2-digit",
-							})}
+							{new Date(createdAt).toLocaleDateString()}
 						</Typography>
 					</Box>
 				</CardContent>

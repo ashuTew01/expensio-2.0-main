@@ -1,0 +1,16 @@
+/* styles.css */
+.phoneInput {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .phoneInput:focus {
+    border-color: #3f51b5;
+    box-shadow: 0 0 0 1px #3f51b5;
+  }
+  
