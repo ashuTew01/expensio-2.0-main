@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 import LoadingIndicator from "../../../components/LoadingIndicator";
 import { formatIncomeListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
+import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 
 // Styled components using styled API
 const StyledTableHeader = styled(Box)(({ theme }) => ({
@@ -78,7 +79,7 @@ const IncomeListScreen = () => {
 	});
 
 	if (isLoadingCognitiveTriggersData || categoriesLoading || incomesLoading)
-		return <LoadingIndicator />;
+		return <AnimatedLoadingIndicator height={"500px"} />;
 
 	const backgroundColorStyle = {
 		backgroundColor: theme.palette.background.default,

@@ -19,6 +19,7 @@ import BreakdownPieChart from "../../components/dashboard/BreakdownPieChart";
 import Hero from "../../components/dashboard/Hero";
 import BigTitle from "../../components/dashboard/BigTitle";
 import DisplayBarGraph from "../../components/dashboard/DisplayBarGraph";
+import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
 
 const Dashboard = () => {
 	const theme = useTheme();
@@ -31,7 +32,7 @@ const Dashboard = () => {
 		isError: dashboardDataError,
 	} = useGetDasboardQuery();
 
-	if (dashboardDataLoading) return <LoadingIndicator />;
+	if (dashboardDataLoading) return <AnimatedLoadingIndicator height="500px" />;
 
 	// calculations to format data for pie chart of category
 	const expenseCategoryTotals = {};
@@ -200,7 +201,7 @@ const Dashboard = () => {
 				<BigTitle
 					title="EXPENDITURE ANALYSIS"
 					subtitle={"Analyze your spendings!"}
-					titleFontColor={"#028fe0"}
+					titleFontColor={"#54cff7"}
 				/>
 
 				<BreakdownPieChart
@@ -226,8 +227,8 @@ const Dashboard = () => {
 
 				<BigTitle
 					title="INCOME ANALYSIS"
-					subtitle={"Unserstand you Income Sources!"}
-					titleFontColor={"#028fe0"}
+					subtitle={"Understand you Income Sources!"}
+					titleFontColor={"#55fa81"}
 				/>
 				<BreakdownPieChart
 					title="Category Breakdown"

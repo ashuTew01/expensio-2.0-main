@@ -20,11 +20,10 @@ import {
 	useGetAllCategoriesQuery,
 	useGetAllCognitiveTriggersQuery,
 } from "../../../state/api";
-import { toast } from "react-toastify";
-import LoadingIndicator from "../../../components/LoadingIndicator";
 import { formatExpenseListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
 import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
+import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 
 // Styled components
 const TableHeader = styled(Box)(({ theme }) => ({
@@ -77,7 +76,7 @@ const ExpenseListScreen = () => {
 	});
 
 	if (isLoadingCognitiveTriggersData || categoriesLoading || expensesLoading)
-		return <LoadingIndicator />;
+		return <AnimatedLoadingIndicator height={"500px"} />;
 
 	const backgroundColorStyle = {
 		backgroundColor: theme.palette.background.default,

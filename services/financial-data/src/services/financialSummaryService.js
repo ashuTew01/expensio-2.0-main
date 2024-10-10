@@ -169,6 +169,9 @@ export const buildFinancialSummaryService = async (
 			userId,
 			last3Months
 		);
+		console.log(startDate, endDate);
+		existingSummary.endDate = endDate;
+		existingSummary.startDate = startDate;
 	} else if (timePeriod === "last6months") {
 		// Check if there's already an existing summary for the last 6 months
 		existingSummary = await FinancialSummary.findOne({ userId, timePeriod });
@@ -201,6 +204,8 @@ export const buildFinancialSummaryService = async (
 			userId,
 			last6Months
 		);
+		existingSummary.endDate = endDate;
+		existingSummary.startDate = startDate;
 	}
 
 	// Format financial data for AI processing
@@ -239,6 +244,7 @@ export const buildFinancialSummaryService = async (
 		summary.personalizedRecommendations;
 	existingSummary.benchmarking = summary.benchmarking;
 	existingSummary.lastComputedAt = new Date();
+
 	await existingSummary.save();
 
 	return { message: "OK", summary: existingSummary };
