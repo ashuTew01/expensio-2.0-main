@@ -34,7 +34,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useGetUserAiTokensDetailQuery } from "../state/api";
 
-const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
+const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 	const dispatch = useDispatch();
 	const theme = useTheme();
 
@@ -88,10 +88,11 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
 	return (
 		<AppBar
+			position={isFixed ? "fixed" : "static"}
 			sx={{
-				position: "static",
 				background: "none",
 				boxShadow: "none",
+				zIndex: isFixed ? (theme) => theme.zIndex.drawer + 1 : undefined,
 			}}
 		>
 			<Toolbar sx={{ justifyContent: "space-between" }}>

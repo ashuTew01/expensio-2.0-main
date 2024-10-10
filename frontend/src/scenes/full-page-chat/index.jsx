@@ -1,39 +1,77 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
 	Box,
-	Paper,
 	Typography,
 	TextField,
 	List,
 	ListItem,
-	ListItemText,
-	Divider,
-	Fab,
 	IconButton,
+	Fab,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useSocket } from "../../context/SocketContext"; // Use the same socket
+import { useSocket } from "../../context/SocketContext";
 import {
 	addMessage,
 	setTyping,
 	setSocketConnected,
-} from "../../state/chatSlice"; // Redux actions
+} from "../../state/chatSlice";
 import { useTheme } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence } from "framer-motion"; // For animations
+
+const TypingIndicator = () => (
+	<Box sx={{ display: "flex", alignItems: "center" }}>
+		<Box
+			sx={{
+				width: 8,
+				height: 8,
+				backgroundColor: "#fff",
+				borderRadius: "50%",
+				marginRight: "4px",
+				animation: "typing 1s infinite",
+			}}
+		/>
+		<Box
+			sx={{
+				width: 8,
+				height: 8,
+				backgroundColor: "#fff",
+				borderRadius: "50%",
+				marginRight: "4px",
+				animation: "typing 1s infinite 0.2s",
+			}}
+		/>
+		<Box
+			sx={{
+				width: 8,
+				height: 8,
+				backgroundColor: "#fff",
+				borderRadius: "50%",
+				animation: "typing 1s infinite 0.4s",
+			}}
+		/>
+		<style>
+			{`@keyframes typing {
+          0% { opacity: 0.2; }
+          20% { opacity: 1; }
+          100% { opacity: 0.2; }
+      }`}
+		</style>
+	</Box>
+);
 
 const FullChatPage = () => {
 	const theme = useTheme();
-	const [inputMessage, setInputMessage] = useState(""); // Input message state
-	const socket = useSocket(); // Get the socket from the context
-	const messageListRef = useRef(); // Ref for MessageList to enable auto-scroll
+	const [inputMessage, setInputMessage] = useState("");
+	const socket = useSocket();
+	const messageListRef = useRef();
 	const { messages, isTyping } = useSelector((state) => state.chat);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const [isLoading, setIsLoading] = useState(true); // Loading state for socket setup
 
 	useEffect(() => {
 		if (!socket) {
@@ -42,12 +80,17 @@ const FullChatPage = () => {
 
 		socket.on("connect", () => {
 			dispatch(setSocketConnected(true));
-			setIsLoading(false); // Set isLoading to false once setup is complete
 		});
 
 		socket.on("response", (data) => {
 			if (data.message) {
-				dispatch(addMessage({ message: data.message, direction: "incoming" }));
+				dispatch(
+					addMessage({
+						message: data.message,
+						direction: "incoming",
+						timestamp: new Date(),
+					})
+				);
 				dispatch(setTyping(false));
 			}
 		});
@@ -58,6 +101,7 @@ const FullChatPage = () => {
 				addMessage({
 					message: `Financial Data:\n${formattedData}`,
 					direction: "incoming",
+					timestamp: new Date(),
 				})
 			);
 			dispatch(setTyping(false));
@@ -65,7 +109,11 @@ const FullChatPage = () => {
 
 		socket.on("error", (data) => {
 			dispatch(
-				addMessage({ message: `Error: ${data.message}`, direction: "incoming" })
+				addMessage({
+					message: `Error: ${data.message}`,
+					direction: "incoming",
+					timestamp: new Date(),
+				})
 			);
 			dispatch(setTyping(false));
 		});
@@ -94,7 +142,13 @@ const FullChatPage = () => {
 
 	const handleSend = () => {
 		if (inputMessage.trim() !== "") {
-			dispatch(addMessage({ message: inputMessage, direction: "outgoing" }));
+			dispatch(
+				addMessage({
+					message: inputMessage,
+					direction: "outgoing",
+					timestamp: new Date(),
+				})
+			);
 			socket.emit("chat_message", inputMessage);
 			setInputMessage("");
 			dispatch(setTyping(true));
@@ -102,18 +156,24 @@ const FullChatPage = () => {
 	};
 
 	const goBack = () => {
-		navigate(-1); // Navigate back to the previous page
+		navigate(-1);
 	};
 
 	const handleKeyDown = (event) => {
 		if (event.key === "Enter") {
-			event.preventDefault(); // Prevents a new line from being added
-			handleSend(); // Calls the handleSend function
+			event.preventDefault();
+			handleSend();
 		}
 	};
 
 	return (
-		<Box m="1.5rem 2.5rem" height="90vh" display="flex" flexDirection="column">
+		<Box
+			p="1.5rem 2.5rem"
+			height="100vh"
+			display="flex"
+			flexDirection="column"
+			sx={{ boxSizing: "border-box", overflow: "hidden" }}
+		>
 			{/* Header */}
 			<Box
 				sx={{
@@ -121,9 +181,8 @@ const FullChatPage = () => {
 					alignItems: "center",
 					padding: "16px",
 					color: "#fff",
-					backgroundColor: theme.palette.background.alt, // Darker background
-					borderRadius: "12px", // Rounded corners for header
-					boxShadow: "0 4px 12px rgba(0,0,0,0.15)", // Subtle shadow for depth
+					backgroundColor: "transparent",
+					borderRadius: "12px",
 				}}
 			>
 				<IconButton onClick={goBack} sx={{ color: "#fff" }}>
@@ -133,148 +192,213 @@ const FullChatPage = () => {
 					variant="h6"
 					sx={{ marginLeft: "16px", fontWeight: "bold" }}
 				>
-					SMART AI - Full Chat
+					SMART AI - Your Personalized Financial Assistant
 				</Typography>
 			</Box>
 
 			{/* Chat Area */}
 			<Box
 				sx={{
-					// Subtracting more for proper height
+					flexGrow: 1,
 					display: "flex",
 					flexDirection: "column",
-					justifyContent: "flex-start",
-					flexGrow: 1,
-					padding: "20px",
-					// padding: "20px", // Padding around chat
-					background: "#111827", // Dark background for chat area
+					background: theme.palette.background.default,
 					borderRadius: "12px",
-					// boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle shadow for chat area
-					backgroundColor: "transparent",
-					overflow: "auto",
+					overflow: "hidden",
+					position: "relative",
 				}}
 			>
-				{/* Message Area */}
-				<Box
-					ref={messageListRef}
-					sx={{
-						overflowY: "auto",
-						padding: "30px", // More padding for messages
-						flexGrow: 1, // Allow the message area to grow
-						// marginBottom: "3px",
-						backgroundColor: "transparent",
-					}}
-				>
-					{messages.length > 0 && (
-						<List>
-							{messages.map((msg, index) => (
-								<ListItem
-									key={index}
-									sx={{
-										display: "flex",
-										justifyContent:
-											msg.direction === "outgoing" ? "flex-end" : "flex-start",
-										marginBottom: "15px",
-										backgroundColor: theme.palette.background.default,
-										padding: "10px",
+				{/* Assistant Image and Welcome Message */}
+				<AnimatePresence>
+					{messages.length === 0 && (
+						<Box
+							component={motion.div}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0, transition: { duration: 0.5 } }}
+							sx={{
+								flexShrink: 0,
+								padding: "20px",
+								backgroundColor: "transparent",
+							}}
+						>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									marginBottom: "20px",
+								}}
+							>
+								<img
+									src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
+									alt="AI Assistant"
+									style={{
+										width: "60px",
+										height: "60px",
+										borderRadius: "50%",
+										marginRight: "15px",
+									}}
+								/>
+								<Typography variant="h5" sx={{ fontWeight: "bold" }}>
+									Welcome to SMART AI!
+								</Typography>
+							</Box>
+							<Typography variant="body1" sx={{ marginLeft: "75px" }}>
+								Ask me anything about your finances.
+							</Typography>
+							<Typography variant="body1" sx={{ marginLeft: "75px" }}>
+								I can help you track expenses, add income, provide financial
+								insights, and do much more on the go.
+							</Typography>
+							<Typography
+								variant="h6"
+								sx={{
+									marginLeft: "75px",
+									marginTop: "10px",
+									fontWeight: "bold",
+								}}
+							>
+								Let's get started!
+							</Typography>
+						</Box>
+					)}
+				</AnimatePresence>
 
-										// Smooth transition for message appearance
-										opacity: 0,
-										transform: "translateY(10px)",
-										animation: `fadeInUp 0.5s ease forwards`, // Custom animation
-										"@keyframes fadeInUp": {
-											"0%": {
-												opacity: 0,
-												transform: "translateY(10px)",
-											},
-											"100%": {
-												opacity: 1,
-												transform: "translateY(0)",
-											},
-										},
+				{/* Messages */}
+				<Box
+					sx={{
+						flexGrow: 1,
+						overflowY: "auto",
+						padding: "20px",
+					}}
+					ref={messageListRef}
+				>
+					<List sx={{ paddingTop: 0 }}>
+						{messages.map((msg, index) => (
+							<ListItem
+								key={index}
+								sx={{
+									display: "flex",
+									justifyContent:
+										msg.direction === "outgoing" ? "flex-end" : "flex-start",
+									marginBottom: "15px",
+								}}
+								component={motion.div}
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.3 }}
+							>
+								{msg.direction === "incoming" && (
+									<Box sx={{ marginRight: "10px" }}>
+										{/* Incoming Message - AI Image */}
+										<img
+											src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
+											alt="AI"
+											style={{
+												width: "40px",
+												height: "40px",
+												borderRadius: "50%",
+											}}
+										/>
+									</Box>
+								)}
+
+								<Box
+									sx={{
+										backgroundColor:
+											msg.direction === "outgoing"
+												? theme.palette.background.alt
+												: "transparent",
+										color: "#fff",
+										padding: "10px 15px",
+										borderRadius: msg.direction === "outgoing" ? "15px" : "0px",
+										maxWidth: "60%",
+										wordWrap: "break-word",
+										fontFamily: '"Inter", sans-serif',
+										fontSize: "1rem",
+										lineHeight: "1.5",
 									}}
 								>
-									{msg.direction === "incoming" && (
-										<Box sx={{ marginRight: "10px" }}>
-											{/* Incoming Message - AI Image */}
-											<img
-												src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
-												alt="AI"
-												style={{
-													width: "40px",
-													height: "40px",
-													borderRadius: "50%",
-												}}
-											/>
-										</Box>
+									{msg.direction === "incoming" ? (
+										// Render incoming message as markdown
+										<ReactMarkdown remarkPlugins={[remarkGfm]}>
+											{msg.message}
+										</ReactMarkdown>
+									) : (
+										// Render outgoing message as plain text
+										<Typography variant="body1">{msg.message}</Typography>
 									)}
-
-									<Box
+									{/* Message timestamp */}
+									<Typography
+										variant="caption"
 										sx={{
-											backgroundColor:
-												msg.direction === "outgoing"
-													? theme.palette.background.alt
-													: "transparent", // No background for incoming messages
-											color: msg.direction === "outgoing" ? "#fff" : "#fff", // White text for outgoing, default text color for incoming
-											padding: "0px 15px",
-											borderRadius: "25px",
-											maxWidth: "60%",
-											wordWrap: "break-word",
-											fontFamily: '"Inter", sans-serif', // Apply Inter font
-											fontSize: "1rem", // Default font size for messages
-											lineHeight: "1.5", // Improve readability with line height
-											// boxShadow:
-											// 	msg.direction === "outgoing"
-											// 		? "0px 4px 10px rgba(0, 0, 0, 0.1)"
-											// 		: "none", // Shadow for outgoing messages only
+											display: "block",
+											marginTop: "5px",
+											color: "rgba(255, 255, 255, 0.7)",
 										}}
 									>
-										{msg.direction === "incoming" ? (
-											// Render incoming message as markdown
-											<ReactMarkdown remarkPlugins={[remarkGfm]}>
-												{msg.message}
-											</ReactMarkdown>
-										) : (
-											// Render outgoing message as plain text
-											<ListItemText
-												primary={msg.message}
-												secondary={new Date().toLocaleTimeString([], {
+										{msg.timestamp
+											? new Date(msg.timestamp).toLocaleTimeString([], {
 													hour: "2-digit",
 													minute: "2-digit",
-												})}
-												sx={{
-													"& .MuiListItemText-primary": {
-														fontFamily: '"Inter", sans-serif', // Apply Inter font
-														fontSize: "1rem", // Default font size for messages
-														lineHeight: "1.5",
-														marginBottom: "2px",
-													},
-													"& .MuiListItemText-secondary": {
-														color: "rgba(255, 255, 255, 0.7)", // Lighter text color for time
-													},
-												}}
-											/>
-										)}
-									</Box>
+												})
+											: ""}
+									</Typography>
+								</Box>
 
-									{msg.direction === "outgoing" && (
-										<Box sx={{ marginLeft: "10px" }}>
-											{/* Outgoing Message - User Image */}
-											<img
-												src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
-												alt="User"
-												style={{
-													width: "40px",
-													height: "40px",
-													borderRadius: "50%",
-												}}
-											/>
-										</Box>
-									)}
-								</ListItem>
-							))}
-						</List>
-					)}
+								{msg.direction === "outgoing" && (
+									<Box sx={{ marginLeft: "10px" }}>
+										{/* Outgoing Message - User Image */}
+										<img
+											src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
+											alt="User"
+											style={{
+												width: "40px",
+												height: "40px",
+												borderRadius: "50%",
+											}}
+										/>
+									</Box>
+								)}
+							</ListItem>
+						))}
+
+						{/* Typing Indicator */}
+						{isTyping && (
+							<ListItem
+								sx={{
+									display: "flex",
+									justifyContent: "flex-start",
+									marginBottom: "15px",
+								}}
+							>
+								<Box sx={{ marginRight: "10px" }}>
+									<img
+										src="https://png.pngtree.com/png-vector/20230217/ourmid/pngtree-chip-ai-human-brain-intelligence-technology-chip-high-tech-circuit-board-png-image_6606248.png"
+										alt="AI"
+										style={{
+											width: "40px",
+											height: "40px",
+											borderRadius: "50%",
+										}}
+									/>
+								</Box>
+								<Box
+									sx={{
+										backgroundColor: "transparent",
+										color: "#fff",
+										padding: "10px 15px",
+										maxWidth: "60%",
+										fontFamily: '"Inter", sans-serif',
+										fontSize: "1rem",
+										lineHeight: "1.5",
+									}}
+								>
+									<TypingIndicator />
+								</Box>
+							</ListItem>
+						)}
+					</List>
 				</Box>
 			</Box>
 
@@ -287,7 +411,8 @@ const FullChatPage = () => {
 					backgroundColor: theme.palette.background.alt,
 					borderRadius: "10px",
 					position: "sticky",
-					bottom: "0",
+					bottom: 0,
+					marginTop: "auto",
 				}}
 			>
 				{/* TextField to take full width */}
@@ -300,17 +425,16 @@ const FullChatPage = () => {
 						onKeyDown={handleKeyDown}
 						variant="outlined"
 						sx={{
-							// Dark background for input field
 							borderRadius: "25px",
 							"& .MuiOutlinedInput-root": {
-								color: "#fff", // White text color
+								color: "#fff",
 								fontFamily: '"Inter", sans-serif',
 							},
 							"& .MuiOutlinedInput-notchedOutline": {
-								borderColor: "#4A5568", // Border color for input
+								borderColor: "#4A5568",
 							},
 							"&:hover .MuiOutlinedInput-notchedOutline": {
-								borderColor: "#CBD5E0", // Border color on hover
+								borderColor: "#CBD5E0",
 							},
 						}}
 					/>
@@ -323,12 +447,9 @@ const FullChatPage = () => {
 						aria-label="send"
 						onClick={handleSend}
 						sx={{
-							backgroundColor: "#3B82F6", // Lighter blue for send button
+							backgroundColor: "#3B82F6",
 							"&:hover": {
-								backgroundColor: "#2563EB", // Darker blue on hover
-							},
-							"&:hover": {
-								backgroundColor: "#2563EB", // Darker blue on hover
+								backgroundColor: "#2563EB",
 							},
 						}}
 					>
