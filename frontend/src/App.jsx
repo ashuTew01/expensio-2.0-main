@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+	BrowserRouter,
+	Routes,
+	Route,
+	Navigate,
+	useNavigate,
+} from "react-router-dom";
 // import Login from "./scenes/login";
 // import Register from "./scenes/register";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -37,6 +43,7 @@ import IncomeScreen from "./scenes/income/screen";
 function App() {
 	const mode = useSelector((state) => state.global.mode);
 	const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+
 	return (
 		<SocketProvider>
 			<BrowserRouter>

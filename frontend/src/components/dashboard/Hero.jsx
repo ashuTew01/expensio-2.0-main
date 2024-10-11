@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 
 const Hero = ({ totalMoneyEarned, totalMoneySpent }) => {
-	const fname = useSelector((state) => state.auth.userInfo.first_name);
+	const fname = useSelector((state) => state.auth.userInfo?.first_name);
 
 	const expenditurePercentage =
 		(Number(totalMoneySpent) /

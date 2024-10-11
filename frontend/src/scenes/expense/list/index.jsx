@@ -323,7 +323,7 @@ const ExpenseListScreen = () => {
 		<Box m="1.5rem 2.5rem">
 			{/* Header Section */}
 			<FlexBetween marginBottom="25px">
-				<Header title="Expense List" subtitle="Keep track of your finances." />
+				<Header title="EXPENSE LIST" subtitle="Keep track of your finances." />
 				<Box>
 					<Button
 						component={Link}

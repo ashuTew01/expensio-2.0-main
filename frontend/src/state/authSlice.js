@@ -29,6 +29,7 @@ const authSlice = createSlice({
 		},
 		removeCredentials: (state, action) => {
 			state.userInfo = null;
+			state.token = null;
 			localStorage.removeItem("tokenExpensio");
 			localStorage.removeItem("userInfoExpensio");
 		},
