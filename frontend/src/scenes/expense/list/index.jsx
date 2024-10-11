@@ -36,6 +36,7 @@ import {
 import { formatExpenseListData } from "../../../utils/formatterFunctions";
 import ErrorDisplay from "../../../components/error/ErrorDisplay";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 
 // Styled components using styled API
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -140,7 +141,7 @@ const ExpenseListScreen = () => {
 
 	// Display loading indicator if any data is loading
 	if (isLoadingCognitiveTriggersData || categoriesLoading || expensesLoading)
-		return <LoadingIndicator />;
+		return <AnimatedLoadingIndicator height={"500px"} />;
 
 	// Handle errors
 	if (cognitiveError || categoriesError || expensesError) {

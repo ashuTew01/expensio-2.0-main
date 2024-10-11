@@ -18,9 +18,11 @@ export const getFinancialSummaryController = async (req, res, next) => {
 		if (!timePeriod || !dateDetails) {
 			throw new ValidationError("Invalid query parameters");
 		}
-		// console.log(
-		// 	`${typeof Number(userId)}\n${typeof timePeriod}\n${typeof Number(year)}\n${typeof Number(month)}\n${typeof req.userToken}`
-		// );
+		const validTimePeriods = ["monthly", "last3months", "last6months"];
+
+		if (!validTimePeriods.includes(timePeriod)) {
+			throw new ValidationError("Invalid Time Period");
+		}
 		const result = await getFinancialSummaryService(
 			userId,
 			timePeriod,
@@ -47,6 +49,11 @@ export const buildFinancialSummaryController = async (req, res, next) => {
 		const { timePeriod, year, month } = req.query;
 		const { userToken } = req; // Bearer token to access the SMART AI Service
 		const dateDetails = { year: Number(year), month: Number(month) };
+		const validTimePeriods = ["monthly", "last3months", "last6months"];
+
+		if (!validTimePeriods.includes(timePeriod)) {
+			throw new ValidationError("Invalid Time Period");
+		}
 
 		// console.log(`${userId}\n${timePeriod}\n${year}\n${month}\n${userToken}`);
 		const result = await buildFinancialSummaryService(

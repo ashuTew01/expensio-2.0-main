@@ -12,10 +12,10 @@ import { useGetIncomeFinancialDataMutation } from "../../state/api"; // Adjust t
 import Header from "../../components/Header"; // Adjust the import path for your Header component
 import FlexBetween from "../../components/FlexBetween"; // Make sure to import your FlexBetween component if it's custom
 import { useEffect } from "react";
-import LoadingIndicator from "../../components/LoadingIndicator";
 import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
+import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
 
 const IncomeFinancialData = () => {
 	const theme = useTheme();
@@ -81,7 +81,7 @@ const IncomeFinancialData = () => {
 				</Box>
 			</FlexBetween>
 
-			{isLoading && <LoadingIndicator />}
+			{isLoading && <AnimatedLoadingIndicator height={"500px"} />}
 
 			{data && data.length === 0 && (
 				<NoDataMessage text="No Incomes are available for this month. Start adding incomes to analyze them here." />

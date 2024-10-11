@@ -32,6 +32,7 @@ import { formatIncomeListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 
 // Styled components using styled API
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -123,7 +124,7 @@ const IncomeListScreen = () => {
 	const [deleteIncomes, { isLoading: isDeleting }] = useDeleteIncomesMutation();
 
 	if (isLoadingCognitiveTriggersData || categoriesLoading || incomesLoading)
-		return <LoadingIndicator />;
+		return <AnimatedLoadingIndicator height={"500px"} />;
 
 	if (cognitiveError || categoriesError || incomesError) {
 		toast.error("Failed to load data. Please try again.");

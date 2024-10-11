@@ -17,6 +17,7 @@ import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
 import { useSelector } from "react-redux";
+import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
 
 const ExpenseFinancialData = () => {
 	const theme = useTheme();
@@ -84,7 +85,7 @@ const ExpenseFinancialData = () => {
 			</FlexBetween>
 			<Box mt="3rem"></Box>
 
-			{isLoading && <LoadingIndicator />}
+			{isLoading && <AnimatedLoadingIndicator height="500px" />}
 
 			{data && data.length === 0 && (
 				<NoDataMessage text="No expenses are available for this month. Start adding expenses to analyze them here." />

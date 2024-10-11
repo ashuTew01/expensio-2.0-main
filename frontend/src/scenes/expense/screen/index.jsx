@@ -13,15 +13,13 @@ import Header from "../../../components/Header";
 import { useGetExpenseByIdQuery } from "../../../state/api";
 import { useParams } from "react-router-dom";
 import OverviewBox from "../../../components/OverviewBox";
-import LoadingIndicator from "../../../components/LoadingIndicator";
+import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 
 const ExpenseScreen = () => {
 	const theme = useTheme();
 	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
 	const { id } = useParams();
-	// console.log(id);
-	// const [expenses, setExpenses] = useState([]);
 	const {
 		data,
 		isLoading: isLoadingEvents,
@@ -29,7 +27,7 @@ const ExpenseScreen = () => {
 	} = useGetExpenseByIdQuery({ id });
 
 	// Handle loading and error states
-	if (isLoadingEvents) return <LoadingIndicator />;
+	if (isLoadingEvents) return <AnimatedLoadingIndicator height="500px" />;
 	if (eventsError) return <p>Error loading expenses.</p>;
 
 	// Check if data is defined and has the expenses property
