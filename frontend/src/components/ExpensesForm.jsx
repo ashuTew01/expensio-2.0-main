@@ -40,6 +40,7 @@ const ExpensesForm = ({
 	const [description, setDescription] = useState("");
 	const [paymentMethod, setPaymentMethod] = useState("");
 	const [mood, setMood] = useState(moods[0]);
+	const [createdAt, setCreatedAt] = useState(); // New state for createdAt
 
 	const [saveExpenses, { isLoading, isError }] = useSaveExpensesMutation();
 
@@ -53,6 +54,10 @@ const ExpensesForm = ({
 		setCategoryCode(event.target.value);
 	};
 
+	const handleCreatedAtChange = (event) => {
+		setCreatedAt(event.target.value);
+	};
+
 	const resetForm = () => {
 		setAmount(0);
 		setTitle("");
@@ -62,6 +67,7 @@ const ExpensesForm = ({
 		setDescription("");
 		setPaymentMethod("");
 		setMood(moods[0]);
+		setCreatedAt("");
 	};
 	const handleSubmit = async () => {
 		try {
@@ -76,6 +82,7 @@ const ExpensesForm = ({
 				description,
 				paymentMethod,
 				mood,
+				...(createdAt && { createdAt: new Date(createdAt).toISOString() }),
 			};
 
 			// Filter out any fields with empty values (like "", null, undefined)
@@ -222,16 +229,6 @@ const ExpensesForm = ({
 						</FormControl>
 					</Grid>
 
-					<Grid item xs={6}>
-						<TextField
-							sx={{ ...backgroundColorStyle }}
-							label="Description"
-							variant="outlined"
-							value={description}
-							onChange={(e) => setDescription(e.target.value)}
-							fullWidth
-						/>
-					</Grid>
 					{/* <Grid item xs={6}>
             <TextField
               sx={{ ...backgroundColorStyle }}
@@ -298,6 +295,33 @@ const ExpensesForm = ({
 							</Select>
 						</FormControl>
 					</Grid>
+
+					{/* New Created At Input */}
+					<Grid item xs={6}>
+						<TextField
+							sx={{ ...backgroundColorStyle }}
+							label="Created At"
+							variant="outlined"
+							type="datetime-local"
+							value={createdAt}
+							onChange={handleCreatedAtChange}
+							fullWidth
+							InputLabelProps={{ shrink: true }}
+						/>
+					</Grid>
+
+					<Grid item xs={6}>
+						<TextField
+							sx={{ ...backgroundColorStyle }}
+							label="Description"
+							variant="outlined"
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							fullWidth
+							multiline
+							rows={3} // Increased number of rows for a bigger input
+						/>
+					</Grid>
 					{/* <Grid item xs={6}>
             <TextField
               sx={{ ...backgroundColorStyle }}
@@ -315,7 +339,7 @@ const ExpensesForm = ({
 				color="secondary"
 				onClick={handleSubmit}
 				disabled={isLoading}
-				sx={{ mt: 4, fontSize: 15, p: 2, paddingInline: 4 }}
+				sx={{ mt: 2, fontSize: 15, p: 2, paddingInline: 4 }}
 			>
 				{isLoading ? <CircularProgress size={24} /> : "Upload Data"}
 			</Button>

@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import { Box, Typography, Button } from "@mui/material";
 import Lottie from "lottie-react";
-import errorAnimation from "../../animation/errorDisplayComponent.json"; // Ensure this path is correct
+import errorAnimation from "../../animations/errorDisplayComponent.json"; // Ensure this path is correct
 
 const ErrorDisplay = ({
 	width = 250, // Width of the animation

@@ -32,6 +32,7 @@ const IncomeForm = ({
 	const [categoryCode, setCategoryCode] = useState("");
 	const [description, setDescription] = useState("");
 	const [incomeType, setIncomeType] = useState("");
+	const [createdAt, setCreatedAt] = useState(""); // New state for createdAt
 	// const [dateTime, setDateTime] = useState(new Date());
 	// const [event, setEvent] = useState("");
 	// const [expenseType, setExpenseType] = useState("");
@@ -50,12 +51,17 @@ const IncomeForm = ({
 		setCategoryCode(event.target.value);
 	};
 
+	const handleCreatedAtChange = (event) => {
+		setCreatedAt(event.target.value);
+	};
+
 	const resetForm = () => {
 		setAmount(0);
 		setTitle("");
 		setCategoryCode("");
 		setDescription("");
 		setIncomeType("");
+		setCreatedAt("");
 	};
 	const handleSubmit = async () => {
 		try {
@@ -65,6 +71,7 @@ const IncomeForm = ({
 				categoryCode,
 				description,
 				incomeType,
+				...(createdAt && { createdAt: new Date(createdAt).toISOString() }),
 			};
 
 			// Filter out any fields with empty values (like "", null, undefined)
@@ -152,16 +159,6 @@ const IncomeForm = ({
 					</Grid>
 
 					<Grid item xs={6}>
-						<TextField
-							sx={{ ...backgroundColorStyle }}
-							label="Description"
-							variant="outlined"
-							value={description}
-							onChange={(e) => setDescription(e.target.value)}
-							fullWidth
-						/>
-					</Grid>
-					<Grid item xs={6}>
 						<FormControl fullWidth variant="outlined">
 							<InputLabel id="income-type-label">Income Type</InputLabel>
 							<Select
@@ -180,6 +177,33 @@ const IncomeForm = ({
 								)}
 							</Select>
 						</FormControl>
+					</Grid>
+
+					{/* New Created At Input */}
+					<Grid item xs={6}>
+						<TextField
+							sx={{ ...backgroundColorStyle }}
+							label="Created At"
+							variant="outlined"
+							type="datetime-local"
+							value={createdAt}
+							onChange={handleCreatedAtChange}
+							fullWidth
+							InputLabelProps={{ shrink: true }}
+						/>
+					</Grid>
+
+					<Grid item xs={6}>
+						<TextField
+							sx={{ ...backgroundColorStyle }}
+							label="Description"
+							variant="outlined"
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							fullWidth
+							multiline
+							rows={3} // Increased number of rows for a bigger input
+						/>
 					</Grid>
 				</Grid>
 			</Box>
