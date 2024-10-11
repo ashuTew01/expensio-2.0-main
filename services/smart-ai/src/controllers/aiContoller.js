@@ -16,7 +16,7 @@ export const callAiController = async (req, res, next) => {
 		// Validate request body
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const { conversationHistory, functions, model } = value;

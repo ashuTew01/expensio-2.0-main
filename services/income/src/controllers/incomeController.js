@@ -35,7 +35,7 @@ export const getIncomesController = async (req, res, next) => {
 
 		const { error, value } = querySchema.validate(req.query);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const incomesData = await getIncomesService(value, userId);
@@ -82,7 +82,7 @@ export const addIncomesController = async (req, res, next) => {
 
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const newIncomes = await addIncomesService(value, userId);
@@ -120,7 +120,7 @@ export const deleteIncomesController = async (req, res, next) => {
 
 		const { error, value } = deleteIncomesSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const result = await deleteIncomesByIdsService(value.incomes, userId);
@@ -151,7 +151,7 @@ export const addCategoriesController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const newCategories = await addCategoriesService(value, req.user?.id);
@@ -185,7 +185,7 @@ export const getCategoriesByIdsController = async (req, res, next) => {
 	const { error, value } = schema.validate(req.body);
 
 	if (error) {
-		throw new ValidationError(error.details[0].message);
+		throw new ValidationError("Some fields are invalid.", error);
 	}
 
 	try {
@@ -213,7 +213,7 @@ export const removeCategoriesController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		await removeCategoriesService(value.codes);

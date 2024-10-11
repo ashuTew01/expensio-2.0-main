@@ -7,6 +7,7 @@ import {
 	deleteUserController,
 	sendVerificationEmailController,
 	updateProfileController,
+	getUserDetailsController,
 } from "../controllers/userController.js";
 import { authMiddleware } from "@expensio/sharedlib";
 const router = express.Router();
@@ -24,5 +25,6 @@ router.get(
 );
 router.delete("/user", authMiddleware, deleteUserController);
 router.put("/user", authMiddleware, updateProfileController);
+router.get("/user", authMiddleware, getUserDetailsController);
 
 export default router;

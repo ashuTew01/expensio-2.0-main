@@ -13,7 +13,7 @@
 		"@chatscope/chat-ui-kit-react": "^2.0.3",
 		"@emotion/react": "^11.13.3",
 		"@emotion/styled": "^11.13.0",
-		"@mui/icons-material": "^5.16.7",
+		"@mui/icons-material": "^6.1.3",
 		"@mui/lab": "^6.0.0-beta.11",
 		"@mui/material": "^6.1.3",
 		"@mui/x-data-grid": "^7.8.0",

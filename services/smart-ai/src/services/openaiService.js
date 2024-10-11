@@ -37,10 +37,10 @@ const resetTokensIfNewMonth = async (userTokens, session) => {
  * @param {Number} minTokensRequired - The minimum number of tokens required to proceed.
  * @throws {Error} - If the user doesn't have enough tokens.
  */
-const checkTokenAvailability = (userTokens, minTokensRequired = 50) => {
+const checkTokenAvailability = (userTokens, minTokensRequired = 5) => {
 	if (userTokens.currentTokens < minTokensRequired) {
 		throw new Error(
-			`Insufficient tokens. You have ${userTokens.currentTokens} tokens, which is less than the required minimum of ${minTokensRequired}.`
+			`Your AI tokens are insufficient. You have ${userTokens.currentTokens.toFixed(2)} AI tokens, which is less than the required minimum of ${minTokensRequired}. Please contact the developers or buy some AI tokens to continue.`
 		);
 	}
 };
@@ -114,15 +114,22 @@ export const callOpenaiService = async (
 		userTokens = await resetTokensIfNewMonth(userTokens);
 		// Check if the user has enough tokens
 		checkTokenAvailability(userTokens);
-
+		let response;
 		// Call OpenAI with conversation history and function calling capabilities
-		const openai = await connectOpenai();
-		const response = await openai.chat.completions.create({
-			model, // Use the specified model
-			messages: conversationHistory,
-			functions, // Optional: include functions if needed
-			function_call: functions.length ? "auto" : undefined,
-		});
+		try {
+			const openai = await connectOpenai();
+			response = await openai.chat.completions.create({
+				model, // Use the specified model
+				messages: conversationHistory,
+				functions, // Optional: include functions if needed
+				function_call: functions.length ? "auto" : undefined,
+			});
+		} catch (error) {
+			logError(error);
+			throw new Error(
+				`There was some issue connecting to our servers. Please try again later.`
+			);
+		}
 
 		// Asynchronously perform token deduction and commit after sending the response
 		setImmediate(async () => {

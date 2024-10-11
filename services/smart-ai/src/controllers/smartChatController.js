@@ -67,13 +67,22 @@ export const handleUserInputController = async (message, socket) => {
 		// Combine the initialPrompt and the stored conversation history when calling OpenAI
 		//Initial prompt kept out so that it doesn't get pop after max_limit.
 		const historyForOpenAI = [...conversationHistory.history, initialPrompt];
-
+		let aiResponse;
 		// Call OpenAI to understand the message and determine function calls
-		const aiResponse = await callOpenaiService(
-			userId,
-			historyForOpenAI,
-			openAIGeneralFunctions
-		);
+		try {
+			aiResponse = await callOpenaiService(
+				userId,
+				historyForOpenAI,
+				openAIGeneralFunctions
+			);
+		} catch (error) {
+			socket.emit("response", {
+				type: "error",
+				message: error.message,
+			});
+			logError(error);
+			return;
+		}
 
 		// If OpenAI suggests a function to call
 		const functionCall = aiResponse.choices[0].message.function_call;
@@ -144,7 +153,7 @@ export const handleUserInputController = async (message, socket) => {
 		// Save updated conversation history
 		await conversationHistory.save();
 	} catch (error) {
-		logError(error);
+		// logError(error);
 		socket.emit("response", {
 			type: "error",
 			message: "An error occurred. Please try again.",

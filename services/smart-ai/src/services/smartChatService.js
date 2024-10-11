@@ -19,9 +19,9 @@ export const handleCreateExpenseService = async (
 	conversationHistory
 ) => {
 	try {
-		socket.emit("loading", {
+		socket.emit("response", {
 			type: "loading",
-			message: "Creating Expense. Please Wait...",
+			message: "🚀 Creating your expense... Please hold on a moment! 🕐",
 		});
 		const prompt = `Create an expense from the messages you see above this in the conversation history. 
                 TRY TO INFER AND ASSUME AS MANY PARAMETERS AS POSSIBLE.. AND FOLLOW THESE RULES
