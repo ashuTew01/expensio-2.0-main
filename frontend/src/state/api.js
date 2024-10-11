@@ -3,6 +3,24 @@ import { v4 as uuidv4 } from "uuid"; // Import UUID generator
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
+const serializeQueryParams = (params) => {
+	const searchParams = new URLSearchParams();
+
+	Object.entries(params).forEach(([key, value]) => {
+		if (value === undefined || value === null || value === "") return;
+
+		if (Array.isArray(value)) {
+			value.forEach((val) => {
+				searchParams.append(key, val);
+			});
+		} else {
+			searchParams.append(key, value);
+		}
+	});
+
+	return searchParams.toString();
+};
+
 export const api = createApi({
 	baseQuery: fetchBaseQuery({
 		baseUrl: reactAppBaseUrl,
@@ -51,7 +69,7 @@ export const api = createApi({
 				body: audioFile,
 			}),
 		}),
-		getAllCategories: build.query({
+		getAllExpenseCategories: build.query({
 			query: () => ({
 				url: `expense/category/all`,
 				method: "GET",
@@ -94,21 +112,26 @@ export const api = createApi({
 				page,
 				pageSize,
 				id,
-			}) => ({
-				url: `expense`,
-				method: "GET",
-				params: {
+			}) => {
+				const queryParams = {
 					...(start_date && { start_date }),
 					...(end_date && { end_date }),
 					...(search && { search }),
 					...(categoryCode && { categoryCode }),
-					...(cognitiveTriggerCodes && { cognitiveTriggerCodes }), // this ensures only non-empty values are passed
+					...(cognitiveTriggerCodes.length > 0 && { cognitiveTriggerCodes }),
 					...(mood && { mood }),
 					...(page && { page }),
 					...(pageSize && { pageSize }),
 					...(id && { id }),
-				},
-			}),
+				};
+
+				const serializedParams = serializeQueryParams(queryParams);
+
+				return {
+					url: `expense?${serializedParams}`,
+					method: "GET",
+				};
+			},
 		}),
 		getExpenseById: build.query({
 			query: ({ id }) => ({
@@ -117,15 +140,22 @@ export const api = createApi({
 				params: { id },
 			}),
 		}),
+		deleteExpenses: build.mutation({
+			query: (expenseIds) => ({
+				url: `expense`,
+				method: "DELETE",
+				body: { expenses: expenseIds },
+			}),
+		}),
 		// income
 		getAllIncome: build.query({
 			query: ({
 				start_date,
 				end_date,
 				search,
-				categoryCode,
+				category_code,
 				page,
-				pageSize,
+				page_size,
 				id,
 			}) => ({
 				url: `income`,
@@ -134,9 +164,9 @@ export const api = createApi({
 					...(start_date && { start_date }),
 					...(end_date && { end_date }),
 					...(search && { search }),
-					...(categoryCode && { categoryCode }),
+					...(category_code && { category_code }),
 					...(page && { page }),
-					...(pageSize && { pageSize }),
+					...(page_size && { page_size }),
 					...(id && { id }),
 				},
 			}),
@@ -153,6 +183,13 @@ export const api = createApi({
 					},
 				};
 			},
+		}),
+		deleteIncomes: build.mutation({
+			query: (incomeIds) => ({
+				url: `income`,
+				method: "DELETE",
+				body: { incomes: incomeIds },
+			}),
 		}),
 		getExpenseFinancialData: build.mutation({
 			query: (data) => ({
@@ -221,6 +258,9 @@ export const {
 	useGetExpenseByIdQuery,
 	useGetUserSummaryQuery,
 	useGetAllExpensesQuery,
+	useDeleteExpensesMutation,
+
+	useDeleteIncomesMutation,
 
 	// financial data
 	useGetExpenseFinancialDataMutation,
@@ -237,7 +277,7 @@ export const {
 	useSaveIncomeMutation,
 	useSaveExpensesThroughTextMutation,
 	useTranscribeAudioMutation,
-	useGetAllCategoriesQuery,
+	useGetAllExpenseCategoriesQuery,
 
 	useSendOtpMutation,
 	useVerifyOtpMutation,

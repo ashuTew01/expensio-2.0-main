@@ -13,6 +13,8 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 import { api } from "./state/api"; //LINE X1
 import { googleAuthApi } from "./state/googleAuth";
 import { summaryApi } from "./state/summaryApi";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 const store = configureStore({
 	reducer: {
@@ -35,7 +37,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
 	<Provider store={store}>
 		<React.StrictMode>
-			<App />
+			<LocalizationProvider dateAdapter={AdapterDateFns}>
+				<App />
+			</LocalizationProvider>
 		</React.StrictMode>
 	</Provider>
 );

@@ -16,9 +16,9 @@ import { connectKafka } from "../config/connectKafka.js";
  * @param {Date} queryParameters.start_date - The start date of the date range.
  * @param {Date} queryParameters.end_date - The end date of the date range.
  * @param {string} queryParameters.search - The search term to search for in the title and description.
- * @param {string} queryParameters.categoryId - The ID of the category to filter by.
+ * @param {string} queryParameters.category_id - The ID of the category to filter by.
  * @param {number} queryParameters.page - The page number to retrieve, defaults to 1.
- * @param {number} queryParameters.pageSize - The number of items to return per page, defaults to 20.
+ * @param {number} queryParameters.page_size - The number of items to return per page, defaults to 20.
  * @param {string} queryParameters.id - The ID of the specific income to retrieve (supersedes all other parameters).
  * @param {string} userId - The ID of the user whose incomes are being retrieved.
  * @returns {Promise<Object>} - A promise that resolves with an object containing the
@@ -30,10 +30,10 @@ export const getIncomesService = async (queryParameters, userId) => {
 		start_date,
 		end_date,
 		search,
-		categoryId,
-		categoryCode,
+		category_id,
+		category_code,
 		page = 1,
-		pageSize = 20,
+		page_size = 20,
 		id, // id supersedes everything else
 	} = queryParameters;
 
@@ -67,16 +67,16 @@ export const getIncomesService = async (queryParameters, userId) => {
 	}
 
 	// Fetch categoryID is categoryCode is provided
-	if (!categoryId && categoryCode) {
-		const category = await Category.find({ code: categoryCode });
-		if (category) query.categoryId = category._id;
+	if (!category_id && category_code) {
+		const category = await Category.find({ code: category_code });
+		if (category) query.categoryId = category[0]._id;
 	}
 
-	if (categoryId) {
-		query.categoryId = categoryId;
+	if (category_id) {
+		query.categoryId = category_id;
 	}
 
-	const limit = parseInt(pageSize);
+	const limit = parseInt(page_size);
 	const skip = (parseInt(page) - 1) * limit;
 
 	const incomes = await Income.find(query)

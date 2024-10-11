@@ -29,6 +29,8 @@ export const getExpensesService = async (queryParameters, userId) => {
 
 	let query = { userId };
 
+	// console.log("Cognitive Trigger Codes:", cognitiveTriggerCodes);
+
 	if (id) {
 		const expense = await Expense.findOne({ _id: id, userId }).populate(
 			"categoryId cognitiveTriggerIds"
@@ -57,25 +59,48 @@ export const getExpensesService = async (queryParameters, userId) => {
 		];
 	}
 
-	if (eventId) {
-		query.eventId = eventId;
-	}
+	// if (eventId) {
+	//     query.eventId = eventId;
+	// }
 
-	// Fetch categoryID is categoryCode is provided
+	// Fetch categoryID if categoryCode is provided and categoryId is not
 	if (!categoryId && categoryCode) {
 		const category = await Category.find({ code: categoryCode });
-		if (category) query.categoryId = category._id;
+		if (category && category.length > 0) {
+			query.categoryId = category[0]._id;
+		}
 	}
 
-	// Fetch cognitiveTriggerIds based on cognitiveTriggerCodes if provided
+	// Handle cognitiveTriggerCodes by fetching their corresponding IDs and using $in
 	if (cognitiveTriggerCodes && cognitiveTriggerCodes.length > 0) {
 		const cognitiveTriggers = await CognitiveTrigger.find({
 			code: { $in: cognitiveTriggerCodes },
 		});
 		if (cognitiveTriggers && cognitiveTriggers.length > 0) {
-			query.cognitiveTriggerIds = cognitiveTriggers.map(
-				(trigger) => trigger._id
-			); // Assign fetched cognitiveTriggerIds
+			const triggerIds = cognitiveTriggers.map((trigger) => trigger._id);
+			// Use $in to match any of the cognitiveTriggerIds
+			if (query.cognitiveTriggerIds) {
+				// If already set by cognitiveTriggerIds, combine both arrays
+				// This will match expenses that have any cognitive triggers from either array
+				query.cognitiveTriggerIds = {
+					$in: [...triggerIds, ...cognitiveTriggerIds],
+				};
+			} else {
+				query.cognitiveTriggerIds = { $in: triggerIds };
+			}
+		}
+	}
+
+	// Handle cognitiveTriggerIds directly by using $in
+	if (cognitiveTriggerIds && cognitiveTriggerIds.length > 0) {
+		if (query.cognitiveTriggerIds) {
+			// If already set by cognitiveTriggerCodes, combine both arrays
+			query.cognitiveTriggerIds.$in = [
+				...query.cognitiveTriggerIds.$in,
+				...cognitiveTriggerIds,
+			];
+		} else {
+			query.cognitiveTriggerIds = { $in: cognitiveTriggerIds };
 		}
 	}
 
@@ -83,16 +108,12 @@ export const getExpensesService = async (queryParameters, userId) => {
 		query.categoryId = categoryId;
 	}
 
-	if (cognitiveTriggerIds && cognitiveTriggerIds.length > 0) {
-		query.cognitiveTriggerIds = { $in: cognitiveTriggerIds };
-	}
-
 	if (mood) {
 		query.mood = mood;
 	}
 
-	const limit = parseInt(pageSize);
-	const skip = (parseInt(page) - 1) * limit;
+	const limit = parseInt(pageSize, 10);
+	const skip = (parseInt(page, 10) - 1) * limit;
 
 	const expenses = await Expense.find(query)
 		.populate("categoryId cognitiveTriggerIds")
@@ -105,7 +126,7 @@ export const getExpensesService = async (queryParameters, userId) => {
 	return {
 		expenses,
 		total,
-		page: parseInt(page),
+		page: parseInt(page, 10),
 		pages: Math.ceil(total / limit),
 	};
 };

@@ -19,12 +19,12 @@ export const getIncomesController = async (req, res, next) => {
 		start_date: Joi.date().iso().optional(),
 		end_date: Joi.date().iso().optional(),
 		search: Joi.string().max(200).optional(),
-		categoryId: Joi.string()
+		category_id: Joi.string()
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
-		categoryCode: Joi.string().optional(),
+		category_code: Joi.string().optional(),
 		page: Joi.number().integer().min(1).optional(),
-		pageSize: Joi.number().integer().min(1).optional(),
+		page_size: Joi.number().integer().min(1).optional(),
 		id: Joi.string()
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),

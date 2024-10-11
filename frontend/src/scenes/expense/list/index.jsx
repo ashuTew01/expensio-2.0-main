@@ -1,8 +1,8 @@
-import FlexBetween from "../../../components/FlexBetween";
-import React, { useState } from "react";
-import Header from "../../../components/Header";
+// src/scenes/expense/list/index.jsx
+
+import React, { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import { styled } from "@mui/material/styles";
-import { Link } from "react-router-dom";
 import {
 	Box,
 	Button,
@@ -13,41 +13,80 @@ import {
 	InputLabel,
 	InputBase,
 	IconButton,
+	Grid,
+	TextField,
+	Tooltip, // For better UX on the delete button
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Search, Delete } from "@mui/icons-material"; // Added Delete icon
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DataGrid } from "@mui/x-data-grid";
+import { toast } from "react-toastify"; // For user feedback (optional)
+
+import FlexBetween from "../../../components/FlexBetween";
+import Header from "../../../components/Header";
+import LoadingIndicator from "../../../components/LoadingIndicator";
+import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
 import {
 	useGetAllExpensesQuery,
-	useGetAllCategoriesQuery,
 	useGetAllCognitiveTriggersQuery,
+	useGetAllExpenseCategoriesQuery,
+	// Placeholder for delete query
+	useDeleteExpensesMutation, // Uncomment when delete query is implemented
 } from "../../../state/api";
-import { toast } from "react-toastify";
-import LoadingIndicator from "../../../components/LoadingIndicator";
 import { formatExpenseListData } from "../../../utils/formatterFunctions";
-import { DataGrid } from "@mui/x-data-grid";
-import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
+import ErrorDisplay from "../../../components/error/ErrorDisplay";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-// Styled components
-const TableHeader = styled(Box)(({ theme }) => ({
-	backgroundColor: theme.palette.secondary.main,
-	color: "white",
-}));
-
-const HoverRow = styled(Box)(({ theme }) => ({
-	"&:hover": {
+// Styled components using styled API
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+	border: "none",
+	borderRadius: "8px",
+	boxShadow: theme.shadows[5],
+	"& .MuiDataGrid-cell": {
+		borderBottom: "none",
+		color: theme.palette.text.primary,
+	},
+	"& .MuiDataGrid-columnHeaders": {
 		backgroundColor: theme.palette.secondary.main,
-		cursor: "pointer",
-		"& > *": {
-			color: "white",
-		},
+		color: theme.palette.common.white,
+		fontSize: "16px",
+		fontWeight: "bold",
+		borderBottom: "none",
+	},
+	"& .MuiDataGrid-virtualScroller": {
+		backgroundColor: theme.palette.background.paper,
+	},
+	"& .MuiDataGrid-footerContainer": {
+		backgroundColor: theme.palette.background.default, // Set footer to background.default
+		color: theme.palette.common.white,
+		borderTop: "none",
+	},
+	"& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+		color: `${theme.palette.common.white} !important`,
+	},
+	// Set all rows to background.default
+	"& .MuiDataGrid-row": {
+		backgroundColor: theme.palette.background.default,
 	},
 }));
 
 const ExpenseListScreen = () => {
 	const theme = useTheme();
+	const navigate = useNavigate(); // Initialize useNavigate
 
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [selectedExpenseId, setSelectedExpenseId] = useState(null);
+
+	// State variables
+	const [searchInput, setSearchInput] = useState("");
+	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategoryCode, setSelectedCategoryCode] = useState("");
-	const [selectedType, setSelectedType] = useState("");
-	const [selectedMood, setSelectedMood] = useState("");
+	const [selectedCognitiveTriggers, setSelectedCognitiveTriggers] = useState(
+		[]
+	);
+	// Removed selectedMood state
+	const [startDate, setStartDate] = useState(null);
+	const [endDate, setEndDate] = useState(null);
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
 		pageSize: 10,
@@ -55,6 +94,7 @@ const ExpenseListScreen = () => {
 
 	const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
+	// Fetch data using RTK Query
 	const {
 		data: cognitiveTriggersData,
 		isLoading: isLoadingCognitiveTriggersData,
@@ -65,39 +105,103 @@ const ExpenseListScreen = () => {
 		data: categoriesData,
 		isLoading: categoriesLoading,
 		isError: categoriesError,
-	} = useGetAllCategoriesQuery();
+	} = useGetAllExpenseCategoriesQuery();
 
 	const {
 		data: expensesData,
 		isLoading: expensesLoading,
 		isError: expensesError,
+		refetch,
 	} = useGetAllExpensesQuery({
+		start_date: startDate ? startDate.toISOString() : null,
+		end_date: endDate ? endDate.toISOString() : null,
+		search: searchTerm,
+		categoryCode: selectedCategoryCode,
+		cognitiveTriggerCodes: selectedCognitiveTriggers,
 		page: paginationModel.page + 1,
 		pageSize: paginationModel.pageSize,
+		id: null, // Assuming no single expense is being fetched
 	});
 
+	// Create a mapping from code to name for Cognitive Triggers
+	const cognitiveTriggerMap = useMemo(() => {
+		const map = {};
+		cognitiveTriggersData?.cognitiveTriggers?.forEach((trigger) => {
+			map[trigger.code] = trigger.name;
+		});
+		return map;
+	}, [cognitiveTriggersData]);
+
+	// console.log(selectedCognitiveTriggers);
+
+	// Placeholder for delete mutation
+	const [deleteExpenses, { isLoading: isDeleting }] =
+		useDeleteExpensesMutation(); // Uncomment when delete query is implemented
+
+	// Display loading indicator if any data is loading
 	if (isLoadingCognitiveTriggersData || categoriesLoading || expensesLoading)
 		return <LoadingIndicator />;
 
+	// Handle errors
+	if (cognitiveError || categoriesError || expensesError) {
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text="Error loading data. Please try again later."
+				/>
+			</Box>
+		);
+	}
+
+	// Styling for background color
 	const backgroundColorStyle = {
 		backgroundColor: theme.palette.background.default,
 	};
 
+	// Handlers for input changes
 	const handleCategoryChange = (event) => {
 		const value = event.target.value;
 		setSelectedCategoryCode(value === "" ? "" : value);
 	};
 
-	const handleTypeChange = (e) => {
-		const value = e.target.value;
-		setSelectedType(value === "" ? "" : value);
+	const handleCognitiveTriggerChange = (event) => {
+		console.log(event);
+		const {
+			target: { value },
+		} = event;
+		if (value.includes("")) {
+			// If "All" is selected, clear the cognitive triggers array
+			setSelectedCognitiveTriggers([]);
+		} else {
+			// Otherwise, set the selected cognitive triggers
+			setSelectedCognitiveTriggers(
+				typeof value === "string" ? value.split(",") : value
+			);
+		}
 	};
 
-	const handleMoodChange = (e) => {
-		const value = e.target.value;
-		setSelectedMood(value === "" ? "" : value);
+	const handleSearchInputChange = (e) => {
+		setSearchInput(e.target.value);
 	};
 
+	const handleKeyDown = (e) => {
+		if (e.key === "Enter") {
+			setSearchTerm(searchInput.trim());
+		}
+	};
+
+	const handleSearchClick = () => {
+		setSearchTerm(searchInput.trim());
+	};
+
+	// Define DataGrid columns
 	const Datagridcolumns = [
 		{
 			field: "serial",
@@ -118,7 +222,7 @@ const ExpenseListScreen = () => {
 			field: "amount",
 			headerName: "Amount",
 			flex: 0.5,
-			renderCell: (params) => params.value.length,
+			// renderCell: (params) => `$${params.value.toFixed(2)}`,
 		},
 		{
 			field: "dateNtime",
@@ -129,132 +233,248 @@ const ExpenseListScreen = () => {
 			field: "cognitiveTriggers",
 			headerName: "Cognitive Triggers",
 			flex: 1,
+			// renderCell: (params) => params.value.join(", "),
 		},
 		{
-			field: "mood",
-			headerName: "Mood",
-			flex: 1,
+			field: "actions",
+			headerName: "Actions",
+			flex: 0.5,
+			sortable: false,
+			filterable: false,
+			renderCell: (params) => (
+				<Tooltip title="Delete Expense">
+					<IconButton
+						color="error"
+						onClick={(e) => {
+							e.stopPropagation(); // Prevent row click
+							handleDelete(params.id);
+						}}
+					>
+						<Delete />
+					</IconButton>
+				</Tooltip>
+			),
 		},
 	];
 
+	// Format data for DataGrid
 	const formattedData = formatExpenseListData(expensesData.expenses);
+	// console.log("Formatted Data for DataGrid:", formattedData);
 
-	const moodData = ["Happy", "Neutral", "Regretful"];
+	// Handle Delete Action
+	const handleDelete = async (id) => {
+		// // Confirm deletion
+		// if (window.confirm("Are you sure you want to delete this expense?")) {
+		// 	try {
+		// 		// Call the deleteExpenses mutation with an array containing the single ID
+		// 		await deleteExpenses([id]).unwrap(); // 'unwrap' to handle fulfilled/rejected promises
+
+		// 		// Show success notification
+		// 		toast.success("Expense deleted successfully.");
+		// 		refetch();
+
+		// 		// Optionally, refetch expenses or rely on cache invalidation
+		// 	} catch (error) {
+		// 		// Handle errors
+		// 		toast.error(error?.data?.message || "Failed to delete expense.");
+		// 	}
+		// }
+		setSelectedExpenseId(id);
+		setIsDialogOpen(true);
+	};
+
+	const handleConfirmDelete = async () => {
+		if (!selectedExpenseId) return;
+
+		try {
+			// Call the deleteExpenses mutation with an array containing the single ID
+			await deleteExpenses([selectedExpenseId]).unwrap(); // 'unwrap' to handle fulfilled/rejected promises
+
+			// Show success notification
+			toast.success("Expense deleted successfully.");
+
+			// Close the dialog
+			setIsDialogOpen(false);
+
+			// Clear the selected expense ID
+			setSelectedExpenseId(null);
+
+			refetch();
+
+			// No need to manually refetch if invalidatesTags is set correctly
+			// If you opted for manual refetching, uncomment the line below:
+			// refetch();
+		} catch (error) {
+			// Handle errors
+			toast.error(error?.data?.message || "Failed to delete expense.");
+		}
+	};
+
+	const handleCancelDelete = () => {
+		setIsDialogOpen(false);
+		setSelectedExpenseId(null);
+	};
+
+	// Define mood options (removed as per user's instruction)
+	// const moodData = ["Happy", "Neutral", "Regretful"]; // Removed
 
 	return (
 		<Box m="1.5rem 2.5rem">
+			{/* Header Section */}
 			<FlexBetween marginBottom="25px">
 				<Header title="Expense List" subtitle="Keep track of your finances." />
 				<Box>
 					<Button
+						component={Link}
+						to="/add-expense"
+						variant="contained"
 						sx={{
 							backgroundColor: theme.palette.secondary.light,
 							color: theme.palette.background.alt,
 							fontSize: "14px",
 							fontWeight: "bold",
 							padding: "10px 20px",
+							"&:hover": {
+								backgroundColor: theme.palette.secondary.main,
+							},
 						}}
 					>
-						EXPENSIO
+						Add Expense
 					</Button>
 				</Box>
 			</FlexBetween>
 
 			<Box
-				sx={{
-					display: "flex",
-					gap: "1.5rem",
-					padding: "1 rem",
-					margin: "1 rem",
-				}}
+				display="flex"
+				flexWrap="wrap"
+				gap="1rem"
+				marginBottom="20px"
+				alignItems="center"
 			>
-				<Box sx={{ width: "50%" }}>
-					<FlexBetween
-						backgroundColor={theme.palette.background.alt}
-						borderRadius="9px"
-						gap="3px"
-						p="0.1rem 1.5rem"
+				{/* Search Bar */}
+				<FlexBetween
+					backgroundColor={theme.palette.background.alt}
+					borderRadius="9px"
+					gap="3px"
+					p="0.5rem 1rem"
+					flex={1}
+					minWidth="300px"
+				>
+					<InputBase
+						placeholder="Search Expenses..."
+						value={searchInput}
+						onChange={handleSearchInputChange}
+						onKeyDown={handleKeyDown}
+						fullWidth
+					/>
+					<IconButton onClick={handleSearchClick}>
+						<Search />
+					</IconButton>
+				</FlexBetween>
+
+				{/* Category Selector */}
+				<FormControl
+					variant="outlined"
+					sx={{ flex: "1 1 150px", maxWidth: "150px" }}
+				>
+					<InputLabel id="category-label">Category</InputLabel>
+					<Select
+						sx={{ ...backgroundColorStyle }}
+						labelId="category-label"
+						value={selectedCategoryCode}
+						onChange={handleCategoryChange}
+						label="Category"
 					>
-						<InputBase placeholder="Search..." />
-						<IconButton>
-							<Search />
-						</IconButton>
-					</FlexBetween>
-				</Box>
-
-				<Box sx={{ width: "50%" }}>
-					<FormControl fullWidth variant="outlined">
-						<InputLabel id="category-label">Category</InputLabel>
-						<Select
-							sx={{ ...backgroundColorStyle }}
-							labelId="category-label"
-							value={selectedCategoryCode}
-							onChange={handleCategoryChange}
-							label="Category"
-						>
-							<MenuItem value="">None</MenuItem>
-							{categoriesLoading ? (
-								<MenuItem disabled>Loading categories...</MenuItem>
-							) : (
-								categoriesData?.categories?.map((category) => (
-									<MenuItem key={category.code} value={category.code}>
-										{category.name}
-									</MenuItem>
-								))
-							)}
-						</Select>
-					</FormControl>
-				</Box>
-			</Box>
-
-			<Box sx={{ display: "flex", gap: "1.5rem", padding: "1 rem" }}>
-				<Box sx={{ width: "50%" }}>
-					<FormControl fullWidth variant="outlined">
-						<InputLabel id="type-label">Type</InputLabel>
-						<Select
-							sx={{ ...backgroundColorStyle }}
-							labelId="type-label"
-							value={selectedType}
-							onChange={handleTypeChange}
-							label="type"
-						>
-							<MenuItem value="">None</MenuItem>
-							{isLoadingCognitiveTriggersData ? (
-								<MenuItem disabled>Loading Psychological types...</MenuItem>
-							) : (
-								cognitiveTriggersData?.cognitiveTriggers?.map((type) => (
-									<MenuItem key={type._id} value={type.name}>
-										{type.name}
-									</MenuItem>
-								))
-							)}
-						</Select>
-					</FormControl>
-				</Box>
-
-				<Box sx={{ width: "50%" }}>
-					<FormControl fullWidth variant="outlined">
-						<InputLabel id="mood-label">Mood</InputLabel>
-						<Select
-							sx={{ ...backgroundColorStyle }}
-							labelId="mood-label"
-							value={selectedMood}
-							onChange={handleMoodChange}
-							label="Mood"
-						>
-							<MenuItem value="">None</MenuItem>
-							{moodData?.map((mood) => (
-								<MenuItem key={mood} value={mood}>
-									{mood}
+						<MenuItem value="">All Categories</MenuItem>
+						{categoriesLoading ? (
+							<MenuItem disabled>Loading categories...</MenuItem>
+						) : (
+							categoriesData?.categories?.map((category) => (
+								<MenuItem key={category.code} value={category.code}>
+									{category.name}
 								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-				</Box>
+							))
+						)}
+					</Select>
+				</FormControl>
+
+				{/* Cognitive Triggers Selector */}
+				<FormControl
+					variant="outlined"
+					sx={{ flex: "1 1 200px", maxWidth: "200px" }}
+				>
+					<InputLabel id="cognitive-triggers-label">
+						Cognitive Triggers
+					</InputLabel>
+					<Select
+						sx={{ ...backgroundColorStyle }}
+						labelId="cognitive-triggers-label"
+						multiple
+						value={selectedCognitiveTriggers}
+						onChange={handleCognitiveTriggerChange}
+						label="Cognitive Triggers"
+						renderValue={(selected) =>
+							selected.length > 0
+								? selected
+										.map((code) => cognitiveTriggerMap[code] || code)
+										.join(", ")
+								: "All"
+						}
+					>
+						<MenuItem value="">
+							<em>All</em>
+						</MenuItem>
+						{isLoadingCognitiveTriggersData ? (
+							<MenuItem disabled>Loading Cognitive Triggers...</MenuItem>
+						) : (
+							cognitiveTriggersData?.cognitiveTriggers?.map((type) => (
+								<MenuItem key={type.code} value={type.code}>
+									{type.name}
+								</MenuItem>
+							))
+						)}
+					</Select>
+				</FormControl>
+
+				{/* Start Date Picker */}
+				<DatePicker
+					label="Start Date"
+					value={startDate}
+					onChange={(newValue) => {
+						setStartDate(newValue);
+					}}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							variant="outlined"
+							sx={{ flex: "1 1 150px", maxWidth: "100px" }}
+						/>
+					)}
+				/>
+
+				{/* End Date Picker */}
+				<DatePicker
+					label="End Date"
+					value={endDate}
+					onChange={(newValue) => {
+						setEndDate(newValue);
+					}}
+					renderInput={(params) => (
+						<TextField
+							{...params}
+							variant="outlined"
+							sx={{ flex: "1 1 150px", maxWidth: "100px" }}
+						/>
+					)}
+				/>
 			</Box>
 
+			{/* DataGrid Section */}
 			<Box
-				margin="25px 0"
+				// margin="25px 0"
+				// height="80vh"
+				marginTop="35px"
+				marginBottom="80px"
 				height="80vh"
 				sx={{
 					"& .MuiDataGrid-root": {
@@ -264,24 +484,24 @@ const ExpenseListScreen = () => {
 						borderBottom: "none",
 					},
 					"& .MuiDataGrid-columnHeaders": {
-						backgroundColor: theme.palette.background.alt,
-						color: theme.palette.secondary[100],
+						backgroundColor: theme.palette.secondary.main,
+						color: theme.palette.common.white,
 						borderBottom: "none",
 					},
 					"& .MuiDataGrid-virtualScroller": {
-						backgroundColor: theme.palette.primary.light,
+						backgroundColor: theme.palette.background.paper,
 					},
 					"& .MuiDataGrid-footerContainer": {
-						backgroundColor: theme.palette.background.alt,
-						color: theme.palette.secondary[100],
+						backgroundColor: theme.palette.background.default, // Set footer to background.default
+						color: theme.palette.common.white,
 						borderTop: "none",
 					},
 					"& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-						color: `${theme.palette.secondary[200]} !important`,
+						color: `${theme.palette.common.white} !important`,
 					},
 				}}
 			>
-				<DataGrid
+				<StyledDataGrid
 					loading={expensesLoading}
 					rows={formattedData}
 					getRowId={(row) => row.id}
@@ -295,8 +515,37 @@ const ExpenseListScreen = () => {
 					slots={{
 						toolbar: CustomToolbar,
 					}}
+					onRowClick={(params) => navigate(`/expense/${params.id}`)} // Row click navigation
+					components={{
+						NoRowsOverlay: () => (
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									height: "100%",
+									color: theme.palette.text.secondary,
+								}}
+							>
+								No income records found.
+							</Box>
+						),
+					}}
 				/>
 			</Box>
+
+			{/* Confirmation Dialog */}
+			<ConfirmationDialog
+				open={isDialogOpen}
+				title="Delete Expense"
+				message="Are you sure you want to delete this expense? This action cannot be undone."
+				onConfirm={handleConfirmDelete}
+				onCancel={handleCancelDelete}
+				confirmText="Delete"
+				cancelText="Cancel"
+				confirmButtonColor="error"
+				cancelButtonColor="primary"
+			/>
 		</Box>
 	);
 };

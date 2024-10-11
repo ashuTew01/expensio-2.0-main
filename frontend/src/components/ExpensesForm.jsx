@@ -16,8 +16,7 @@ import {
 } from "@mui/material";
 import {
 	useSaveExpensesMutation,
-	useGetAllCategoriesQuery,
-	useGetAllEventsQuery,
+	useGetAllExpenseCategoriesQuery,
 } from "../state/api";
 import { toast } from "react-toastify";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
@@ -48,7 +47,7 @@ const ExpensesForm = ({
 		data: categoriesData,
 		isLoading: categoriesLoading,
 		isError: categoriesError,
-	} = useGetAllCategoriesQuery();
+	} = useGetAllExpenseCategoriesQuery();
 
 	const handleCategoryChange = (event) => {
 		setCategoryCode(event.target.value);
