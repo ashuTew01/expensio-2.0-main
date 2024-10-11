@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: guest-token-reset-cron-job
+  namespace: expensio-dev
+spec:
+  schedule: "30 20 * * *" # 2 AM IST (8:30 PM UTC)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: guest-token-reset-cron-job
+              image: curlimages/curl:latest
+              env:
+                - name: GUEST_RESET_TOKEN # Environment variable for the Bearer token
+                  valueFrom:
+                    secretKeyRef:
+                      name: shared-secret # Reference to the Kubernetes secret
+                      key: GUEST_RESET_TOKEN
+                - name: SMART_AI_SERVICE_URL # Environment variable for the Smart AI service URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: shared-secret # Reference to the Kubernetes secret
+                      key: SMART_AI_SERVICE_URL
+              command:
+                - "/bin/sh"
+                - "-c"
+                - |
+                  echo "GUEST_RESET_TOKEN: $GUEST_RESET_TOKEN"
+                  echo "SMART_AI_SERVICE_URL: $SMART_AI_SERVICE_URL"
+                  curl -X POST -H "Authorization: Bearer $GUEST_RESET_TOKEN" "${SMART_AI_SERVICE_URL}/guest/token-reset"
+          restartPolicy: OnFailure
+      backoffLimit: 3

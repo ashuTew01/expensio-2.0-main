@@ -1,7 +1,10 @@
 import Joi from "joi";
 import { callOpenaiService } from "../services/openaiService.js";
 import { ValidationError } from "@expensio/sharedlib";
-import { getUserAiTokensDetailsService } from "../services/aiSubscriptionService.js";
+import {
+	getUserAiTokensDetailsService,
+	resetGuestAiTokensService,
+} from "../services/aiSubscriptionService.js";
 
 export const callAiController = async (req, res, next) => {
 	try {
@@ -43,5 +46,30 @@ export const getUserAiTokensDetailsController = async (req, res, next) => {
 		res.status(200).json({ data: aiUserTokensDocument, message: "OK" });
 	} catch (error) {
 		next(error);
+	}
+};
+export const resetGuestAiTokensController = async (req, res, next) => {
+	try {
+		let { tokens } = req.query;
+
+		if (!tokens) {
+			tokens = 50;
+		} else {
+			tokens = Number(tokens);
+
+			if (isNaN(tokens) || tokens < 0) {
+				return res.status(400).json({
+					error: "'tokens' must be a whole number",
+				});
+			}
+		}
+
+		await resetGuestAiTokensService(tokens);
+
+		return res.status(200).json({
+			message: `Guest AI tokens successfully reset to ${tokens}`,
+		});
+	} catch (error) {
+		next(error); // Forward error to the error handling middleware
 	}
 };

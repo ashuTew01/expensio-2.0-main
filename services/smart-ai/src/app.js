@@ -66,5 +66,5 @@ await startServices();
 
 server.listen(PORT, () => {
 	logInfo("Smart Ai service is running on port " + PORT);
-	starterFunctions();
+	// starterFunctions();
 });

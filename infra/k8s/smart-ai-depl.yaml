@@ -62,6 +62,11 @@ spec:
                 secretKeyRef:
                   name: shared-secret
                   key: OPENAI_API_KEY
+            - name: GUEST_RESET_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: GUEST_RESET_TOKEN
 ---
 apiVersion: v1
 kind: Service
