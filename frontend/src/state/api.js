@@ -33,7 +33,7 @@ export const api = createApi({
 		},
 	}),
 	reducerPath: "adminApi",
-	tagTypes: ["User", "Dashboard"],
+	tagTypes: ["User", "Dashboard", "Incomes", "Expenses"],
 	endpoints: (build) => ({
 		expenseTest: build.query({
 			query: () => ({
@@ -132,6 +132,7 @@ export const api = createApi({
 					method: "GET",
 				};
 			},
+			providesTags: "Expenses",
 		}),
 		getExpenseById: build.query({
 			query: ({ id }) => ({
@@ -146,6 +147,7 @@ export const api = createApi({
 				method: "DELETE",
 				body: { expenses: expenseIds },
 			}),
+			invalidatesTags: ["Expenses"],
 		}),
 		// income
 		getAllIncome: build.query({
@@ -170,6 +172,14 @@ export const api = createApi({
 					...(id && { id }),
 				},
 			}),
+			providesTags: ["Incomes"],
+		}),
+		getIncomeById: build.query({
+			query: ({ id }) => ({
+				url: `income`,
+				method: "GET",
+				params: { id },
+			}),
 		}),
 		saveIncome: build.mutation({
 			query: (data) => {
@@ -190,6 +200,7 @@ export const api = createApi({
 				method: "DELETE",
 				body: { incomes: incomeIds },
 			}),
+			invalidatesTags: ["Incomes"],
 		}),
 		getExpenseFinancialData: build.mutation({
 			query: (data) => ({
@@ -267,6 +278,7 @@ export const {
 	useGetIncomeFinancialDataMutation,
 
 	useGetAllIncomeQuery,
+	useGetIncomeByIdQuery,
 	useGetAllIncomeCategoriesQuery,
 
 	useSaveGoalMutation,

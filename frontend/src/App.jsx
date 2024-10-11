@@ -32,6 +32,7 @@ import FullChatPage from "./scenes/full-page-chat";
 
 import { SocketProvider } from "./context/SocketContext";
 import EmailLoginPage from "./scenes/email-login-page";
+import IncomeScreen from "./scenes/income/screen";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -61,6 +62,7 @@ function App() {
 								{/* income */}
 								<Route path="/income/list" element={<IncomeListScreen />} />
 								<Route path="/income/add" element={<AddIncomeScreen />} />
+								<Route path="/income/:id" element={<IncomeScreen />} />
 								{/* Summary routes */}
 								<Route path="/user/summary" element={<SummaryScreen />} />
 								<Route

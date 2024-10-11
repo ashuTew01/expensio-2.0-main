@@ -1,6 +1,6 @@
 // src/scenes/expense/list/index.jsx
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import { styled } from "@mui/material/styles";
 import {
