@@ -23,6 +23,7 @@ const ErrorDisplay = ({
 	animationLoop = true, // Controls whether the animation should loop
 	retry = false, // Whether to show a retry button
 	onRetry = () => {}, // Function to call on retry
+	buttonText,
 }) => {
 	const theme = useTheme();
 
@@ -84,7 +85,7 @@ const ErrorDisplay = ({
 						textTransform: "none",
 					}}
 				>
-					Retry
+					{buttonText}
 				</Button>
 			)}
 		</Box>
