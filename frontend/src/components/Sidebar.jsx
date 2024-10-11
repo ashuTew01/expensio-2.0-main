@@ -108,7 +108,7 @@ const Sidebar = ({
 	// const { data: userInfo, isLoading } = useGetUserQuery();
 	// const user = userInfo?.user;
 	const userImage = "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
-	const userName = userInfo.first_name + " " + (userInfo?.last_name || "");
+	const userName = userInfo?.first_name + " " + (userInfo?.last_name || "");
 
 	useEffect(() => {
 		setActive(pathname.substring(1));

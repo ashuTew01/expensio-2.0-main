@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { v4 as uuidv4 } from "uuid"; // Import UUID generator
+import { removeCredentials, setUserInfo } from "./authSlice";
+import { toast } from "react-toastify";
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
@@ -21,20 +23,51 @@ const serializeQueryParams = (params) => {
 	return searchParams.toString();
 };
 
+// Create a custom baseQuery that wraps fetchBaseQuery
+const baseQuery = fetchBaseQuery({
+	baseUrl: reactAppBaseUrl,
+	prepareHeaders: (headers, { getState }) => {
+		const token = getState().auth.token; // Access the token from Redux store
+		if (token) {
+			headers.set("Authorization", `Bearer ${token}`);
+		}
+		return headers;
+	},
+});
+
+// Wrap the baseQuery to handle 401 Unauthorized responses
+const baseQueryWithAuth = async (args, api, extraOptions) => {
+	const result = await baseQuery(args, api, extraOptions);
+
+	if (result.error && result.error.status === 401) {
+		// Dispatch the logout action to clear credentials
+		api.dispatch(removeCredentials());
+	}
+
+	return result;
+};
+
 export const api = createApi({
-	baseQuery: fetchBaseQuery({
-		baseUrl: reactAppBaseUrl,
-		prepareHeaders: (headers, { getState }) => {
-			const token = getState().auth.token; // Access the token from Redux store
-			if (token) {
-				headers.set("Authorization", `Bearer ${token}`);
-			}
-			return headers;
-		},
-	}),
+	baseQuery: baseQueryWithAuth,
 	reducerPath: "adminApi",
 	tagTypes: ["User", "Dashboard", "Incomes", "Expenses"],
 	endpoints: (build) => ({
+		// getUserDetail query
+		getUserDetails: build.query({
+			query: () => ({
+				url: "user/user",
+				method: "GET",
+			}),
+			onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+				try {
+					const { data } = await queryFulfilled;
+					dispatch(setUserInfo(data)); // Store user details in Redux
+				} catch (error) {
+					// Handle errors if needed
+				}
+			},
+			providesTags: ["User"],
+		}),
 		expenseTest: build.query({
 			query: () => ({
 				url: "expense/test",
@@ -257,17 +290,13 @@ export const api = createApi({
 });
 
 export const {
-	useLoginMutation,
-	useRegisterMutation,
-	useLogoutMutation,
-
-	useGetUserQuery,
 	useGetAllEventsQuery,
 	useGetAllCognitiveTriggersQuery,
 
 	useExpenseTestQuery,
 	useGetExpenseByIdQuery,
 	useGetUserSummaryQuery,
+	useGetUserDetailsQuery,
 	useGetAllExpensesQuery,
 	useDeleteExpensesMutation,
 

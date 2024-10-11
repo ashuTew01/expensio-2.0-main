@@ -270,7 +270,7 @@ const IncomeListScreen = () => {
 			sx={{ backgroundColor: theme.palette.background.default }}
 		>
 			<FlexBetween marginBottom="25px">
-				<Header title="Income List" subtitle="Keep track of your income." />
+				<Header title="INCOME LIST" subtitle="Keep track of your income." />
 
 				<Box>
 					<Button
