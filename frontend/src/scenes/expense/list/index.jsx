@@ -1,6 +1,6 @@
 // src/scenes/expense/list/index.jsx
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import { styled } from "@mui/material/styles";
 import {
@@ -13,7 +13,6 @@ import {
 	InputLabel,
 	InputBase,
 	IconButton,
-	Grid,
 	TextField,
 	Tooltip, // For better UX on the delete button
 } from "@mui/material";
@@ -24,7 +23,6 @@ import { toast } from "react-toastify"; // For user feedback (optional)
 
 import FlexBetween from "../../../components/FlexBetween";
 import Header from "../../../components/Header";
-import LoadingIndicator from "../../../components/LoadingIndicator";
 import { CustomToolbar } from "../../../components/CustomToolBarMuiDataGrid";
 import {
 	useGetAllExpensesQuery,
@@ -68,6 +66,9 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 	// Set all rows to background.default
 	"& .MuiDataGrid-row": {
 		backgroundColor: theme.palette.background.default,
+		"&:hover": {
+			backgroundColor: theme.palette.background.alt, // Set hover color
+		},
 	},
 }));
 
@@ -223,6 +224,9 @@ const ExpenseListScreen = () => {
 			field: "amount",
 			headerName: "Amount",
 			flex: 0.5,
+			valueFormatter: (params) => {
+				return `₹${params.toLocaleString()}`;
+			},
 			// renderCell: (params) => `$${params.value.toFixed(2)}`,
 		},
 		{
@@ -513,6 +517,7 @@ const ExpenseListScreen = () => {
 					paginationMode="server"
 					paginationModel={paginationModel}
 					onPaginationModelChange={setPaginationModel}
+					autoHeight
 					slots={{
 						toolbar: CustomToolbar,
 					}}

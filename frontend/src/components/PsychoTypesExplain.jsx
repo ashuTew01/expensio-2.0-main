@@ -45,7 +45,7 @@ const PsychologicalTypesExplain = ({
 				textAlign="center"
 				sx={{ fontWeight: "bold" }}
 			>
-				PSYCHOLOGICAL TYPES
+				COGNITIVE TRIGGERS
 			</Typography>
 			<Grid container spacing={3}>
 				{psychoTypesData?.cognitiveTriggers?.map((type) => (

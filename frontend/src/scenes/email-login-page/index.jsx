@@ -1,7 +1,6 @@
 // src/pages/auth/EmailLoginPage.jsx
 import React, { useState, useEffect } from "react";
 import {
-	Container,
 	CssBaseline,
 	Box,
 	Typography,

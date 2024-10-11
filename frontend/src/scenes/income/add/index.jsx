@@ -21,7 +21,10 @@ const AddIncomeScreen = () => {
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>
-				<Header title="DASHBOARD" subtitle="Keep track of your finances." />
+				<Header
+					title="CAPTURE YOUR EARNINGS"
+					subtitle="Document every income source to stay organized and informed."
+				/>
 
 				<Box>
 					<Button
@@ -48,7 +51,7 @@ const AddIncomeScreen = () => {
 				}}
 			>
 				<Box
-					gridColumn="span 8"
+					gridColumn="span 12"
 					gridRow="span 3"
 					backgroundColor={theme.palette.background.alt}
 					p="1.5rem"
@@ -58,19 +61,6 @@ const AddIncomeScreen = () => {
 						cognitiveTriggersData={cognitiveTriggersData}
 						cognitiveTriggersDataLoading={cognitiveTriggersDataLoading}
 						cognitiveTriggersDataError={cognitiveTriggersDataError}
-					/>
-				</Box>
-				<Box
-					gridColumn="span 4"
-					gridRow="span 3"
-					backgroundColor={theme.palette.background.alt}
-					p="1.5rem"
-					borderRadius="0.55rem"
-				>
-					<PsychologicalTypesExplain
-						psychoTypesData={cognitiveTriggersData}
-						psychoTypesLoading={cognitiveTriggersDataLoading}
-						psychoTypesError={cognitiveTriggersDataError}
 					/>
 				</Box>
 			</Box>

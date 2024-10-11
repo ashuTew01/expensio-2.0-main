@@ -36,37 +36,38 @@ import { useSelector } from "react-redux";
 
 const navItems = [
 	{
-		text: "Dashboard",
+		text: "Home",
 		route: "dashboard",
 		icon: <HomeOutlined />,
+	},
+
+	{
+		text: "Financial Summary",
+		route: "user/summary",
+		icon: <Summarize />,
 	},
 	{
 		text: "Smart AI",
 		route: "smart-ai-chat",
 		icon: <SupportAgent />,
 	},
-	{
-		text: "Financial Summary",
-		route: "user/summary",
-		icon: <Summarize />,
-	},
 
 	{
-		text: "Expenses",
+		text: "Expense",
 		icon: null,
 	},
 	{
-		text: "Expense Financial Data",
+		text: "Analytics",
 		route: "user/expense-financial-data",
 		icon: <AccountBalanceWallet />,
 	},
 	{
-		text: "List",
+		text: "Ledger",
 		route: "expense/list",
 		icon: <ListAlt />,
 	},
 	{
-		text: "Add Expense",
+		text: "Record",
 		route: "expense/add",
 		icon: <AddCircle />,
 	},
@@ -75,17 +76,17 @@ const navItems = [
 		icon: null,
 	},
 	{
-		text: "Income Financial Data",
+		text: "Analytics",
 		route: "user/income-financial-data",
 		icon: <Paid />,
 	},
 	{
-		text: "List Income",
+		text: "ledger",
 		route: "income/list",
 		icon: <ListAlt />,
 	},
 	{
-		text: "Add Income",
+		text: "Record",
 		route: "income/add",
 		icon: <AddCircle />,
 	},

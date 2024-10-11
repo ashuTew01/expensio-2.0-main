@@ -12,7 +12,6 @@ import { useGetExpenseFinancialDataMutation } from "../../state/api"; // Adjust 
 import Header from "../../components/Header"; // Adjust the import path for your Header component
 import FlexBetween from "../../components/FlexBetween"; // Make sure to import your FlexBetween component if it's custom
 import { useEffect } from "react";
-import LoadingIndicator from "../../components/LoadingIndicator";
 import CustomCard from "../../components/financialDataScreen/CustomCard";
 import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
@@ -112,7 +111,7 @@ const ExpenseFinancialData = () => {
 									// maxHeight: { xs: 233, md: 167 },
 									// maxWidth: { xs: 350, md: 250 },
 								}}
-								alt={"Love Earth"}
+								alt={"EXPENSE DATA"}
 								src={"/expense-data.png"}
 							/>
 						</Box>
@@ -135,7 +134,6 @@ const ExpenseFinancialData = () => {
 								<Typography
 									variant="h1"
 									sx={{
-										fontSize: 55,
 										color: "#50a8fa", // Bright, attention-grabbing color for greeting
 										fontWeight: "bold",
 										textShadow: "2px 2px 8px rgba(0, 0, 0, 0.3)", // Add a subtle shadow for depth
@@ -160,7 +158,8 @@ const ExpenseFinancialData = () => {
 								<Typography
 									variant="h1"
 									sx={{
-										fontSize: 90,
+										marginBottom: "0px",
+										fontSize: 80,
 										fontWeight: "bold",
 										color: "#02d487", // Bold, bright color for emphasis
 										textShadow: "3px 3px 10px rgba(0, 0, 0, 0.5)", // Larger shadow for emphasis
@@ -173,8 +172,8 @@ const ExpenseFinancialData = () => {
 								<Typography
 									variant="h1"
 									sx={{
-										fontSize: 28,
-										marginTop: "0.5rem",
+										fontSize: 25,
+										marginTop: "0rem",
 										color: "#ffffff",
 									}}
 								>
@@ -196,6 +195,7 @@ const ExpenseFinancialData = () => {
 							</Box>
 						</Box>
 					</Box>
+
 					<Box mt="5rem"></Box>
 
 					<Box

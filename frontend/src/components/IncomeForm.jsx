@@ -202,7 +202,7 @@ const IncomeForm = ({
 							onChange={(e) => setDescription(e.target.value)}
 							fullWidth
 							multiline
-							rows={3} // Increased number of rows for a bigger input
+							rows={4} // Increased number of rows for a bigger input
 						/>
 					</Grid>
 				</Grid>

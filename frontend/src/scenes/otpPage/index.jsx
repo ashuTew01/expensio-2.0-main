@@ -1,7 +1,6 @@
 // src/pages/auth/OtpPage.jsx
 import React, { useState } from "react";
 import {
-	Container,
 	CssBaseline,
 	Box,
 	Typography,

@@ -21,7 +21,10 @@ const AddExpenseScreen = () => {
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>
-				<Header title="DASHBOARD" subtitle="Keep track of your finances." />
+				<Header
+					title="TRACK YOUR SPENDING"
+					subtitle="Log your expenses to gain better control over your spending."
+				/>
 
 				<Box>
 					<Button

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import Header from "../Header";
 
 const SummaryHeading = ({

@@ -13,14 +13,11 @@ import {
 	Chip,
 	Stack,
 	Tooltip,
-	IconButton,
 	Divider,
 } from "@mui/material";
 import { ArrowBack, Edit, Delete } from "@mui/icons-material";
 
 import FlexBetween from "../../../components/FlexBetween";
-import Header from "../../../components/Header";
-import OverviewBox from "../../../components/OverviewBox"; // Assuming this is a summary component
 import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
 import ErrorDisplay from "../../../components/error/ErrorDisplay";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
@@ -113,19 +110,24 @@ const ExpenseScreen = () => {
 			<FlexBetween width="100%" mb="2rem">
 				<Button
 					startIcon={<ArrowBack />}
-					onClick={() => navigate("/expense/list")}
+					onClick={() => navigate(-1)}
 					variant="contained"
-					color={theme.palette.background.default}
 					sx={{
-						backgroundColor: theme.palette.secondary.light,
 						color: theme.palette.background.alt,
-						fontSize: "12px",
+						fontSize: "14px",
 						fontWeight: "bold",
 						padding: "10px 20px",
-						"&:hover": { backgroundColor: "#afafaf" },
+						borderRadius: "8px",
+						backgroundColor: theme.palette.common.white,
+						transition: "all 0.3s ease",
+						"&:hover": {
+							transform: "scale(1.05)",
+							backgroundColor: theme.palette.background.alt,
+							color: "#fff",
+						},
 					}}
 				>
-					Back to Expenses
+					BACK
 				</Button>
 				<Box>
 					<Tooltip title="Delete Expense">
@@ -133,7 +135,6 @@ const ExpenseScreen = () => {
 							startIcon={<Delete />}
 							onClick={handleDelete}
 							variant="outlined"
-							color="error"
 							disabled={isDeleting}
 							sx={{
 								textTransform: "none",
@@ -142,8 +143,12 @@ const ExpenseScreen = () => {
 								borderColor: theme.palette.error.main,
 								color: theme.palette.error.main,
 								boxShadow: theme.shadows[3],
+								transition: "all 0.3s ease",
 								"&:hover": {
-									backgroundColor: "#fff",
+									backgroundColor: theme.palette.error.light,
+									color: theme.palette.error.contrastText,
+									boxShadow: theme.shadows[8],
+									transform: "scale(1.05)",
 								},
 							}}
 						>
@@ -153,17 +158,17 @@ const ExpenseScreen = () => {
 				</Box>
 			</FlexBetween>
 
-			{/* Expense Details Card */}
+			{/* Expense Details Card with Hover Animation */}
 			<Card
 				sx={{
 					width: isNonMediumScreens ? "60%" : "90%",
 					boxShadow: 6,
 					borderRadius: 3,
-					backgroundColor: theme.palette.background.paper,
+					backgroundColor: theme.palette.background.alt,
 					transition: "transform 0.3s, box-shadow 0.3s",
 					"&:hover": {
-						transform: "translateY(-5px)",
-						boxShadow: 10,
+						transform: "translateY(-8px) scale(1.02)",
+						boxShadow: theme.shadows[12],
 					},
 				}}
 			>
@@ -203,7 +208,7 @@ const ExpenseScreen = () => {
 							<Typography
 								variant="subtitle2"
 								color="text.secondary"
-								sx={{ fontWeight: "bold", mb: "0.5rem" }}
+								sx={{ fontWeight: "bold", fontSize: "1rem", mb: "0.5rem" }}
 							>
 								Amount
 							</Typography>
@@ -219,7 +224,7 @@ const ExpenseScreen = () => {
 									<Typography
 										variant="subtitle2"
 										color="text.secondary"
-										sx={{ fontWeight: "bold", mb: "0.5rem" }}
+										sx={{ fontWeight: "bold", fontSize: "1rem", mb: "0.5rem" }}
 									>
 										Payment Method
 									</Typography>
@@ -238,7 +243,7 @@ const ExpenseScreen = () => {
 							<Typography
 								variant="subtitle2"
 								color="text.secondary"
-								sx={{ fontWeight: "bold", mb: "0.5rem" }}
+								sx={{ fontWeight: "bold", fontSize: "1rem", mb: "0.5rem" }}
 							>
 								Category
 							</Typography>
@@ -258,7 +263,11 @@ const ExpenseScreen = () => {
 							<Typography
 								variant="subtitle2"
 								color="text.secondary"
-								sx={{ fontWeight: "bold", mb: "0.5rem" }}
+								sx={{
+									fontWeight: "bold",
+									fontSize: "1rem",
+									mb: "0.5rem",
+								}}
 							>
 								Cognitive Triggers
 							</Typography>
@@ -278,10 +287,9 @@ const ExpenseScreen = () => {
 										<Chip
 											key={trigger._id}
 											label={trigger.name}
-											color="primary"
+											color="#4d4a49"
 											variant="outlined"
 											sx={{
-												fontWeight: "bold",
 												fontSize: "0.9rem",
 											}}
 										/>
@@ -295,7 +303,7 @@ const ExpenseScreen = () => {
 							<Typography
 								variant="subtitle2"
 								color="text.secondary"
-								sx={{ fontWeight: "bold", mb: "0.5rem" }}
+								sx={{ fontWeight: "bold", fontSize: "1rem", mb: "0.5rem" }}
 							>
 								Mood
 							</Typography>
@@ -320,7 +328,7 @@ const ExpenseScreen = () => {
 							<Typography
 								variant="subtitle2"
 								color="text.secondary"
-								sx={{ fontWeight: "bold", mb: "0.5rem" }}
+								sx={{ fontWeight: "bold", fontSize: "1rem", mb: "0.5rem" }}
 							>
 								Created At
 							</Typography>

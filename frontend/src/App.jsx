@@ -1,11 +1,4 @@
-import { useState } from "react";
-import {
-	BrowserRouter,
-	Routes,
-	Route,
-	Navigate,
-	useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import Login from "./scenes/login";
 // import Register from "./scenes/register";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -39,6 +32,7 @@ import FullChatPage from "./scenes/full-page-chat";
 import { SocketProvider } from "./context/SocketContext";
 import EmailLoginPage from "./scenes/email-login-page";
 import IncomeScreen from "./scenes/income/screen";
+import PageNotFound from "./scenes/notFound";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -94,6 +88,7 @@ function App() {
 							<Route path="/login" element={<EmailLoginPage />} />
 							<Route path="/otp" element={<OtpPage />} />
 							<Route path="/user-data-form" element={<UserDataForm />} />
+							<Route path="/*" element={<PageNotFound />} />
 						</Route>
 					</Routes>
 				</ThemeProvider>

@@ -27,7 +27,7 @@ import {
 	useDeleteIncomesMutation,
 } from "../../../state/api";
 import { toast } from "react-toastify";
-import LoadingIndicator from "../../../components/LoadingIndicator";
+
 import { formatIncomeListData } from "../../../utils/formatterFunctions";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
@@ -64,11 +64,14 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 	// Set all rows to background.default
 	"& .MuiDataGrid-row": {
 		backgroundColor: theme.palette.background.default,
+		"&:hover": {
+			backgroundColor: theme.palette.background.alt, // Set hover color
+		},
 	},
 }));
 
 const FilterCard = styled(Card)(({ theme }) => ({
-	backgroundColor: "transparent", // Fully transparent
+	backgroundColor: theme.palette.background.default, // Fully transparent
 	padding: theme.spacing(2),
 	borderRadius: "8px",
 	boxShadow: "none", // Remove shadow for transparency
@@ -296,7 +299,7 @@ const IncomeListScreen = () => {
 							sx={{
 								display: "flex",
 								alignItems: "center",
-								backgroundColor: "#545353",
+								backgroundColor: theme.palette.background.default,
 								borderRadius: "8px",
 								padding: "0.5rem 1rem",
 							}}

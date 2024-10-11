@@ -1,9 +1,9 @@
-import * as React from "react";
+import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import { Box, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
@@ -19,7 +19,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { setIfUserExist } from "../../state/authSlice";
-import { FlashOnRounded } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 
 // Copyright component

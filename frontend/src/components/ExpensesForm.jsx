@@ -6,8 +6,6 @@ import {
 	Button,
 	Grid,
 	CircularProgress,
-	FormControlLabel,
-	Checkbox,
 	useTheme,
 	MenuItem,
 	Select,

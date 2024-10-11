@@ -1,13 +1,7 @@
 import React from "react";
 import FlexBetween from "components/FlexBetween";
 import Header from "components/Header";
-import {
-	Box,
-	Button,
-	Typography,
-	useTheme,
-	useMediaQuery,
-} from "@mui/material";
+import { Box, Button, useTheme, useMediaQuery } from "@mui/material";
 import GoalsForm from "components/goals/GoalForm";
 
 const AddGoalScreen = () => {

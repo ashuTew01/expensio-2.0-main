@@ -1,19 +1,10 @@
 import React from "react";
 import FlexBetween from "../../components/FlexBetween";
 import Header from "../../components/Header";
-import {
-	Box,
-	Button,
-	Typography,
-	useTheme,
-	useMediaQuery,
-} from "@mui/material";
+import { Box, Button, useTheme, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useGetDasboardQuery } from "../../state/api";
-import BarGraph from "../../components/BarGraph";
-import LoadingIndicator from "../../components/LoadingIndicator";
 import LatestExpenses from "../../components/dashboard/LatestExpenses";
-import ExpenseCard from "../../components/ExpenseCard";
 import LatestIncomes from "../../components/dashboard/LatestIncomes";
 import BreakdownPieChart from "../../components/dashboard/BreakdownPieChart";
 import Hero from "../../components/dashboard/Hero";
