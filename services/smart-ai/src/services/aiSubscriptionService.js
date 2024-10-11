@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import UserTokens from "../models/UserTokens.js";
 import AiSubscription from "../models/AiSubscription.js";
-import { ValidationError } from "@expensio/sharedlib";
+import { logInfo, ValidationError } from "@expensio/sharedlib";
 
 /**
  * Adds a new subscription to the database.
@@ -18,7 +18,7 @@ export const addSubscriptionToDb = async (name, monthlyTokens) => {
 	// Validate monthlyTokens
 	if (
 		typeof monthlyTokens !== "number" ||
-		monthlyTokens <= 0 ||
+		monthlyTokens < 0 ||
 		monthlyTokens > 10000 // You can adjust the upper limit as per your app's requirements
 	) {
 		throw new ValidationError(
@@ -65,7 +65,7 @@ export const assignSubscriptionToUser = async (userId, subscriptionId) => {
 
 	try {
 		// Validate userId
-		if (!userId || typeof userId !== "number") {
+		if (typeof userId !== "number") {
 			throw new ValidationError(
 				`Invalid userId: ${userId}. UserId must be a number.`
 			);
@@ -139,5 +139,34 @@ export const getUserAiTokensDetailsService = async (userId) => {
 		return userTokens;
 	} catch (error) {
 		throw new Error(`Failed to get user tokens: ${error.message}`);
+	}
+};
+
+export const resetGuestAiTokensService = async (aiTokensToReset = 50) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		logInfo(`Resetting Guest user tokens to ${aiTokensToReset}.`);
+		const userTokens = await UserTokens.findOne({ userId: 0 }).session(session);
+		// if (!userTokens) {
+		// 	// If userTokens record doesn't exist, create a new one
+		// 	userTokens = new UserTokens({
+		// 		userId: 0,
+		// 		aiSubscriptionId: subscription._id,
+		// 		currentTokens: subscription.monthlyTokens, // Start with monthly tokens from the new subscription
+		// 		lastRefillDate: currentDate,
+		// 	});
+		// }
+
+		userTokens.currentTokens = aiTokensToReset;
+		await userTokens.save({ session });
+		await session.commitTransaction();
+		session.endSession();
+		logInfo(`Guest user tokens reset to ${aiTokensToReset} tokens`);
+		return userTokens;
+	} catch (error) {
+		await session.abortTransaction();
+		session.endSession();
+		throw new Error(`Failed to reset guest user tokens: ${error.message}`);
 	}
 };

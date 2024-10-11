@@ -94,7 +94,10 @@ export const callOpenaiService = async (
 			);
 		}
 
-		if (role === "user" && !userId) {
+		if (
+			role === "user" &&
+			!(typeof userId === "number" && Number.isInteger(userId) && userId >= 0)
+		) {
 			throw new Error(
 				`Invalid userId: ${userId}. Please provide a valid userId`
 			);
