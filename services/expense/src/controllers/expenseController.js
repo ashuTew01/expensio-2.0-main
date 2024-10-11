@@ -41,7 +41,7 @@ export const getExpensesController = async (req, res, next) => {
 
 		const { error, value } = querySchema.validate(req.query);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some query parameters are invalid.", error);
 		}
 
 		const expensesData = await getExpensesService(value, userId);
@@ -56,34 +56,32 @@ export const getExpensesController = async (req, res, next) => {
 // @route   POST
 // @access  Private
 export const addExpensesController = async (req, res, next) => {
-	console.log("in expense controller");
-	const expenseSchema = Joi.object({
-		title: Joi.string().max(200).required(),
-		description: Joi.string().max(1000).optional(),
-		expenseType: Joi.string()
-			.valid("necessity", "luxury", "investment", "saving")
-			.required(),
-		isRecurring: Joi.boolean().optional(),
-		notes: Joi.array().items(Joi.string().max(300)).max(10).optional(),
-		amount: Joi.number().positive().required(),
-		categoryCode: Joi.string().required(),
-		cognitiveTriggerCodes: Joi.array()
-			.items(Joi.string().optional())
-			.optional(),
-		image: Joi.string().max(300).optional(),
-		paymentMethod: Joi.string()
-			.valid("cash", "credit_card", "debit_card", "online_payment", "unknown")
-			.optional(),
-		mood: Joi.string().valid("happy", "neutral", "regretful").optional(),
-		eventId: Joi.string()
-			.pattern(/^[0-9a-fA-F]{24}$/)
-			.optional(),
-		createdAt: Joi.date().iso().optional(),
-	});
-
-	const requestSchema = Joi.array().items(expenseSchema).min(1).required();
-
 	try {
+		const expenseSchema = Joi.object({
+			title: Joi.string().max(200).required(),
+			description: Joi.string().max(1000).optional(),
+			expenseType: Joi.string()
+				.valid("necessity", "luxury", "investment", "saving")
+				.required(),
+			isRecurring: Joi.boolean().optional(),
+			notes: Joi.array().items(Joi.string().max(300)).max(10).optional(),
+			amount: Joi.number().positive().required(),
+			categoryCode: Joi.string().required(),
+			cognitiveTriggerCodes: Joi.array()
+				.items(Joi.string().optional())
+				.optional(),
+			image: Joi.string().max(300).optional(),
+			paymentMethod: Joi.string()
+				.valid("cash", "credit_card", "debit_card", "online_payment", "unknown")
+				.optional(),
+			mood: Joi.string().valid("happy", "neutral", "regretful").optional(),
+			eventId: Joi.string()
+				.pattern(/^[0-9a-fA-F]{24}$/)
+				.optional(),
+			createdAt: Joi.date().iso().optional(),
+		});
+
+		const requestSchema = Joi.array().items(expenseSchema).min(1).required();
 		const userId = req.user.id;
 		const idempotencyKey = req.headers["idempotency-key"];
 
@@ -100,7 +98,7 @@ export const addExpensesController = async (req, res, next) => {
 		// Validate request body
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const newExpenses = await addExpensesService(value, userId);
@@ -138,7 +136,7 @@ export const deleteExpensesController = async (req, res, next) => {
 
 		const { error, value } = deleteExpensesSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const result = await deleteExpensesByIdsService(value.expenses, userId);
@@ -169,7 +167,7 @@ export const addCognitiveTriggersController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0]);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const newCognitiveTriggers = await addCognitiveTriggersService(value);
@@ -203,7 +201,7 @@ export const getCognitiveTriggersByIdsController = async (req, res, next) => {
 	const { error, value } = schema.validate(req.body);
 
 	if (error) {
-		throw new ValidationError(error.details[0].message);
+		throw new ValidationError("Some fields are invalid.", error);
 	}
 
 	try {
@@ -232,7 +230,7 @@ export const removeCognitiveTriggersController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		await removeCognitiveTriggersService(value.codes);
@@ -263,7 +261,7 @@ export const addCategoriesController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		const newCategories = await addCategoriesService(value, req.user?.id);
@@ -297,7 +295,7 @@ export const getCategoriesByIdsController = async (req, res, next) => {
 	const { error, value } = schema.validate(req.body);
 
 	if (error) {
-		throw new ValidationError(error.details[0].message);
+		throw new ValidationError("Some fields are invalid.", error);
 	}
 
 	try {
@@ -325,7 +323,7 @@ export const removeCategoriesController = async (req, res, next) => {
 	try {
 		const { error, value } = requestSchema.validate(req.body);
 		if (error) {
-			throw new ValidationError(error.details[0].message);
+			throw new ValidationError("Some fields are invalid.", error);
 		}
 
 		await removeCategoriesService(value.codes);

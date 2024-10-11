@@ -30,6 +30,14 @@ export const createUserService = async (userData) => {
 	return user;
 };
 
+export const findUserByIdService = async (userId) => {
+	try {
+		return await userModel.findUserByIdModel(userId);
+	} catch (error) {
+		throw new NotFoundError("User not found.");
+	}
+};
+
 export const findUserByPhoneService = async (phone) => {
 	try {
 		return await userModel.findUserByPhoneModel(phone);
