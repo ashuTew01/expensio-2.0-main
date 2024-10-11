@@ -15,9 +15,6 @@ import {
 	InputLabel,
 } from "@mui/material";
 import {
-	useSaveExpensesMutation,
-	useGetAllCategoriesQuery,
-	useGetAllEventsQuery,
 	useSaveIncomeMutation,
 	useGetAllIncomeCategoriesQuery,
 } from "../state/api";

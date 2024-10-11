@@ -21,7 +21,7 @@ export const formatIncomeListData = (incomes) => {
 		serial: index + 1, // Adding serial number
 		title: income.title,
 		categoryName: income.categoryId.name, // Using the nested category name
-		amount: income.amount,
+		amount: Number(income.amount),
 		dateNtime: dayjs(income.createdAt).format("DD/MM/YYYY HH:mm:ss"), // Formatting date and time
 	}));
 };

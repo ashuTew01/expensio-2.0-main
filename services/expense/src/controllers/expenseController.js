@@ -27,7 +27,7 @@ export const getExpensesController = async (req, res, next) => {
 			.optional()
 			.pattern(/^[0-9a-fA-F]{24}$/),
 		categoryCode: Joi.string().optional(),
-		cognitiveTriggerCodes: Joi.array().items(Joi.string()).optional(),
+		cognitiveTriggerCodes: Joi.array().items(Joi.string()).single().optional(),
 		mood: Joi.string().valid("happy", "neutral", "regretful").optional(),
 		page: Joi.number().integer().min(1).optional(),
 		pageSize: Joi.number().integer().min(1).optional(),
