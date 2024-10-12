@@ -68,7 +68,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 		try {
 			// await logoutApiCall().unwrap();
 			dispatch(removeCredentials());
-			navigate("/");
+			window.location.href = "/";
 		} catch (error) {
 			console.log(error);
 			// toast.error("Couldn't log you out. Try again!");

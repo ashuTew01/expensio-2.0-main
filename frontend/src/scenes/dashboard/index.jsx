@@ -189,50 +189,56 @@ const Dashboard = () => {
 					totalMoneySpent={totalMoneySpent}
 				/>
 
-				<BigTitle
-					title="EXPENDITURE ANALYSIS"
-					subtitle={"Analyze your spendings!"}
-					titleFontColor={"#54cff7"}
-				/>
+				{totalMoneySpent > 0 && (
+					<>
+						{" "}
+						<BigTitle
+							title="EXPENDITURE ANALYSIS"
+							subtitle={"Analyze your spendings!"}
+							titleFontColor={"#54cff7"}
+						/>
+						<BreakdownPieChart
+							title="Category Breakdown"
+							formattedData={expenseCategoryTotals}
+							text={`Looking into where you spend most of your money, can help you keep your expenses in control.`}
+						/>
+						{/* Category Bar Graph */}
+						<DisplayBarGraph
+							title="Category Analysis"
+							formattedData={expenseCategoryDataForBarGraph}
+							yAxis="Amount Spent"
+							currency="₹"
+						/>
+						<LatestExpenses latestExpenses={latestExpenses} />
+						<BreakdownPieChart
+							title="Understand Your Cognitive Triggers"
+							formattedData={psychologicalTotals}
+							text={`Knowing what causes you to spend the most, can help you control desires, and hence spendings.`}
+						/>
+					</>
+				)}
 
-				<BreakdownPieChart
-					title="Category Breakdown"
-					formattedData={expenseCategoryTotals}
-					text={`Looking into where you spend most of your money, can help you keep your expenses in control.`}
-				/>
-
-				{/* Category Bar Graph */}
-				<DisplayBarGraph
-					title="Category Analysis"
-					formattedData={expenseCategoryDataForBarGraph}
-					yAxis="Amount Spent"
-					currency="₹"
-				/>
-
-				<LatestExpenses latestExpenses={latestExpenses} />
-				<BreakdownPieChart
-					title="Understand Your Cognitive Triggers"
-					formattedData={psychologicalTotals}
-					text={`Knowing what causes you to spend the most, can help you control desires, and hence spendings.`}
-				/>
-
-				<BigTitle
-					title="INCOME ANALYSIS"
-					subtitle={"Understand you Income Sources!"}
-					titleFontColor={"#55fa81"}
-				/>
-				<BreakdownPieChart
-					title="Category Breakdown"
-					formattedData={incomeCategoryTotals}
-					text={`Multiplying Income Sources can help you stay ahead of 99% of people.`}
-				/>
-				<DisplayBarGraph
-					title="Category Analysis"
-					formattedData={incomeCategoryDataForBarGraph}
-					yAxis="Amount Earned"
-					currency="₹"
-				/>
-				<LatestIncomes latestIncomes={latestIncomes} />
+				{totalMoneyEarned > 0 && (
+					<>
+						<BigTitle
+							title="INCOME ANALYSIS"
+							subtitle={"Understand you Income Sources!"}
+							titleFontColor={"#55fa81"}
+						/>
+						<BreakdownPieChart
+							title="Category Breakdown"
+							formattedData={incomeCategoryTotals}
+							text={`Multiplying Income Sources can help you stay ahead of 99% of people.`}
+						/>
+						<DisplayBarGraph
+							title="Category Analysis"
+							formattedData={incomeCategoryDataForBarGraph}
+							yAxis="Amount Earned"
+							currency="₹"
+						/>
+						<LatestIncomes latestIncomes={latestIncomes} />
+					</>
+				)}
 			</Box>
 		</Box>
 	);

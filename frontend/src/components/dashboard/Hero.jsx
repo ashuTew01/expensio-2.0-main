@@ -76,31 +76,36 @@ const Hero = ({ totalMoneyEarned, totalMoneySpent }) => {
 				mt="5rem"
 			>
 				<Box>
+					{/* Greeting */}
 					<Typography variant="h1" sx={{ fontWeight: "bold" }}>
 						Hey {fname}!
 					</Typography>
-					<Typography variant="h1" sx={{}}>
+
+					{/* Total Money Spent */}
+					<Typography variant="h1">
 						You spent{" "}
 						<Box
 							component="span"
 							sx={{
 								fontWeight: "bold",
-								color: "#ff5454", // Highlight the number of expenses with a bright yellow color
-								textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)", // Add depth to the number
+								color: "#ff5454", // Red color for spending
+								textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)",
 								variant: "h1",
 							}}
 						>
 							₹{totalMoneySpent || 0}
 						</Box>{" "}
 					</Typography>
-					<Typography variant="h1" sx={{}}>
+
+					{/* Total Money Earned */}
+					<Typography variant="h1">
 						and earned{" "}
 						<Box
 							component="span"
 							sx={{
 								fontWeight: "bold",
-								color: "#75e05a", // Highlight the number of expenses with a bright yellow color
-								textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)", // Add depth to the number
+								color: "#75e05a", // Green color for earnings
+								textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)",
 								variant: "h1",
 							}}
 						>
@@ -108,7 +113,27 @@ const Hero = ({ totalMoneyEarned, totalMoneySpent }) => {
 						</Box>{" "}
 						this month.
 					</Typography>
-					<Typography variant="h1" sx={{ fontWeight: "bold" }}></Typography>
+
+					{/* Conditional Messages */}
+					<Box mt={2}>
+						{/* If totalMoneySpent is 0 */}
+						{!totalMoneySpent && (
+							<Typography variant="h5" sx={{ color: "#ff5454" }}>
+								You haven't spent anything this month yet! Start tracking your
+								expenses.
+							</Typography>
+						)}
+
+						{/* If totalMoneyEarned is 0 */}
+						{!totalMoneyEarned && (
+							<Typography variant="h5" sx={{ color: "#75e05a" }}>
+								You haven't added any incomes this month yet! Start adding
+								incomes to analyze them.{" "}
+							</Typography>
+						)}
+					</Box>
+
+					{/* Spacer */}
 					<Box height="10px"></Box>
 				</Box>
 				{typeof expenditurePercentage === "number" &&
