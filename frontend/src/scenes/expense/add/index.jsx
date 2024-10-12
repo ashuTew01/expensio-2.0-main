@@ -27,21 +27,6 @@ const AddExpenseScreen = () => {
 					title="TRACK YOUR SPENDING"
 					subtitle="Log your expenses to gain better control over your spending."
 				/>
-
-				<Box>
-					<Button
-						sx={{
-							backgroundColor: theme.palette.secondary.light,
-							color: theme.palette.background.alt,
-							fontSize: "14px",
-							fontWeight: "bold",
-							padding: "10px 20px",
-						}}
-						onClick={() => navigate("/dashboard")}
-					>
-						EXPENSIO
-					</Button>
-				</Box>
 			</FlexBetween>
 			<Box
 				mt="20px"

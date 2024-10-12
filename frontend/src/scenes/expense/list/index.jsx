@@ -331,7 +331,7 @@ const ExpenseListScreen = () => {
 				<Box>
 					<Button
 						component={Link}
-						to="/add-expense"
+						to="/expense/add"
 						variant="contained"
 						sx={{
 							backgroundColor: theme.palette.secondary.light,

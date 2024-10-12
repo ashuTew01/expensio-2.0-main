@@ -267,8 +267,9 @@ const IncomeListScreen = () => {
 								backgroundColor: theme.palette.secondary.main,
 							},
 						}}
+						onClick={() => navigate("/income/add")}
 					>
-						EXPENSIO
+						Add Income
 					</Button>
 				</Box>
 			</FlexBetween>
