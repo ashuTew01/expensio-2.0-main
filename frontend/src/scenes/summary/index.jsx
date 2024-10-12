@@ -4,7 +4,6 @@ import {
 	Button,
 	Typography,
 	useTheme,
-	useMediaQuery,
 	Select,
 	MenuItem,
 	FormControl,
@@ -28,7 +27,7 @@ import buildLoadingAnimation from "../../animations/buildLoading.json";
 
 const SummaryScreen = () => {
 	const theme = useTheme();
-	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
+	// const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
 	const [year, setYear] = useState(new Date().getFullYear());
 	const [timePeriod, setTimePeriod] = useState("monthly"); // Default time period

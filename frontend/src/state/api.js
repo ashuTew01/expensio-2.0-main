@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { v4 as uuidv4 } from "uuid"; // Import UUID generator
-import { removeCredentials, setUserInfo } from "./authSlice";
+import { removeCredentials } from "./authSlice";
 
 const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 

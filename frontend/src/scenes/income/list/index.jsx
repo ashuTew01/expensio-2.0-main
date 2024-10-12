@@ -21,7 +21,6 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Delete, Search } from "@mui/icons-material";
 import {
-	useGetAllCognitiveTriggersQuery,
 	useGetAllIncomeQuery,
 	useGetAllIncomeCategoriesQuery,
 	useDeleteIncomesMutation,

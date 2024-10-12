@@ -25,7 +25,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 const IncomeForm = ({}) => {
 	const theme = useTheme();
-	const moods = ["neutral", "happy", "regretful"];
 	const incomeTypes = ["primary", "secondary", "settlement", "unknown"];
 
 	const [saveIncome, { isLoading, isError }] = useSaveIncomeMutation();

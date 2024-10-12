@@ -1,5 +1,4 @@
 import React from "react";
-import { useTheme } from "@mui/material";
 import Lottie from "lottie-react";
 import loadingAnimation from "../animations/normalLoading.json";
 
@@ -16,7 +15,6 @@ const AnimatedLoadingIndicator = ({
 	textStyle = {}, // Additional styles for the loading text
 	animationLoop = true, // Controls whether the animation should loop
 }) => {
-	const theme = useTheme();
 	const fadeInAnimation = {
 		"@keyframes fadeInOut": {
 			"0%": { opacity: 0 },

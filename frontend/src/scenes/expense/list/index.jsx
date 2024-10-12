@@ -94,7 +94,7 @@ const ExpenseListScreen = () => {
 		pageSize: 10,
 	});
 
-	const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
+	// const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
 	// Fetch data using RTK Query
 	const {

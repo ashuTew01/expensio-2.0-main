@@ -4,7 +4,6 @@ import { Box, Grid, Typography, Container } from "@mui/material";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import SecurityIcon from "@mui/icons-material/Security";
-import StorageIcon from "@mui/icons-material/Storage";
 import CodeIcon from "@mui/icons-material/Code";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { motion } from "framer-motion";

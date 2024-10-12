@@ -135,31 +135,15 @@ const Dashboard = () => {
 				)
 			: [];
 
-	const cognitiveTriggerForBarGraph =
-		dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.map(
-			(item, i) => ({
-				category: item.cognitiveTriggerName,
-				amountSpent: item.totalAmountSpent,
-				expenses: item.numExpenses,
-				color: theme.palette.secondary[((i % 9) + 1) * 100],
-			})
-		);
-
-	// Define the columns for the DataGrid
-	const columns = [
-		{ field: "id", headerName: "ID", flex: 1 },
-		{ field: "title", headerName: "Title", flex: 1 },
-		{
-			field: "amount",
-			headerName: "Amount",
-			flex: 1,
-			renderCell: (params) => `$${params.value.toFixed(2)}`,
-		},
-		{ field: "expenseType", headerName: "Expense Type", flex: 1 },
-		{ field: "categoryName", headerName: "Category", flex: 1 },
-		{ field: "cognitiveTriggers", headerName: "Cognitive Triggers", flex: 2 },
-		{ field: "createdAt", headerName: "Created At", flex: 1 },
-	];
+	// const cognitiveTriggerForBarGraph =
+	// 	dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.map(
+	// 		(item, i) => ({
+	// 			category: item.cognitiveTriggerName,
+	// 			amountSpent: item.totalAmountSpent,
+	// 			expenses: item.numExpenses,
+	// 			color: theme.palette.secondary[((i % 9) + 1) * 100],
+	// 		})
+	// 	);
 
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();

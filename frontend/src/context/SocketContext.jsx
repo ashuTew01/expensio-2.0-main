@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
 	const [socket, setSocket] = useState(null); // State to store the socket instance
 	const socketRef = useRef(null);
 
-	const token = useSelector((state) => state.auth.token);
+	const { userInfo, token } = useSelector((state) => state.auth);
 
 	useEffect(() => {
 		// If the token doesn't exist, don't make the socket connection
@@ -32,6 +32,7 @@ export const SocketProvider = ({ children }) => {
 			path: "/ws/smart-chat",
 			query: {
 				token: `Bearer ${token}`,
+				user: `${userInfo.first_name} ${userInfo.last_name || ""}`,
 			},
 		});
 

@@ -4,7 +4,6 @@ import {
 	Typography,
 	Paper,
 	Grid,
-	Divider,
 	CircularProgress,
 	useTheme,
 } from "@mui/material";

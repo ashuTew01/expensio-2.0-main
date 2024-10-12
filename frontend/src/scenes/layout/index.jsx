@@ -1,6 +1,6 @@
 // src/scenes/layout/index.jsx
 import React, { useState } from "react";
-import { Box, useMediaQuery, Toolbar } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { Outlet, useLocation } from "react-router-dom"; //this allows us to have the template layouts.
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";

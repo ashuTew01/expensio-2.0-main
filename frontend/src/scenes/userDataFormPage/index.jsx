@@ -1,7 +1,6 @@
 // src/pages/auth/UserDataForm.jsx
 import React, { useEffect } from "react";
 import {
-	Container,
 	CssBaseline,
 	Box,
 	Typography,
@@ -87,7 +86,7 @@ const UserDataForm = () => {
 
 	useEffect(() => {
 		if (!email) navigate("/login");
-	}, [email]);
+	}, [email, navigate]);
 
 	const formSchema = yup.object().shape({
 		firstName: yup.string().required("This is a required field."),
@@ -108,7 +107,7 @@ const UserDataForm = () => {
 			.required("OTP is required"),
 	});
 
-	const currentDate = new Date().toISOString().split("T")[0];
+	// const currentDate = new Date().toISOString().split("T")[0];
 
 	const handleSubmit = async (values, { setSubmitting }) => {
 		try {

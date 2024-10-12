@@ -1,10 +1,7 @@
 // src/scenes/navbar/index.jsx
 import React, { useState } from "react";
 import {
-	LightModeOutlined,
-	DarkModeOutlined,
 	Menu as MenuIcon,
-	Search,
 	ArrowDropDownOutlined,
 	Add as AddIcon, // Importing the Add icon
 } from "@mui/icons-material";

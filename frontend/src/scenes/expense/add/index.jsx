@@ -1,16 +1,14 @@
 import React from "react";
 import FlexBetween from "../../../components/FlexBetween.jsx";
 import Header from "../../../components/Header.jsx";
-import { Box, Button, useTheme, useMediaQuery } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import ExpensesForm from "../../../components/ExpensesForm.jsx";
 import { useGetAllCognitiveTriggersQuery } from "../../../state/api.js";
 import PsychologicalTypesExplain from "../../../components/PsychoTypesExplain.jsx";
-import { useNavigate } from "react-router-dom";
 
 const AddExpenseScreen = () => {
 	const theme = useTheme();
 	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
-	const navigate = useNavigate();
 
 	const {
 		data: cognitiveTriggersData,
