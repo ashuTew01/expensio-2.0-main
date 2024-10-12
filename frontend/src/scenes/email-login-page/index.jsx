@@ -1,5 +1,5 @@
 // src/pages/auth/EmailLoginPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
 	CssBaseline,
 	Box,
@@ -8,26 +8,47 @@ import {
 	Button,
 	Grid,
 	Link,
+	CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { useSendOtpMutation } from "../../state/api";
 import { useDispatch, useSelector } from "react-redux";
-import { setIfUserExist } from "../../state/authSlice";
+import { setIfUserExist, setToken, setUserInfo } from "../../state/authSlice";
 import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import "react-toastify/dist/ReactToastify.css";
 import backgroundImage from "/auth-background.jpg"; // Replace with your image path
 
-const BackgroundContainer = styled(Box)({
+// Styled Components
+const BackgroundContainer = styled(Box)(({ theme }) => ({
 	minHeight: "100vh",
 	backgroundImage: `url(${backgroundImage})`,
 	backgroundSize: "cover",
 	backgroundPosition: "center",
 	display: "flex",
+	flexDirection: "column",
 	alignItems: "center",
 	justifyContent: "center",
-});
+	position: "relative",
+	padding: theme.spacing(2),
+}));
+
+const Header = styled(Box)(({ theme }) => ({
+	position: "absolute",
+	top: theme.spacing(2),
+	right: theme.spacing(2),
+	display: "flex",
+	gap: theme.spacing(2),
+	[theme.breakpoints.down("sm")]: {
+		top: theme.spacing(1),
+		right: theme.spacing(1),
+		flexDirection: "column",
+		gap: theme.spacing(1),
+	},
+}));
 
 const GlassCard = styled(Box)(({ theme }) => ({
 	backdropFilter: "blur(10px)",
@@ -37,15 +58,20 @@ const GlassCard = styled(Box)(({ theme }) => ({
 	boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
 	maxWidth: 500,
 	width: "100%",
+	zIndex: 1,
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-	marginTop: theme.spacing(4),
 	padding: theme.spacing(1.5),
 	fontSize: "1.2rem",
 	fontWeight: "bold",
 	borderRadius: theme.spacing(1),
 	backgroundColor: "#238efa",
+	color: "#fff",
+	"&:hover": {
+		backgroundColor: "#1c6ed8",
+	},
+	transition: "background-color 0.3s ease",
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -72,11 +98,23 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 			borderColor: "#fff",
 		},
 	},
+	"& .MuiFormHelperText-root": {
+		color: "#ff6b6b",
+	},
+}));
+
+const GuestLoginStyledButton = styled(StyledButton)(({ theme }) => ({
+	backgroundColor: "#2079d4",
+	padding: theme.spacing(1), // Reduced padding for a smaller button
+	fontSize: "0.85rem", // Smaller font size
+	minWidth: "150px", // Ensure the button isn't too small in width
+	"&:hover": {
+		backgroundColor: "#45a049",
+	},
 }));
 
 const EmailLoginPage = () => {
-	const [email, setEmail] = useState("");
-	const [sendOtp] = useSendOtpMutation();
+	const [sendOtp, { isLoading }] = useSendOtpMutation();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -88,28 +126,70 @@ const EmailLoginPage = () => {
 		}
 	}, [navigate, userInfo]);
 
-	const onClickHandler = async () => {
-		if (!email) {
-			toast.error("Please enter a valid email address");
-			return;
-		}
+	// Define Yup validation schema
+	const validationSchema = Yup.object({
+		email: Yup.string()
+			.email("Enter a valid email")
+			.required("Email is required"),
+	});
 
-		try {
-			const response = await sendOtp({ email }).unwrap();
-			toast.success(response.message);
-			dispatch(setIfUserExist(response.userExists));
+	// Initialize Formik
+	const formik = useFormik({
+		initialValues: {
+			email: "",
+		},
+		validationSchema: validationSchema,
+		onSubmit: async (values) => {
+			try {
+				const response = await sendOtp({ email: values.email }).unwrap();
+				toast.success(response.message);
+				dispatch(setIfUserExist(response.userExists));
+				navigate("/otp", { state: { email: values.email } });
+			} catch (err) {
+				console.error(err);
+				toast.error(err.data?.error || "Failed to send OTP");
+			}
+		},
+	});
 
-			navigate("/otp", { state: { email } });
-		} catch (err) {
-			console.error(err);
-			toast.error(err.data?.error || "Failed to send OTP");
-		}
+	// Define the guest user information
+	const guestUserInfo = {
+		id: 0,
+		phone: "+911234567890",
+		first_name: "Guest",
+		last_name: "User",
+		username: "guest",
+		email: "guest@test.com",
+		profile_picture_url: null,
+		bio: "This is the official guest user, intended for checking out features.",
+	};
+
+	const handleGuestLogin = () => {
+		dispatch(setToken("guest"));
+		dispatch(setUserInfo(guestUserInfo));
+		toast.success("Logged in as Guest!");
+		navigate("/dashboard"); // Replace with your desired route
 	};
 
 	return (
 		<BackgroundContainer>
 			<CssBaseline />
 			<ToastContainer />
+
+			{/* Header with Guest Login Button */}
+			<Header>
+				<GuestLoginStyledButton
+					variant="outlined"
+					onClick={handleGuestLogin}
+					component={motion.button}
+					whileHover={{ scale: 1.02 }}
+					whileTap={{ scale: 0.98 }}
+					aria-label="Guest Login"
+				>
+					<Typography>Guest Login</Typography>
+				</GuestLoginStyledButton>
+			</Header>
+
 			<GlassCard
 				component={motion.div}
 				initial={{ opacity: 0, y: 50 }}
@@ -132,7 +212,12 @@ const EmailLoginPage = () => {
 				>
 					Please enter your email to receive a verification code
 				</Typography>
-				<Box component="form" noValidate sx={{ mt: 1 }}>
+				<Box
+					component="form"
+					noValidate
+					sx={{ mt: 1 }}
+					onSubmit={formik.handleSubmit}
+				>
 					<StyledTextField
 						variant="outlined"
 						margin="normal"
@@ -143,22 +228,29 @@ const EmailLoginPage = () => {
 						name="email"
 						autoComplete="email"
 						autoFocus
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						value={formik.values.email}
+						onChange={formik.handleChange}
+						onBlur={formik.handleBlur}
+						error={formik.touched.email && Boolean(formik.errors.email)}
+						helperText={formik.touched.email && formik.errors.email}
 					/>
 					<StyledButton
-						type="button"
+						type="submit"
 						fullWidth
 						variant="contained"
-						// color={"#f5bd02"}
-						onClick={onClickHandler}
 						component={motion.button}
+						disabled={isLoading || !formik.isValid || !formik.dirty}
 						whileHover={{ scale: 1.05 }}
 						whileTap={{ scale: 0.95 }}
+						sx={{ mt: 3, mb: 2 }}
 					>
-						Send OTP
+						{isLoading ? (
+							<CircularProgress size={24} color="inherit" />
+						) : (
+							"Send OTP"
+						)}
 					</StyledButton>
-					<Grid container justifyContent="center" sx={{ mt: 2 }}>
+					<Grid container justifyContent="center">
 						<Grid item>
 							<Link href="/" variant="body2" sx={{ color: "#fff" }}>
 								{"Back to Home"}
