@@ -67,7 +67,7 @@ const navItems = [
 		icon: <ListAlt />,
 	},
 	{
-		text: "Record",
+		text: "Add",
 		route: "expense/add",
 		icon: <AddCircle />,
 	},
@@ -86,7 +86,7 @@ const navItems = [
 		icon: <ListAlt />,
 	},
 	{
-		text: "Record",
+		text: "Add",
 		route: "income/add",
 		icon: <AddCircle />,
 	},

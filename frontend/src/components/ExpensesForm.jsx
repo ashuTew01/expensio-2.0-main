@@ -1,3 +1,4 @@
+// src/components/ExpensesForm.jsx
 import React, { useEffect, useState } from "react";
 import {
 	Box,
@@ -29,16 +30,14 @@ const ExpensesForm = ({
 
 	const theme = useTheme();
 	const [title, setTitle] = useState("");
-	const [amount, setAmount] = useState(0);
+	const [amount, setAmount] = useState("");
 	const [categoryCode, setCategoryCode] = useState("");
-	// const [dateTime, setDateTime] = useState(new Date());
-	// const [event, setEvent] = useState("");
 	const [expenseType, setExpenseType] = useState("");
 	const [cognitiveTriggerCode, setCognitiveTriggerCode] = useState([]);
 	const [description, setDescription] = useState("");
 	const [paymentMethod, setPaymentMethod] = useState("");
 	const [mood, setMood] = useState(moods[0]);
-	const [createdAt, setCreatedAt] = useState(); // New state for createdAt
+	const [createdAt, setCreatedAt] = useState(""); // Initialize as empty string
 
 	const [saveExpenses, { isLoading, isError }] = useSaveExpensesMutation();
 
@@ -57,7 +56,7 @@ const ExpensesForm = ({
 	};
 
 	const resetForm = () => {
-		setAmount(0);
+		setAmount("");
 		setTitle("");
 		setCategoryCode("");
 		setExpenseType("");
@@ -67,17 +66,36 @@ const ExpensesForm = ({
 		setMood(moods[0]);
 		setCreatedAt("");
 	};
+
 	const handleSubmit = async () => {
+		// Validate mandatory fields
+		if (!title.trim()) {
+			toast.error("Title is required.");
+			return;
+		}
+		if (!amount || Number(amount) <= 0) {
+			toast.error("Please enter a valid amount.");
+			return;
+		}
+		if (!categoryCode) {
+			toast.error("Category is required.");
+			return;
+		}
+		if (!expenseType) {
+			toast.error("Expense Type is required.");
+			return;
+		}
+
 		try {
 			const expenseData = {
-				title,
+				title: title.trim(),
 				amount: Number(amount),
 				categoryCode,
 				expenseType,
 				cognitiveTriggerCodes: Array.isArray(cognitiveTriggerCode)
 					? cognitiveTriggerCode
 					: [cognitiveTriggerCode], // Ensure it's an array
-				description,
+				description: description.trim(),
 				paymentMethod,
 				mood,
 				...(createdAt && { createdAt: new Date(createdAt).toISOString() }),
@@ -113,6 +131,7 @@ const ExpensesForm = ({
 		backgroundColor: theme.palette.background.default,
 		// fontColor: "black",
 	};
+
 	return (
 		<>
 			<Typography
@@ -123,6 +142,7 @@ const ExpensesForm = ({
 			</Typography>
 			<Box mt={3}>
 				<Grid container spacing={2}>
+					{/* Title Field (Required) */}
 					<Grid item xs={6}>
 						<TextField
 							sx={{ ...backgroundColorStyle }}
@@ -131,8 +151,11 @@ const ExpensesForm = ({
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							fullWidth
+							required
 						/>
 					</Grid>
+
+					{/* Amount Field (Required) */}
 					<Grid item xs={6}>
 						<TextField
 							sx={{ ...backgroundColorStyle }}
@@ -142,10 +165,13 @@ const ExpensesForm = ({
 							value={amount}
 							onChange={(e) => setAmount(e.target.value)}
 							fullWidth
+							required
 						/>
 					</Grid>
+
+					{/* Category Field (Required) */}
 					<Grid item xs={6}>
-						<FormControl fullWidth variant="outlined">
+						<FormControl fullWidth variant="outlined" required>
 							<InputLabel id="category-label">Category</InputLabel>
 							<Select
 								sx={{ ...backgroundColorStyle }}
@@ -156,6 +182,8 @@ const ExpensesForm = ({
 							>
 								{categoriesLoading ? (
 									<MenuItem disabled>Loading categories...</MenuItem>
+								) : categoriesError ? (
+									<MenuItem disabled>Error loading categories</MenuItem>
 								) : (
 									categoriesData?.categories?.map((category) => (
 										<MenuItem key={category.code} value={category.code}>
@@ -166,39 +194,31 @@ const ExpensesForm = ({
 							</Select>
 						</FormControl>
 					</Grid>
-					{/* <Grid item xs={6}>
-            <TextField
-              sx={{ ...backgroundColorStyle }}
-              label="Date & Time"
-              variant="outlined"
-              type="datetime-local"
-              value={dateTime}
-              onChange={(e) => setDateTime(e.target.value)}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid> */}
+
+					{/* Expense Type Field (Required) */}
 					<Grid item xs={6}>
-						<FormControl fullWidth variant="outlined">
-							<InputLabel id="event-label">Expense Type</InputLabel>
+						<FormControl fullWidth variant="outlined" required>
+							<InputLabel id="expense-type-label">Expense Type</InputLabel>
 							<Select
 								sx={{ ...backgroundColorStyle }}
-								labelId="event-label2"
+								labelId="expense-type-label"
 								value={expenseType}
 								onChange={(e) => setExpenseType(e.target.value)}
-								label="Event"
+								label="Expense Type"
 							>
-								{expenseTypes.map((expenseType) => (
-									<MenuItem key={expenseType} value={expenseType}>
-										{capitalizeFirstLetter(expenseType)}
+								{expenseTypes.map((type) => (
+									<MenuItem key={type} value={type}>
+										{capitalizeFirstLetter(type)}
 									</MenuItem>
 								))}
 							</Select>
 						</FormControl>
 					</Grid>
+
+					{/* Psychological Type Field */}
 					<Grid item xs={6}>
 						<FormControl fullWidth variant="outlined">
-							<InputLabel id="psycho-types-label">
+							<InputLabel id="psychologicaltype-label">
 								Psychological Type
 							</InputLabel>
 							<Select
@@ -208,9 +228,21 @@ const ExpensesForm = ({
 								onChange={(e) => setCognitiveTriggerCode(e.target.value)}
 								label="Psychological Type"
 								multiple // Allow selecting multiple values
+								renderValue={(selected) =>
+									selected
+										.map(
+											(code) =>
+												cognitiveTriggersData?.cognitiveTriggers?.find(
+													(trigger) => trigger.code === code
+												)?.name
+										)
+										.join(", ")
+								}
 							>
 								{cognitiveTriggersDataLoading ? (
 									<MenuItem disabled>Loading...</MenuItem>
+								) : cognitiveTriggersDataError ? (
+									<MenuItem disabled>Error loading triggers</MenuItem>
 								) : (
 									cognitiveTriggersData?.cognitiveTriggers?.map(
 										(cognitiveTrigger) => (
@@ -227,26 +259,7 @@ const ExpensesForm = ({
 						</FormControl>
 					</Grid>
 
-					{/* <Grid item xs={6}>
-            <TextField
-              sx={{ ...backgroundColorStyle }}
-              label="Notes"
-              variant="outlined"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              fullWidth
-            />
-          </Grid> */}
-					{/* <Grid item xs={6}>
-            <TextField
-              sx={{ ...backgroundColorStyle }}
-              label="Image"
-              variant="outlined"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              fullWidth
-            />
-          </Grid> */}
+					{/* Payment Method Field */}
 					<Grid item xs={6}>
 						<FormControl fullWidth variant="outlined">
 							<InputLabel id="payment-method-label">Payment Method</InputLabel>
@@ -271,22 +284,20 @@ const ExpensesForm = ({
 							</Select>
 						</FormControl>
 					</Grid>
+
+					{/* Mood after transaction Field */}
 					<Grid item xs={6}>
 						<FormControl fullWidth variant="outlined">
 							<InputLabel id="mood-label">Mood after transaction</InputLabel>
 							<Select
 								sx={{ ...backgroundColorStyle }}
-								labelId="mood-label2"
+								labelId="mood-label"
 								value={mood}
 								onChange={(e) => setMood(e.target.value)}
-								label="Mood"
+								label="Mood after transaction"
 							>
 								{moods.map((mood_) => (
-									<MenuItem
-										key={mood_}
-										value={mood_}
-										label={capitalizeFirstLetter(mood_)}
-									>
+									<MenuItem key={mood_} value={mood_}>
 										{capitalizeFirstLetter(mood_)}
 									</MenuItem>
 								))}
@@ -294,7 +305,7 @@ const ExpensesForm = ({
 						</FormControl>
 					</Grid>
 
-					{/* New Created At Input */}
+					{/* Created At Field */}
 					<Grid item xs={6}>
 						<TextField
 							sx={{ ...backgroundColorStyle }}
@@ -308,6 +319,7 @@ const ExpensesForm = ({
 						/>
 					</Grid>
 
+					{/* Description Field */}
 					<Grid item xs={6}>
 						<TextField
 							sx={{ ...backgroundColorStyle }}
@@ -320,18 +332,10 @@ const ExpensesForm = ({
 							rows={3} // Increased number of rows for a bigger input
 						/>
 					</Grid>
-					{/* <Grid item xs={6}>
-            <TextField
-              sx={{ ...backgroundColorStyle }}
-              label="Goal ID"
-              variant="outlined"
-              value={goalId}
-              onChange={(e) => setGoalId(e.target.value)}
-              fullWidth
-            />
-          </Grid> */}
 				</Grid>
 			</Box>
+
+			{/* Submit Button */}
 			<Button
 				variant="outlined"
 				color="secondary"
@@ -341,6 +345,8 @@ const ExpensesForm = ({
 			>
 				{isLoading ? <CircularProgress size={24} /> : "Upload Data"}
 			</Button>
+
+			{/* Error Message */}
 			{isError && (
 				<Typography variant="body1" color="error" sx={{ mt: 2 }}>
 					Error uploading data. Please try again.

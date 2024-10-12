@@ -7,6 +7,7 @@ import {
 	Button,
 	Grid,
 	Link,
+	CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -51,6 +52,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const OtpPage = () => {
 	const [otp, setOtp] = useState("");
 	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState();
 	const location = useLocation();
 	const dispatch = useDispatch();
 
@@ -62,6 +64,7 @@ const OtpPage = () => {
 		try {
 			if (otp.length === 6) {
 				// Assuming OTP length is 6
+				setIsLoading(true);
 				if (!userExists) {
 					navigate("/user-data-form", { state: { email, otp } });
 				} else {
@@ -85,6 +88,16 @@ const OtpPage = () => {
 		} catch (err) {
 			console.error(err);
 			toast.error("Failed to handle OTP");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	// Handler for pressing "Enter" key
+	const handleKeyPress = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault(); // Prevent the default form submission behavior
+			onClickHandler(); // Call the OTP send handler
 		}
 	};
 
@@ -138,28 +151,35 @@ const OtpPage = () => {
 				>
 					Enter the 6-digit code sent to your email
 				</Typography>
-				<OtpInput
-					value={otp}
-					onChange={setOtp}
-					numInputs={6}
-					isInputNum
-					shouldAutoFocus
-					inputStyle={inputStyle}
-					containerStyle={containerStyle}
-					renderInput={renderInput} // Added this line
-				/>
-				<StyledButton
-					type="button"
-					fullWidth
-					variant="contained"
-					color="primary"
-					onClick={onClickHandler}
-					component={motion.button}
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
-				>
-					Verify OTP
-				</StyledButton>
+				<Box component="form" onKeyDown={handleKeyPress}>
+					<OtpInput
+						value={otp}
+						onChange={setOtp}
+						numInputs={6}
+						isInputNum
+						shouldAutoFocus
+						inputStyle={inputStyle}
+						containerStyle={containerStyle}
+						renderInput={renderInput} // Added this line
+					/>
+					<StyledButton
+						type="button"
+						fullWidth
+						variant="contained"
+						color="primary"
+						onClick={onClickHandler}
+						disabled={isLoading}
+						component={motion.button}
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+					>
+						{isLoading ? (
+							<CircularProgress size={24} color="inherit" /> // Show loader when loading
+						) : (
+							"Verify OTP"
+						)}
+					</StyledButton>
+				</Box>
 				<Grid container justifyContent="center" sx={{ mt: 2 }}>
 					<Grid item>
 						<Link href="/login" variant="body2" sx={{ color: "#fff" }}>
