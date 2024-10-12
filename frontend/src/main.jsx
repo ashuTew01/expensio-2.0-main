@@ -11,7 +11,7 @@ import { Provider } from "react-redux";
 
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { api } from "./state/api"; //LINE X1
-import { googleAuthApi } from "./state/googleAuth";
+
 import { summaryApi } from "./state/summaryApi";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -19,17 +19,13 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 const store = configureStore({
 	reducer: {
 		global: globalReducer,
-		[api.reducerPath]: api.reducer, //LINE X2
-		[googleAuthApi.reducerPath]: googleAuthApi.reducer,
+		[api.reducerPath]: api.reducer,
 		[summaryApi.reducerPath]: summaryApi.reducer,
 		auth: authReducer,
 		chat: chatReducer,
 	},
 	middleware: (getDefault) =>
-		getDefault()
-			.concat(api.middleware)
-			.concat(googleAuthApi.middleware)
-			.concat(summaryApi.middleware),
+		getDefault().concat(api.middleware).concat(summaryApi.middleware),
 });
 setupListeners(store.dispatch);
 

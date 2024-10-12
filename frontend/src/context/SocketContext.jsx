@@ -40,10 +40,10 @@ export const SocketProvider = ({ children }) => {
 
 		// Optionally log the socket connection status
 		socketRef.current.on("connect", () => {
-			console.log("Socket connected:", socketRef.current.id);
+			// console.log("Socket connected:", socketRef.current.id);
 		});
 		socketRef.current.on("disconnect", () => {
-			console.log("Socket disconnected");
+			// console.log("Socket disconnected");
 		});
 
 		return () => {

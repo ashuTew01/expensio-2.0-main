@@ -156,7 +156,7 @@ const ExpenseListScreen = () => {
 				<ErrorDisplay
 					fontSize="25px"
 					textColor="rgba(235, 87, 87, 255)"
-					text="Error loading data. Please try again later."
+					text="Error loading data. Please refresh the page."
 				/>
 			</Box>
 		);

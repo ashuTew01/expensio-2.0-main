@@ -11,6 +11,7 @@ import Hero from "../../components/dashboard/Hero";
 import BigTitle from "../../components/dashboard/BigTitle";
 import DisplayBarGraph from "../../components/dashboard/DisplayBarGraph";
 import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
+import ErrorDisplay from "../../components/error/ErrorDisplay";
 
 const Dashboard = () => {
 	const theme = useTheme();
@@ -20,8 +21,26 @@ const Dashboard = () => {
 	const {
 		data: dashboardData,
 		isLoading: dashboardDataLoading,
-		isError: dashboardDataError,
+		isError: isDashboardDataError,
+		error: dashboardDataError,
 	} = useGetDasboardQuery();
+
+	if (isDashboardDataError) {
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text={dashboardDataError?.data.error.message}
+				/>
+			</Box>
+		);
+	}
 
 	if (dashboardDataLoading) return <AnimatedLoadingIndicator height="500px" />;
 

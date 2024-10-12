@@ -79,29 +79,10 @@ export const api = createApi({
 				};
 			},
 		}),
-		saveExpensesThroughText: build.mutation({
-			query: (data) => ({
-				url: `expense/add/text`,
-				method: "POST",
-				body: data,
-			}),
-		}),
-		transcribeAudio: build.mutation({
-			query: (audioFile) => ({
-				url: "general/audio-to-text",
-				method: "POST",
-				body: audioFile,
-			}),
-		}),
+
 		getAllExpenseCategories: build.query({
 			query: () => ({
 				url: `expense/category/all`,
-				method: "GET",
-			}),
-		}),
-		getAllEvents: build.query({
-			query: () => ({
-				url: `event/all`,
 				method: "GET",
 			}),
 		}),
@@ -240,14 +221,7 @@ export const api = createApi({
 				body: data,
 			}),
 		}),
-		// PUT GOALS QUERIES HERE
-		saveGoal: build.mutation({
-			query: (data) => ({
-				url: `goal/add`,
-				method: "POST",
-				body: data,
-			}),
-		}),
+
 		sendOtp: build.mutation({
 			query: (data) => ({
 				url: `user/send-otp`,
@@ -281,38 +255,38 @@ export const api = createApi({
 });
 
 export const {
-	useGetAllEventsQuery,
+	// cognitive trigger queries
 	useGetAllCognitiveTriggersQuery,
 
+	// expense queries
 	useExpenseTestQuery,
-	useGetExpenseByIdQuery,
-	useGetUserSummaryQuery,
-	useGetUserDetailsQuery,
 	useGetAllExpensesQuery,
+	useGetExpenseByIdQuery,
 	useDeleteExpensesMutation,
+	useGetAllExpenseCategoriesQuery,
+	useSaveExpensesMutation,
 
+	// summary
+	useGetUserSummaryQuery,
+
+	//user
+	useGetUserDetailsQuery,
+	useSendOtpMutation,
+	useVerifyOtpMutation,
+
+	// INCOME
 	useDeleteIncomesMutation,
+	useGetAllIncomeQuery,
+	useGetIncomeByIdQuery,
+	useGetAllIncomeCategoriesQuery,
+	useSaveIncomeMutation,
 
 	// financial data
 	useGetExpenseFinancialDataMutation,
 	useGetIncomeFinancialDataMutation,
 
-	useGetAllIncomeQuery,
-	useGetIncomeByIdQuery,
-	useGetAllIncomeCategoriesQuery,
-
-	useSaveGoalMutation,
-
+	// dashboard
 	useGetDasboardQuery,
-
-	useSaveExpensesMutation,
-	useSaveIncomeMutation,
-	useSaveExpensesThroughTextMutation,
-	useTranscribeAudioMutation,
-	useGetAllExpenseCategoriesQuery,
-
-	useSendOtpMutation,
-	useVerifyOtpMutation,
 
 	//smart ai
 	useGetUserAiTokensDetailQuery,

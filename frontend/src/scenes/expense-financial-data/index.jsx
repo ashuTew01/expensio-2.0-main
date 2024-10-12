@@ -17,14 +17,16 @@ import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
 import { useSelector } from "react-redux";
 import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
+import ErrorDisplay from "../../components/error/ErrorDisplay";
 
 const ExpenseFinancialData = () => {
 	const theme = useTheme();
 	const isNonMobile = useMediaQuery("(min-width: 1000px)");
 	const [year, setYear] = useState(new Date().getFullYear());
 	const [month, setMonth] = useState(new Date().getMonth() + 1); // Current month
-	const [getExpenseFinancialData, { isLoading, data, error }] =
+	const [getExpenseFinancialData, { isLoading, isError, data, error }] =
 		useGetExpenseFinancialDataMutation();
+	const { userInfo } = useSelector((state) => state.auth);
 
 	// Effect to fetch financial data whenever month or year changes
 	useEffect(() => {
@@ -42,7 +44,26 @@ const ExpenseFinancialData = () => {
 		getExpenseFinancialData(requestBody);
 	}, [month, year, getExpenseFinancialData]);
 
-	const { userInfo } = useSelector((state) => state.auth);
+	if (isError) {
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text={
+						error?.data.error.message ||
+						"Error loading data. Please refresh the page."
+					}
+				/>
+			</Box>
+		);
+	}
+
 	return (
 		<Box m="1.5rem 2.5rem">
 			<FlexBetween>

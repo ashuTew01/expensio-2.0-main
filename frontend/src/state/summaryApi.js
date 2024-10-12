@@ -20,11 +20,7 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
 	const result = await baseQuery(args, api, extraOptions);
 
 	if (result.error && result.error.status === 401) {
-		// Dispatch the logout action to clear credentials
 		api.dispatch(removeCredentials());
-
-		// Optionally, display a toast notification
-		// toast.error("Session expired. Please log in again.");
 	}
 
 	return result;

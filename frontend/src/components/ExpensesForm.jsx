@@ -283,7 +283,7 @@ const ExpensesForm = ({
 								<Grid item xs={12} sm={6}>
 									<FormControl fullWidth variant="outlined">
 										<InputLabel id="psychologicaltype-label">
-											Psychological Type
+											Cognitive Triggers
 										</InputLabel>
 										<Select
 											sx={{ ...backgroundColorStyle }}
