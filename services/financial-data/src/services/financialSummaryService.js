@@ -4,7 +4,7 @@ import {
 	getExpenseFinancialDataService,
 	getIncomeFinancialDataService,
 } from "./financialDataService.js";
-import { formatFinancialData } from "../utils/formatFinancialData.js";
+import { formatFinancialDataCompact } from "../utils/formatFinancialDataCompact.js";
 import { financialSummaryPrompt } from "../data/aiPrompts.js";
 import { generateFinancialSummaryFunction } from "../utils/openaiFunctions.js";
 
@@ -209,7 +209,7 @@ export const buildFinancialSummaryService = async (
 	}
 
 	// Format financial data for AI processing
-	const formattedData = formatFinancialData(
+	const formattedData = formatFinancialDataCompact(
 		expenseFinancialData,
 		incomeFinancialData
 	);

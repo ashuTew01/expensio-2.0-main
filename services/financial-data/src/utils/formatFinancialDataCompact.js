@@ -5,7 +5,10 @@
  * @param {Array<Object>} incomeDataArray - An array of income financial data objects.
  * @returns {string} A string summary of the financial data.
  */
-export const formatFinancialData = (expenseDataArray, incomeDataArray) => {
+export const formatFinancialDataCompact = (
+	expenseDataArray,
+	incomeDataArray
+) => {
 	let summary = "Currency: Rupees\n";
 
 	// Process income data if available

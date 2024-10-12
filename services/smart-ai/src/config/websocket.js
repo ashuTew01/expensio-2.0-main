@@ -19,6 +19,7 @@ export const initializeWebSocket = (server) => {
 	});
 	io.use((socket, next) => {
 		const token = socket.handshake.query.token?.split(" ")[1]; // Extract Bearer token from query string
+		const nameOfUser = socket.handshake.query.user;
 
 		if (token) {
 			try {
@@ -28,11 +29,13 @@ export const initializeWebSocket = (server) => {
 						phone: "+911234567890",
 						email: "guest@test.com",
 					};
+					socket.nameOfUser = "Guest";
 				} else {
 					const decoded = jwt.verify(token, process.env.JWT_SECRET);
 					socket.user = decoded;
 				}
 				socket.token = token;
+				socket.nameOfUser = nameOfUser;
 				next(); // Allow the connection
 			} catch (error) {
 				next(new Error("Authentication error: Invalid token"));

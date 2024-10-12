@@ -4,7 +4,10 @@ import UserTokens from "../models/UserTokens.js"; // Import UserTokens model
 import mongoose from "mongoose"; // For transactions
 import { validModels } from "../utils/openaiApiModels.js";
 import { calculateAiTokens } from "../utils/calculateAiTokens.js";
+
+//****************************** WARNING:: DONT REMOVE ********************************************************************* */
 import AiSubscription from "../models/AiSubscription.js"; //DONT REMOVE, POPULATE WILL BREAK! Code will not immediately break, but will break next month.
+//***************************************************************************************************** */
 
 const validRoles = ["user"];
 
@@ -75,7 +78,7 @@ const deductTokens = async (userTokens, tokensUsed, session) => {
 export const callOpenaiService = async (
 	userId = null,
 	conversationHistory = null,
-	functions = [],
+	functions = undefined,
 	model = "gpt-4o-mini",
 	role = "user"
 ) => {
@@ -125,7 +128,7 @@ export const callOpenaiService = async (
 				model, // Use the specified model
 				messages: conversationHistory,
 				functions, // Optional: include functions if needed
-				function_call: functions.length ? "auto" : undefined,
+				function_call: functions ? "auto" : undefined,
 			});
 		} catch (error) {
 			logError(error);

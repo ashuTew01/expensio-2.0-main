@@ -4,6 +4,7 @@ import {
 	handleCreateExpenseService,
 	handleCreateIncomeService,
 	handleGetFinancialDataService,
+	handleUseFinancialDataService,
 } from "../services/smartChatService.js";
 import ConversationHistory from "../models/ConversationHistory.js";
 import { logError } from "@expensio/sharedlib";
@@ -24,14 +25,23 @@ export const smartChatTestController = async (req, res) => {
 export const handleUserInputController = async (message, socket) => {
 	try {
 		const userId = socket.user.id;
+		const date = new Date();
+		const formattedDate = date.toLocaleDateString("en-US", {
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+		});
+		const nameOfUser = socket.nameOfUser;
 		const initialPrompt = {
 			role: "system",
-			content: `THIS IS JUST A SYSTEM PROMPT, ALWAYS ATTACHED TO HISTORY TO HELP YOU. USER's MESSAGE IS ABOVE THIS. Date: ${new Date()}. You are a helpful financial assistant. 
-			    Dont answer queries if the user's messages get too drifted off the financial related domain.
-				1. Always try to interpret what the user wants to do before calling any function, or simply asking for a simple query. 
-				2. If you think expense/income is to be created: If you can infer the title and amount, call the createExpense function, don't trouble the user into asking. If it is impossible to infer these, then only ask the user to provide details of the expense/income. 
-				3. If the user sends a message like "Hello" or similar, that means he is most likely starting a new chat, dont trouble him what he was doing before that chat unless he asks.
-			`,
+			content: `You are Expensio's Smart AI assistant, a mature, witty, and highly knowledgeable financial expert with PhDs in Money, Economics, Behavior, and Psychology. Your goal is to provide tailored, insightful financial advice while keeping things light and engaging.
+						Always interpret the user's intent before asking for more details or calling functions.
+						For expense/income creation: infer the title and amount when possible, only ask for details if necessary.
+						Stay focused on financial matters; avoid answering off-topic queries.
+						Keep responses short. If needed too much, you can make it not short.
+						Expensio helps users track expenses, income, and spending patterns, offering personalized financial insights and summaries. It analyzes moods, behaviors, and cognitive triggers to provide tailored strategies for smarter financial management.
+					    If greeted with "Hello" or similar, assume the user is starting fresh—no need to reference previous chats unless asked. Today is ${formattedDate}. ${nameOfUser ? "User's Name is " + nameOfUser : ""}
+			        `,
 		};
 
 		// Ensure message is within character limit
@@ -86,6 +96,7 @@ export const handleUserInputController = async (message, socket) => {
 
 		// If OpenAI suggests a function to call
 		const functionCall = aiResponse.choices[0].message.function_call;
+		const functionArgs = functionCall?.arguments || null;
 		if (functionCall) {
 			socket.emit("response", {
 				type: "general_response",
@@ -116,12 +127,21 @@ export const handleUserInputController = async (message, socket) => {
 					});
 					break;
 
-				case "getFinancialData":
-					await handleGetFinancialDataService(socket, conversationHistory);
-					conversationHistory.history.push({
-						role: "assistant",
-						content: `Function getFinancialData called and data sent successfully.`,
-					});
+				// case "getFinancialData":
+				// 	await handleGetFinancialDataService(socket, conversationHistory);
+				// 	conversationHistory.history.push({
+				// 		role: "assistant",
+				// 		content: `Function getFinancialData called and data sent successfully.`,
+				// 	});
+				// 	break;
+
+				case "useFinancialData":
+					await handleUseFinancialDataService(
+						socket,
+						conversationHistory,
+						functionArgs,
+						formattedDate
+					);
 					break;
 
 				// Handle other cases for financial data, etc.
@@ -129,7 +149,7 @@ export const handleUserInputController = async (message, socket) => {
 
 				default:
 					socket.emit("response", {
-						type: "loading",
+						type: "error",
 						message: "Unrecognized function.",
 					});
 			}

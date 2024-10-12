@@ -95,6 +95,13 @@ const FullChatPage = () => {
 			}
 		});
 
+		socket.on("wait", (data) => {
+			if (data.message) {
+				dispatch(addMessage({ message: data.message, direction: "incoming" }));
+				dispatch(setTyping(true));
+			}
+		});
+
 		socket.on("financial-data", (data) => {
 			const formattedData = JSON.stringify(data.message, null, 2);
 			dispatch(
@@ -129,6 +136,7 @@ const FullChatPage = () => {
 				socket.off("financial-data");
 				socket.off("typing");
 				socket.off("error");
+				socket.off("wait");
 			}
 		};
 	}, [socket, dispatch]);

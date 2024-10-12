@@ -284,3 +284,69 @@ export const handleGetFinancialDataService = async (
 		});
 	}
 };
+
+export const handleUseFinancialDataService = async (
+	socket,
+	conversationHistory,
+	functionArgs,
+	formattedDate
+) => {
+	try {
+		if (!functionArgs) {
+			socket.emit("response", {
+				type: "error",
+				message:
+					"I tried to fetch financial data for your query, but there seems to be a problem, can you explain your query a bit more?",
+			});
+			return;
+		}
+
+		const parsedArgs = JSON.parse(functionArgs);
+		const { monthYearPairs } = parsedArgs;
+
+		// socket.emit(
+		// 	"wait",
+		// 	"🔍 Analyzing your financial data to get the answers you need... Please hang tight! ⏳✨"
+		// );
+
+		const response = await axios.post(
+			`${process.env.FINANCIALDATA_SERVICE_URL}/overall`,
+			{ monthYearPairs, type: "compact" },
+			{
+				headers: {
+					Authorization: `Bearer ${socket.token}`,
+				},
+			}
+		);
+
+		const compactFinancialDataString = response.data.data;
+		const prompt = `You're Expensio's mature, witty, and intelligent financial assistant. Today is ${formattedDate}. 
+			      Look at the conversation history above and the financial data below to return a response for user's query: 
+				  Here is the financial data of the given months, remember that for future queries: \n${compactFinancialDataString}.
+			`;
+		const messages = [
+			...conversationHistory.history,
+			{ role: "system", content: prompt },
+		];
+
+		const aiResponse = await callOpenaiService(socket.user.id, messages);
+		const aiResponseMessage = aiResponse.choices[0].message.content;
+
+		socket.emit("response", {
+			type: "response",
+			message: aiResponseMessage,
+		});
+		conversationHistory.history.push({
+			role: "assistant",
+			content: aiResponse.choices[0].message.content,
+		});
+		return;
+	} catch (error) {
+		logError(error);
+		socket.emit("response", {
+			type: "error",
+			message:
+				"There was some issue reviewing your financial data. Please try again later.",
+		});
+	}
+};

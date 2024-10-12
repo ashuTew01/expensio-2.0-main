@@ -180,10 +180,42 @@ export const openAIGeneralFunctions = [
 		name: "createIncome",
 		description: "Call if user wants to add income (only 1).",
 	},
+	// {
+	// 	name: "getFinancialData",
+	// 	description: "Call if user wants to fetch financial data.",
+	// },
 	{
-		name: "getFinancialData",
-		description: "Call if user wants to fetch financial data.",
+		name: "useFinancialData",
+		description: `Call this if user query will be better answered by their financial data instead of general knowledge. 
+	    MAKE SURE TO Only call it if that month's data not in history. Else use existing data.`,
+
+		parameters: {
+			type: "object",
+			properties: {
+				monthYearPairs: {
+					type: "array",
+					description: "Array of month-year objects.",
+					items: {
+						type: "object",
+						properties: {
+							month: {
+								type: "integer",
+								description: "Month (1 = Jan, 12 = Dec).",
+							},
+							year: {
+								type: "integer",
+								description: "Year in YYYY format.",
+							},
+						},
+						required: ["month", "year"],
+						example: { month: 10, year: 2024 },
+					},
+				},
+			},
+			required: ["monthYearPairs"],
+		},
 	},
+
 	//   {
 	//     name: "getFinancialSummary",
 	//     description: "Call if user wants a financial summary.",
