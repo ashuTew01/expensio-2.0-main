@@ -264,6 +264,9 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 							anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 						>
 							<MenuItem onClick={logoutHandler}>Log Out</MenuItem>
+							<MenuItem onClick={() => navigate("/user/update-profile")}>
+								Update Profile
+							</MenuItem>
 						</Menu>
 					</FlexBetween>
 				</FlexBetween>

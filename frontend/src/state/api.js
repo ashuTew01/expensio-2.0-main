@@ -59,6 +59,13 @@ export const api = createApi({
 			}),
 			providesTags: ["User"],
 		}),
+		updateUserProfile: build.mutation({
+			query: (userUpdates) => ({
+				url: `/user/user`, // The endpoint that matches your backend route
+				method: "PUT",
+				body: userUpdates,
+			}),
+		}),
 		expenseTest: build.query({
 			query: () => ({
 				url: "expense/test",
@@ -273,6 +280,7 @@ export const {
 	useGetUserDetailsQuery,
 	useSendOtpMutation,
 	useVerifyOtpMutation,
+	useUpdateUserProfileMutation,
 
 	// INCOME
 	useDeleteIncomesMutation,

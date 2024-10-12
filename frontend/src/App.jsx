@@ -30,6 +30,7 @@ import { SocketProvider } from "./context/SocketContext";
 import EmailLoginPage from "./scenes/email-login-page";
 import IncomeScreen from "./scenes/income/screen";
 import PageNotFound from "./scenes/notFound";
+import UpdateProfilePage from "./scenes/updateProfile";
 
 function App() {
 	const mode = useSelector((state) => state.global.mode);
@@ -63,6 +64,10 @@ function App() {
 								<Route
 									path="/user/income-financial-data"
 									element={<IncomeFinancialData />}
+								/>
+								<Route
+									path="/user/update-profile"
+									element={<UpdateProfilePage />}
 								/>
 								{/* chat page */}
 								<Route path="/smart-ai-chat" element={<FullChatPage />} />
