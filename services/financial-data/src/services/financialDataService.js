@@ -404,9 +404,11 @@ export const removeExpenseFinancialDataService = async (
 						financialData.categories.pull({ _id: category._id });
 					}
 				}
-
+				const triggerIds = Array.isArray(cognitiveTriggerIds)
+					? cognitiveTriggerIds
+					: [];
 				// Update the cognitive triggers information
-				for (const triggerId of cognitiveTriggerIds) {
+				for (const triggerId of triggerIds) {
 					const trigger = financialData.cognitiveTriggers.find((t) =>
 						t.cognitiveTriggerId.equals(triggerId)
 					);

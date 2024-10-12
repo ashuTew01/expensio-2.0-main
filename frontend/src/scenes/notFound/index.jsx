@@ -2,15 +2,13 @@
 // npm install @mui/material @emotion/react @emotion/styled framer-motion react-parallax-tilt lottie-react
 
 import React from "react";
-import { Box, Typography, Button, useTheme } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import Tilt from "react-parallax-tilt";
 import Lottie from "lottie-react";
 import animationData from "../../animations/404NotFound.json"; // Ensure this path is correct
 
 const PageNotFound = () => {
-	const theme = useTheme(); // Access MUI theme for dynamic styling
-
 	return (
 		<Box
 			sx={{

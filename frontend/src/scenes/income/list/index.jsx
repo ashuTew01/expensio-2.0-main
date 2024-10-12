@@ -21,7 +21,6 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Delete, Search } from "@mui/icons-material";
 import {
-	useGetAllCognitiveTriggersQuery,
 	useGetAllIncomeQuery,
 	useGetAllIncomeCategoriesQuery,
 	useDeleteIncomesMutation,
@@ -33,6 +32,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
+import ErrorDisplay from "../../../components/error/ErrorDisplay";
 
 // Styled components using styled API
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -98,12 +98,6 @@ const IncomeListScreen = () => {
 	const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
 	const {
-		data: cognitiveTriggersData,
-		isLoading: isLoadingCognitiveTriggersData,
-		isError: cognitiveError,
-	} = useGetAllCognitiveTriggersQuery();
-
-	const {
 		data: categoriesData,
 		isLoading: categoriesLoading,
 		isError: categoriesError,
@@ -126,12 +120,25 @@ const IncomeListScreen = () => {
 
 	const [deleteIncomes, { isLoading: isDeleting }] = useDeleteIncomesMutation();
 
-	if (isLoadingCognitiveTriggersData || categoriesLoading || incomesLoading)
+	if (categoriesLoading || incomesLoading)
 		return <AnimatedLoadingIndicator height={"500px"} />;
 
-	if (cognitiveError || categoriesError || incomesError) {
-		toast.error("Failed to load data. Please try again.");
-		return null;
+	if (categoriesError || incomesError) {
+		// console.log(dashboardDataError.data.error.message);
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text={"Error loading data. Please refresh the page."}
+				/>
+			</Box>
+		);
 	}
 
 	const handleCategoryChange = (event) => {
@@ -155,23 +162,6 @@ const IncomeListScreen = () => {
 	};
 
 	const handleDelete = async (id) => {
-		// // Confirm deletion
-		// if (window.confirm("Are you sure you want to delete this expense?")) {
-		// 	try {
-		// 		// Call the deleteExpenses mutation with an array containing the single ID
-		// 		await deleteIncomes([id]).unwrap(); // 'unwrap' to handle fulfilled/rejected promises
-
-		// 		// Show success notification
-		// 		toast.success("Expense deleted successfully.");
-		// 		refetch();
-
-		// 		// Optionally, refetch expenses or rely on cache invalidation
-		// 	} catch (error) {
-		// 		// Handle errors
-		// 		toast.error(error?.data?.message || "Failed to delete expense.");
-		// 	}
-		// }
-
 		setSelectedIncomeId(id);
 		setIsDialogOpen(true);
 	};
@@ -180,25 +170,14 @@ const IncomeListScreen = () => {
 		if (!selectedIncomeId) return;
 
 		try {
-			// Call the deleteExpenses mutation with an array containing the single ID
-			await deleteIncomes([selectedIncomeId]).unwrap(); // 'unwrap' to handle fulfilled/rejected promises
-
-			// Show success notification
+			await deleteIncomes([selectedIncomeId]).unwrap();
 			toast.success("Income deleted successfully.");
 
-			// Close the dialog
 			setIsDialogOpen(false);
-
-			// Clear the selected expense ID
 			setSelectedIncomeId(null);
 
 			refetch();
-
-			// No need to manually refetch if invalidatesTags is set correctly
-			// If you opted for manual refetching, uncomment the line below:
-			// refetch();
 		} catch (error) {
-			// Handle errors
 			toast.error(error?.data?.message || "Failed to delete Income.");
 		}
 	};
@@ -287,8 +266,9 @@ const IncomeListScreen = () => {
 								backgroundColor: theme.palette.secondary.main,
 							},
 						}}
+						onClick={() => navigate("/income/add")}
 					>
-						EXPENSIO
+						Add Income
 					</Button>
 				</Box>
 			</FlexBetween>

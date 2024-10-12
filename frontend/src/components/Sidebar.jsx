@@ -16,15 +16,9 @@ import {
 	ChevronLeft,
 	ChevronRightOutlined,
 	HomeOutlined,
-	WaterDrop,
-	Co2,
-	Favorite,
 	AddCircle,
-	Assignment,
 	Summarize,
-	Analytics,
 	ListAlt,
-	PaidOutlined,
 	AccountBalanceWallet,
 	Paid,
 	SupportAgent,
@@ -81,7 +75,7 @@ const navItems = [
 		icon: <Paid />,
 	},
 	{
-		text: "ledger",
+		text: "Ledger",
 		route: "income/list",
 		icon: <ListAlt />,
 	},
@@ -154,7 +148,7 @@ const Sidebar = ({
 						</Box>
 						{/* box for the logo END */}
 						<List>
-							{navItems.map(({ text, route, icon }) => {
+							{navItems.map(({ text, route, icon }, index) => {
 								if (!icon) {
 									return (
 										<Typography
@@ -168,7 +162,7 @@ const Sidebar = ({
 								const lcText = route;
 
 								return (
-									<ListItem key={text} disablePadding>
+									<ListItem key={index} disablePadding>
 										{" "}
 										{/* removing disablePadding also gives it a nice distinctive look */}
 										<ListItemButton

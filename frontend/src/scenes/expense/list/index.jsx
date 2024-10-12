@@ -94,7 +94,7 @@ const ExpenseListScreen = () => {
 		pageSize: 10,
 	});
 
-	const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
+	// const userId = JSON.parse(localStorage.getItem("userInfoExpensio"))?.id;
 
 	// Fetch data using RTK Query
 	const {
@@ -156,7 +156,7 @@ const ExpenseListScreen = () => {
 				<ErrorDisplay
 					fontSize="25px"
 					textColor="rgba(235, 87, 87, 255)"
-					text="Error loading data. Please try again later."
+					text="Error loading data. Please refresh the page."
 				/>
 			</Box>
 		);
@@ -331,7 +331,7 @@ const ExpenseListScreen = () => {
 				<Box>
 					<Button
 						component={Link}
-						to="/add-expense"
+						to="/expense/add"
 						variant="contained"
 						sx={{
 							backgroundColor: theme.palette.secondary.light,

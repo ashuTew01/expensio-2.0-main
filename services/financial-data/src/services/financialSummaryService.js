@@ -231,7 +231,7 @@ export const buildFinancialSummaryService = async (
 			},
 		}
 	);
-	// console.log(aiResponse);
+
 	const aiResponse = axiosResponse.data.aiResponse;
 	const summary = JSON.parse(
 		aiResponse.choices[0].message.function_call.arguments

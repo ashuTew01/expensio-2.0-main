@@ -14,12 +14,6 @@ const options = {
 const OverviewBoxLatestExpense = ({ expense, colSpan, rowSpan }) => {
 	const theme = useTheme();
 	console.log(expense);
-	//   const { title, amount, dateTime, mood, category, psychologicalType } =
-	// expense;
-
-	//   const t = expense[title];
-	//   console.log(t);
-	//   console.log(title);
 
 	return (
 		<Box

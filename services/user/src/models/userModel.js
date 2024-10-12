@@ -218,12 +218,11 @@ export const updateUserProfileModel = async (
         UPDATE users
         SET
             username = COALESCE($2, username),
-            email = COALESCE($3, email),
-            first_name = COALESCE($4, first_name),
-            last_name = COALESCE($5, last_name),
-            profile_picture_url = COALESCE($6, profile_picture_url),
-            bio = COALESCE($7, bio),
-            date_of_birth = COALESCE($8, date_of_birth),
+            first_name = COALESCE($3, first_name),
+            last_name = COALESCE($4, last_name),
+            profile_picture_url = COALESCE($5, profile_picture_url),
+            bio = COALESCE($6, bio),
+            date_of_birth = COALESCE($7, date_of_birth),
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
         RETURNING username, email, first_name, last_name, profile_picture_url, bio, date_of_birth;
@@ -231,7 +230,6 @@ export const updateUserProfileModel = async (
 	const values = [
 		userId,
 		username,
-		email,
 		first_name,
 		last_name,
 		profile_picture_url,

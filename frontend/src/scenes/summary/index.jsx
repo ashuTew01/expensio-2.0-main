@@ -4,7 +4,6 @@ import {
 	Button,
 	Typography,
 	useTheme,
-	useMediaQuery,
 	Select,
 	MenuItem,
 	FormControl,
@@ -28,7 +27,7 @@ import buildLoadingAnimation from "../../animations/buildLoading.json";
 
 const SummaryScreen = () => {
 	const theme = useTheme();
-	const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
+	// const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
 
 	const [year, setYear] = useState(new Date().getFullYear());
 	const [timePeriod, setTimePeriod] = useState("monthly"); // Default time period
@@ -161,12 +160,12 @@ const SummaryScreen = () => {
 
 				{/* Middle Section - Time Period, Month, Year, and Get Summary */}
 				<Box
-					flexBasis="50%" // Enough space for form controls to fit comfortably
+					flexBasis="50%"
 					display="flex"
 					justifyContent="center"
 					alignItems="center"
-					gap={2} // Adjust the gap between the form elements for clarity
-					sx={{ flexWrap: "wrap" }} // Ensures responsiveness on smaller screens
+					gap={2}
+					sx={{ flexWrap: "wrap" }}
 				>
 					<FormControl sx={{ minWidth: 120, borderRadius: "8px" }}>
 						<InputLabel>Time Period</InputLabel>
@@ -177,7 +176,6 @@ const SummaryScreen = () => {
 						>
 							<MenuItem value="monthly">Monthly</MenuItem>
 							<MenuItem value="last3months">Last 3 Months</MenuItem>
-							{/* <MenuItem value="last6months">Last 6 Months</MenuItem> */}
 						</Select>
 					</FormControl>
 
@@ -246,7 +244,7 @@ const SummaryScreen = () => {
 
 				{/* Right Section - Build Summary */}
 				<Box
-					flexBasis="10%" // Smaller section for Build Summary but not too small
+					flexBasis="10%"
 					mt="1.5rem"
 					textAlign="center"
 					display="flex"
@@ -290,7 +288,6 @@ const SummaryScreen = () => {
 			{/* Render content based on state */}
 			{(() => {
 				if (isLazyFetching) {
-					// Display loading animation when fetching summary
 					return (
 						<Box
 							mt="2rem"
@@ -308,7 +305,6 @@ const SummaryScreen = () => {
 						</Box>
 					);
 				} else if (isBuildingSummary) {
-					// Display build summary loading with random fact
 					return (
 						<Box
 							mt="2rem"
@@ -321,12 +317,10 @@ const SummaryScreen = () => {
 								variant="h4"
 								align="center"
 								sx={{
-									color: "#f5f5f5", // Soft white, works well on a dark background
-									// mt: "1.5rem", // Top margin for spacing
-									// mb: "1rem",
-									fontWeight: "bold", // Emphasize the text with boldness
-									letterSpacing: "0.05rem", // Subtle letter spacing for better readability
-									animation: "fadeIn 0.5s ease-in", // Apply a fade-in animation
+									color: "#f5f5f5",
+									fontWeight: "bold",
+									letterSpacing: "0.05rem",
+									animation: "fadeIn 0.5s ease-in",
 								}}
 							>
 								Building your Summary! Please wait...
@@ -335,10 +329,10 @@ const SummaryScreen = () => {
 							<Typography variant="h4">
 								<span
 									style={{
-										fontWeight: "bold", // Emphasize the text with boldness
+										fontWeight: "bold",
 										letterSpacing: "0.05rem",
-										color: "#e67e22", // Bright orange to highlight the action
-										animation: "pulse 1.5s infinite", // Pulse effect to draw attention to action
+										color: "#e67e22",
+										animation: "pulse 1.5s infinite",
 									}}
 								>
 									{randomFact}
@@ -368,12 +362,10 @@ const SummaryScreen = () => {
 								variant="h4"
 								align="center"
 								sx={{
-									color: "#f5f5f5", // Soft white, works well on a dark background
-									// mt: "1.5rem", // Top margin for spacing
-									// mb: "1rem",
-									fontWeight: "bold", // Emphasize the text with boldness
-									letterSpacing: "0.05rem", // Subtle letter spacing for better readability
-									animation: "fadeInPulse 0.5s", // Apply a fade-in animation
+									color: "#f5f5f5",
+									fontWeight: "bold",
+									letterSpacing: "0.05rem",
+									animation: "fadeInPulse 0.5s",
 								}}
 							>
 								Summary Loaded Successfully!
@@ -381,14 +373,12 @@ const SummaryScreen = () => {
 						</Box>
 					);
 				} else if (displaySummary && financialSummary) {
-					// Display summary with animation
 					return (
 						<Box mt="2rem">
 							<SummaryList financialSummary={financialSummary} />
 						</Box>
 					);
 				} else if (error === "UNAVAILABLE") {
-					// Handle unavailable summary
 					return (
 						<Box
 							mt="2rem"
@@ -408,36 +398,28 @@ const SummaryScreen = () => {
 								variant="h4"
 								align="center"
 								sx={{
-									color: "#f5f5f5", // Soft white, works well on a dark background
-									mb: "1.5rem", // Bottom margin for spacing
-									mt: "1.5rem", // Top margin for spacing
-									fontWeight: "bold", // Emphasize the text with boldness
-									letterSpacing: "0.05rem", // Subtle letter spacing for better readability
-									animation: "fadeInPulse 0.3s", // Apply a fade-in animation
+									color: "#f5f5f5",
+									mb: "1.5rem",
+									mt: "1.5rem",
+									fontWeight: "bold",
+									letterSpacing: "0.05rem",
+									animation: "fadeInPulse 0.3s",
 								}}
 							>
 								The summary is either not available, or not fresh.
 								<br />
 								<span
 									style={{
-										color: "#e67e22", // Bright orange to highlight the action
-										animation: "pulse 1.5s infinite", // Pulse effect to draw attention to action
+										color: "#e67e22",
+										animation: "pulse 1.5s infinite",
 									}}
 								>
 									Please click the build button to build the summary.
 								</span>
 							</Typography>
-							{/* <Button
-								variant="contained"
-								color="secondary"
-								onClick={handleBuildSummary}
-							>
-								Build Summary
-							</Button> */}
 						</Box>
 					);
 				} else if (error === "ERROR") {
-					// Handle other errors
 					return (
 						<Box
 							mt="2rem"

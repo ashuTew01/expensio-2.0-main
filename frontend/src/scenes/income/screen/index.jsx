@@ -1,6 +1,6 @@
 // src/scenes/income/IncomeScreen.jsx
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTheme, useMediaQuery } from "@mui/material";
 import {
@@ -14,7 +14,7 @@ import {
 	Tooltip,
 	Divider,
 } from "@mui/material";
-import { ArrowBack, Edit, Delete } from "@mui/icons-material";
+import { ArrowBack, Delete } from "@mui/icons-material";
 
 import FlexBetween from "../../../components/FlexBetween";
 import AnimatedLoadingIndicator from "../../../components/AnimatedLoadingIndicator";
@@ -44,15 +44,6 @@ const IncomeScreen = () => {
 
 	// Extract income data
 	const income = data?.incomes?.[0];
-
-	// Create a mapping from code to name for Cognitive Triggers (if applicable)
-	const cognitiveTriggerMap = useMemo(() => {
-		const map = {};
-		income?.cognitiveTriggerIds?.forEach((trigger) => {
-			map[trigger.code] = trigger.name;
-		});
-		return map;
-	}, [income]);
 
 	// Handle delete action
 	const handleDelete = () => {

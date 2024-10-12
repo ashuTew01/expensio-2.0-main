@@ -1,19 +1,13 @@
 // src/scenes/navbar/index.jsx
 import React, { useState } from "react";
 import {
-	LightModeOutlined,
-	DarkModeOutlined,
 	Menu as MenuIcon,
-	Search,
 	ArrowDropDownOutlined,
 	Add as AddIcon, // Importing the Add icon
 } from "@mui/icons-material";
 import FlexBetween from "../components/FlexBetween";
 import { useDispatch } from "react-redux";
-import { setMode } from "../state";
-// import { useGetUserQuery } from "state/api";
 import { removeCredentials } from "../state/authSlice";
-// import { useLogoutMutation } from "state/api";
 import aiTokenIcon from "../assets/ai_tokens.svg";
 
 import {
@@ -22,26 +16,24 @@ import {
 	Box,
 	Typography,
 	IconButton,
-	InputBase,
 	Toolbar,
 	Menu,
 	MenuItem,
-	Tooltip, // Importing Tooltip for hover text
+	Tooltip,
 	useTheme,
-	Popover, // Importing Popover for the plus button
+	Popover,
 	Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useGetUserAiTokensDetailQuery } from "../state/api";
+import { toast } from "react-toastify";
 
 const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 	const dispatch = useDispatch();
 	const theme = useTheme();
 
 	const userInfo = JSON.parse(localStorage.getItem("userInfoExpensio"));
-	// const { image: userImage, name: userName } = userInfo;
 
-	const userImage = "";
 	const userName = userInfo.first_name;
 
 	const [anchorElUser, setAnchorElUser] = useState(null);
@@ -58,20 +50,14 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 		useGetUserAiTokensDetailQuery();
 	const aiTokens = userAiTokensDetail?.data?.currentTokens;
 
-	// const { data: userInfo, isLoading } = useGetUserQuery();
-	// const user = userInfo?.user;
 	const navigate = useNavigate();
-
-	// const [logoutApiCall] = useLogoutMutation();
 
 	const logoutHandler = async () => {
 		try {
-			// await logoutApiCall().unwrap();
 			dispatch(removeCredentials());
 			window.location.href = "/";
 		} catch (error) {
-			console.log(error);
-			// toast.error("Couldn't log you out. Try again!");
+			toast.error("Couldn't log you out. Try again!");
 		}
 		handleUserMenuClose();
 	};
@@ -212,7 +198,6 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 										boxShadow: "none",
 									},
 								}}
-								// disabled // Button is not clickable yet
 							>
 								<img
 									src={aiTokenIcon}
@@ -276,6 +261,9 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 							anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 						>
 							<MenuItem onClick={logoutHandler}>Log Out</MenuItem>
+							<MenuItem onClick={() => navigate("/user/update-profile")}>
+								Update Profile
+							</MenuItem>
 						</Menu>
 					</FlexBetween>
 				</FlexBetween>

@@ -17,22 +17,19 @@ import { useTheme } from "@emotion/react";
 import NoDataMessage from "../../components/NoDataMessage";
 import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
 import { useSelector } from "react-redux";
+import ErrorDisplay from "../../components/error/ErrorDisplay";
 
 const IncomeFinancialData = () => {
 	const theme = useTheme();
 	const isNonMobile = useMediaQuery("(min-width: 1000px)");
 	const [year, setYear] = useState(new Date().getFullYear());
 	const [month, setMonth] = useState(new Date().getMonth() + 1); // Current month
-	const [getIncomeFinancialData, { isLoading, data, error }] =
+	const [getIncomeFinancialData, { isLoading, data, isError, error }] =
 		useGetIncomeFinancialDataMutation();
 
 	const { userInfo } = useSelector((state) => state.auth);
 
-	console.log(data);
-
-	// Effect to fetch financial data whenever month or year changes
 	useEffect(() => {
-		// Constructing the request body based on selected month and year
 		const requestBody = {
 			monthYearPairs: [
 				{
@@ -45,6 +42,26 @@ const IncomeFinancialData = () => {
 		// Fetching data
 		getIncomeFinancialData(requestBody);
 	}, [month, year, getIncomeFinancialData]);
+
+	if (isError) {
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text={
+						error?.data.error.message ||
+						"Error loading data. Please refresh the page."
+					}
+				/>
+			</Box>
+		);
+	}
 
 	return (
 		<Box m="1.5rem 2.5rem">

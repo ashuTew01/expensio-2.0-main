@@ -23,13 +23,8 @@ import { toast } from "react-toastify";
 import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 import "react-toastify/dist/ReactToastify.css";
 
-const IncomeForm = ({
-	cognitiveTriggersData,
-	cognitiveTriggersDataLoading,
-	cognitiveTriggersDataError,
-}) => {
+const IncomeForm = ({}) => {
 	const theme = useTheme();
-	const moods = ["neutral", "happy", "regretful"];
 	const incomeTypes = ["primary", "secondary", "settlement", "unknown"];
 
 	const [saveIncome, { isLoading, isError }] = useSaveIncomeMutation();

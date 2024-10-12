@@ -11,6 +11,7 @@ import Hero from "../../components/dashboard/Hero";
 import BigTitle from "../../components/dashboard/BigTitle";
 import DisplayBarGraph from "../../components/dashboard/DisplayBarGraph";
 import AnimatedLoadingIndicator from "../../components/AnimatedLoadingIndicator";
+import ErrorDisplay from "../../components/error/ErrorDisplay";
 
 const Dashboard = () => {
 	const theme = useTheme();
@@ -20,8 +21,27 @@ const Dashboard = () => {
 	const {
 		data: dashboardData,
 		isLoading: dashboardDataLoading,
-		isError: dashboardDataError,
+		isError: isDashboardDataError,
+		error: dashboardDataError,
 	} = useGetDasboardQuery();
+
+	if (isDashboardDataError && dashboardDataError.data.status === 500) {
+		console.log(dashboardDataError);
+		return (
+			<Box
+				display="flex"
+				justifyContent="center"
+				alignItems="center"
+				// height="100vh"
+			>
+				<ErrorDisplay
+					fontSize="25px"
+					textColor="rgba(235, 87, 87, 255)"
+					text={dashboardDataError?.data.error.message}
+				/>
+			</Box>
+		);
+	}
 
 	if (dashboardDataLoading) return <AnimatedLoadingIndicator height="500px" />;
 
@@ -116,31 +136,15 @@ const Dashboard = () => {
 				)
 			: [];
 
-	const cognitiveTriggerForBarGraph =
-		dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.map(
-			(item, i) => ({
-				category: item.cognitiveTriggerName,
-				amountSpent: item.totalAmountSpent,
-				expenses: item.numExpenses,
-				color: theme.palette.secondary[((i % 9) + 1) * 100],
-			})
-		);
-
-	// Define the columns for the DataGrid
-	const columns = [
-		{ field: "id", headerName: "ID", flex: 1 },
-		{ field: "title", headerName: "Title", flex: 1 },
-		{
-			field: "amount",
-			headerName: "Amount",
-			flex: 1,
-			renderCell: (params) => `$${params.value.toFixed(2)}`,
-		},
-		{ field: "expenseType", headerName: "Expense Type", flex: 1 },
-		{ field: "categoryName", headerName: "Category", flex: 1 },
-		{ field: "cognitiveTriggers", headerName: "Cognitive Triggers", flex: 2 },
-		{ field: "createdAt", headerName: "Created At", flex: 1 },
-	];
+	// const cognitiveTriggerForBarGraph =
+	// 	dashboardData?.currentMonthExpenseFinancialData?.cognitiveTriggers?.map(
+	// 		(item, i) => ({
+	// 			category: item.cognitiveTriggerName,
+	// 			amountSpent: item.totalAmountSpent,
+	// 			expenses: item.numExpenses,
+	// 			color: theme.palette.secondary[((i % 9) + 1) * 100],
+	// 		})
+	// 	);
 
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();

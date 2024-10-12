@@ -4,7 +4,6 @@ import {
 	Typography,
 	Paper,
 	Grid,
-	Divider,
 	CircularProgress,
 	useTheme,
 } from "@mui/material";
@@ -29,14 +28,6 @@ const PsychologicalTypesExplain = ({
 		);
 	}
 
-	// if (psychoTypesError) {
-	//   return (
-	//     <Typography variant="body1" color="error">
-	//       Error fetching psychological types. Please try again.
-	//     </Typography>
-	//   );
-	// }
-	// console.log(psychoTypesData);
 	return (
 		<Box p="1.5rem" height="100%" overflow="auto">
 			<Typography

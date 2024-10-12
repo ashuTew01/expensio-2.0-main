@@ -1,7 +1,7 @@
 import React from "react";
 import FlexBetween from "../../../components/FlexBetween.jsx";
 import Header from "../../../components/Header.jsx";
-import { Box, Button, useTheme, useMediaQuery } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import ExpensesForm from "../../../components/ExpensesForm.jsx";
 import { useGetAllCognitiveTriggersQuery } from "../../../state/api.js";
 import PsychologicalTypesExplain from "../../../components/PsychoTypesExplain.jsx";
@@ -25,20 +25,6 @@ const AddExpenseScreen = () => {
 					title="TRACK YOUR SPENDING"
 					subtitle="Log your expenses to gain better control over your spending."
 				/>
-
-				<Box>
-					<Button
-						sx={{
-							backgroundColor: theme.palette.secondary.light,
-							color: theme.palette.background.alt,
-							fontSize: "14px",
-							fontWeight: "bold",
-							padding: "10px 20px",
-						}}
-					>
-						EXPENSIO
-					</Button>
-				</Box>
 			</FlexBetween>
 			<Box
 				mt="20px"

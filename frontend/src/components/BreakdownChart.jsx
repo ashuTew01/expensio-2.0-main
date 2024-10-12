@@ -18,8 +18,6 @@ const BreakdownChart = ({
 		})
 	);
 
-	// console.log(formattedData);
-
 	return (
 		<Box
 			height={"350px"}

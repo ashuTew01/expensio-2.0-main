@@ -1,4 +1,10 @@
-import { logError, logWarning, logInfo } from "@expensio/sharedlib";
+import {
+	logError,
+	logWarning,
+	logInfo,
+	NotFoundError,
+	InternalServerError,
+} from "@expensio/sharedlib";
 import Dashboard from "../models/Dashboard.js";
 import ExpenseDetails from "../models/ExpenseDetails.js";
 import IncomeDetails from "../models/IncomeDetails.js";
@@ -533,14 +539,21 @@ export const getDashboardService = async (userId) => {
 			.exec();
 
 		if (!dashboard) {
-			return {
-				message:
-					"Dashboard not found. Please add some expenses and incomes to generate your dashboard.",
-			};
+			throw new NotFoundError(
+				"Dashboard not found. Please add some expenses and incomes to generate your dashboard."
+			);
 		}
 
 		return dashboard;
 	} catch (error) {
-		throw new Error(`Failed to retrieve dashboard: ${error.message}`);
+		// If the error is an instance of NotFoundError, rethrow it
+		if (error instanceof NotFoundError) {
+			throw error;
+		}
+
+		// For other errors, throw an InternalServerError
+		throw new InternalServerError(
+			`Failed to retrieve dashboard: ${error.message}`
+		);
 	}
 };

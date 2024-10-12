@@ -45,21 +45,17 @@ const ChatBot = () => {
 	useEffect(() => {
 		// Wait until the socket is initialized
 		if (!socket) {
-			console.log("Socket not initialized yet");
+			// console.log("Socket not initialized yet");
 			return;
 		}
 
-		console.log("Socket is being set up...");
+		// console.log("Socket is being set up...");
 
 		// Register socket event listeners
 		socket.on("connect", () => {
-			console.log("isloading before", isLoading); //printing true
-			console.log("socket setup :- inside connect listener");
 			dispatch(setSocketConnected(true));
-			console.log(`Connected with id: ${socket.id}`);
-			setIsLoading(false); // Set isLoading to false once setup is complete
-			console.log("socket setup completed");
-			console.log("isloading after", isLoading); //printing true
+
+			setIsLoading(false);
 		});
 
 		socket.on("response", (data) => {
@@ -112,7 +108,6 @@ const ChatBot = () => {
 		};
 	}, [socket, dispatch]);
 
-	// Auto-scroll to the bottom when messages or typing indicator changes
 	useEffect(() => {
 		if (messageListRef.current) {
 			messageListRef.current.scrollToBottom("smooth");
@@ -134,10 +129,9 @@ const ChatBot = () => {
 
 	const expandToFullPage = () => {
 		setIsOpen(!isOpen);
-		navigate("smart-ai-chat"); // Redirect to full chat page
+		navigate("smart-ai-chat");
 	};
 
-	// If socket is still null (not initialized), show a loader
 	if (!socket) {
 		return (
 			<Box

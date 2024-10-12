@@ -1,11 +1,9 @@
 import React from "react";
 import { Box, Alert } from "@mui/material";
-import { useTheme } from "@emotion/react";
 import LoadingIndicator from "./LoadingIndicator";
 import ShowMarkDown from "./ShowMarkDown";
 
 const SummaryMarkdownDisplay = ({ markdown, isLoading, isError }) => {
-	const theme = useTheme();
 	if (isLoading) {
 		return <LoadingIndicator />;
 	}
