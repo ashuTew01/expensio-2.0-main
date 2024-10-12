@@ -11,52 +11,34 @@ import { motion } from "framer-motion";
 
 const techDetails = [
 	{
-		title: "Advanced Microservices Architecture",
+		title: "Event-Driven Microservices Architecture with Kafka",
 		description:
-			"Utilized Node.js and Express to develop a robust microservices architecture. Each service operates independently, enabling seamless updates, deployments, and horizontal scaling without impacting the entire system.",
+			"Expensio utilizes a microservices architecture with Kafka at its core, enabling efficient real-time event handling and ensuring that services operate independently for better scalability and performance.",
 		icon: <CodeIcon sx={{ fontSize: 50, color: "#1E90FF" }} />,
 	},
 	{
-		title: "Kafka-Powered Event Bus",
+		title: "Event Replay & Dead Letter Queue",
 		description:
-			"Implemented Apache Kafka for a highly efficient, event-driven system. Facilitated real-time data processing and communication between services, ensuring system decoupling and scalability.",
-		icon: <CloudQueueIcon sx={{ fontSize: 50, color: "#28A745" }} />,
+			"Expensio supports event replay for new services to catch up on historical data. Failed events are handled through a Dead Letter Queue, ensuring no data loss and robust system reliability.",
+		icon: <RepeatIcon sx={{ fontSize: 50, color: "#FF69B4" }} />,
 	},
 	{
 		title: "Distributed Saga Pattern",
 		description:
-			"Implemented the Distributed Saga Pattern to manage complex transactions across multiple microservices. This ensures data consistency and integrity in distributed workflows, enhancing reliability.",
+			"The Distributed Saga Pattern ensures consistency across financial transactions involving multiple services. This approach guarantees data reliability and system-wide consistency.",
 		icon: <SyncAltIcon sx={{ fontSize: 50, color: "#DC3545" }} />,
 	},
 	{
-		title: "Secure OTP Authentication",
+		title: "Kubernetes Orchestration",
 		description:
-			"Enhanced security with rate-limited OTP authentication and robust account lockout mechanisms. Utilized PostgreSQL for secure user data management and implemented encrypted data storage.",
+			"Expensio is fully containerized using Docker and orchestrated with Kubernetes, allowing seamless scaling, stable deployments, and maintaining high availability even during peak loads.",
+		icon: <CloudQueueIcon sx={{ fontSize: 50, color: "#28A745" }} />,
+	},
+	{
+		title: "OTP Authentication with Rate Limiting",
+		description:
+			"Expensio ensures secure account access through rate-limited OTP authentication, protecting users from brute-force attacks and ensuring data security with strong encryption and account lockout features.",
 		icon: <SecurityIcon sx={{ fontSize: 50, color: "#FFC107" }} />,
-	},
-	{
-		title: "Containerization with Docker & Kubernetes",
-		description:
-			"Containerized microservices using Docker and orchestrated deployments with Kubernetes. Achieved seamless scaling, management, and high availability in a cloud-native environment.",
-		icon: <CodeIcon sx={{ fontSize: 50, color: "#1E90FF" }} />, // Replace with Docker/Kubernetes icons if available
-	},
-	{
-		title: "Idempotent and Transactional Services",
-		description:
-			"Designed services to be idempotent, ensuring safe event processing without duplicates. Leveraged MongoDB transactions to maintain data consistency across services.",
-		icon: <StorageIcon sx={{ fontSize: 50, color: "#28A745" }} />,
-	},
-	{
-		title: "Event Replay Capability",
-		description:
-			"Enabled event replay for new services, allowing them to subscribe to historical events. This ensures no data is missed and services stay updated with past and present events.",
-		icon: <RepeatIcon sx={{ fontSize: 50, color: "#FF69B4" }} />,
-	},
-	{
-		title: "AI-Driven Smart Chat Assistant",
-		description:
-			"Integrated an intelligent AI engine to power the Smart Chat Assistant. Users can interact naturally to manage finances, with the system intelligently processing and responding to queries.",
-		icon: <CodeIcon sx={{ fontSize: 50, color: "#6A5ACD" }} />,
 	},
 ];
 

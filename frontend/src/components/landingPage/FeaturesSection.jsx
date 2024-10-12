@@ -1,62 +1,43 @@
 // src/components/landingPage/FeaturesSection.jsx
 import React from "react";
 import { Box, Grid, Typography, Container } from "@mui/material";
-import BuildIcon from "@mui/icons-material/Build";
-import ChatIcon from "@mui/icons-material/Chat";
-import SecurityIcon from "@mui/icons-material/Security";
-import DataUsageIcon from "@mui/icons-material/DataUsage";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import CategoryIcon from "@mui/icons-material/Category";
+
+import InsightsIcon from "@mui/icons-material/Insights";
+import PsychologyIcon from "@mui/icons-material/Psychology";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import PieChartIcon from "@mui/icons-material/PieChart";
 import { motion } from "framer-motion";
 
 const features = [
 	{
-		title: "Microservices Architecture",
-		description:
-			"Harness the power of microservices for unparalleled scalability and maintainability. Each service operates independently, ensuring seamless updates and deployments without impacting the entire system.",
-		icon: <BuildIcon sx={{ fontSize: 50, color: "#1E90FF" }} />,
+		title: "Revolutionary Financial Insights at Your Fingertips",
+		description: `Expensio doesn’t just track your expenses—it revolutionizes how you understand your finances. Get real-time, beautifully visualized insights that show you exactly where your money is going, helping you take full control of your financial destiny like never before.`,
+		icon: <InsightsIcon sx={{ fontSize: 50, color: "#1E90FF" }} />, // Changed to InsightsIcon
 	},
 	{
-		title: "Kafka-Driven Event Bus",
+		title: "Unlock the Secrets of Your Spending Habits",
 		description:
-			"Experience real-time data processing with our Apache Kafka-powered event-driven system. Efficiently handle events like `EXPENSE_CREATED` for parallel task processing and ultimate system decoupling.",
-		icon: <DataUsageIcon sx={{ fontSize: 50, color: "#28A745" }} />,
+			"Ever wonder why you spend the way you do? Expensio decodes the psychology behind your purchases with cutting-edge Cognitive Trigger Analysis. Discover how subtle factors like social influence or impulse buying drive your decisions—and how to master them for ultimate financial freedom.",
+		icon: <PsychologyIcon sx={{ fontSize: 50, color: "#FF5733" }} />, // Changed to PsychologyIcon
 	},
 	{
-		title: "Smart AI Chat Assistant",
+		title: "Your Personal AI Financial Guru",
 		description:
-			"Interact with our intelligent AI-driven chat assistant for effortless financial management. Add expenses, query data, and receive personalized insights through natural, conversational interactions.",
-		icon: <ChatIcon sx={{ fontSize: 50, color: "#DC3545" }} />,
+			"Meet your AI-powered financial assistant—an always-on, super-intelligent guide that helps you manage your money effortlessly. Add expenses, get instant advice, and gain deep insights just by chatting. It’s like having your own financial advisor 24/7!",
+		icon: <SmartToyIcon sx={{ fontSize: 50, color: "#DC3545" }} />, // Changed to SmartToyIcon
 	},
 	{
-		title: "Advanced OTP Authentication",
+		title: "Tailored Financial Strategies with Summaries",
 		description:
-			"Secure your account with rate-limited OTP authentication and robust account lockout mechanisms. Protect against unauthorized access with cutting-edge security features.",
-		icon: <SecurityIcon sx={{ fontSize: 50, color: "#FFC107" }} />,
+			"Experience a financial summary like never before. Expensio analyzes your spending, moods, and cognitive triggers to create a dynamic, actionable view of your financial behavior. Whether saving or cutting expenses, Expensio offers targeted strategies through visually stunning summaries, empowering you to make smarter decisions.",
+		icon: <BarChartIcon sx={{ fontSize: 50, color: "#FFC107" }} />, // Changed to BarChartIcon
 	},
 	{
-		title: "Comprehensive Financial Analytics",
+		title: "Next-Level Category Breakdown",
 		description:
-			"Gain deep insights into your financial behavior with detailed tracking by month, category, mood, and cognitive triggers. Make informed decisions with our advanced analytics.",
-		icon: <TrendingUpIcon sx={{ fontSize: 50, color: "#1E90FF" }} />,
-	},
-	{
-		title: "Automated Transaction Categorization",
-		description:
-			"Let Expensio automatically categorize your transactions, including support for custom cognitive triggers that reflect your unique financial habits.",
-		icon: <CategoryIcon sx={{ fontSize: 50, color: "#28A745" }} />,
-	},
-	{
-		title: "Distributed Saga Pattern",
-		description:
-			"Ensure data consistency across multiple services with our implementation of the Distributed Saga Pattern. Experience reliable and atomic workflows in complex transactions.",
-		icon: <BuildIcon sx={{ fontSize: 50, color: "#6A5ACD" }} />,
-	},
-	{
-		title: "Event Replay Capability",
-		description:
-			"Never miss out on critical data with our event replay feature. New services can subscribe to historical events, ensuring they are always up-to-date.",
-		icon: <DataUsageIcon sx={{ fontSize: 50, color: "#FF69B4" }} />,
+			"Dive deep into hyper-detailed category analysis. With stunning visual breakdowns, see where every rupee goes—from housing to personal care splurges. Get the clarity you need to fine-tune your budget and maximize your savings like a pro.",
+		icon: <PieChartIcon sx={{ fontSize: 50, color: "#28A745" }} />, // Changed to PieChartIcon
 	},
 ];
 

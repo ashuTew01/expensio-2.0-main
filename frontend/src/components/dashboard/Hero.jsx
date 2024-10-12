@@ -111,25 +111,33 @@ const Hero = ({ totalMoneyEarned, totalMoneySpent }) => {
 					<Typography variant="h1" sx={{ fontWeight: "bold" }}></Typography>
 					<Box height="10px"></Box>
 				</Box>
-				<Box width="38rem">
-					<Typography color={color} variant="h4" sx={{ fontSize: "0.2 rem" }}>
-						Your expenditure is{" "}
-						<Box
-							component="span"
-							sx={{
-								fontWeight: "bold",
-								textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)", // Add depth to the number
-								variant: "h1",
-							}}
-						>
-							{expenditurePercentage.toFixed(0)}%
-						</Box>{" "}
-						of your income. {" " + recommendation}
-					</Typography>
-					{/* <Typography variant="h4" sx={{ fontSize: "0.2 rem" }}>
+				{typeof expenditurePercentage === "number" &&
+					!isNaN(expenditurePercentage) &&
+					expenditurePercentage >= 0 && (
+						<Box width="38rem">
+							<Typography
+								color={color}
+								variant="h4"
+								sx={{ fontSize: "0.2 rem" }}
+							>
+								Your expenditure is{" "}
+								<Box
+									component="span"
+									sx={{
+										fontWeight: "bold",
+										textShadow: "2px 2px 5px rgba(0, 0, 0, 0.4)", // Add depth to the number
+										variant: "h1",
+									}}
+								>
+									{expenditurePercentage.toFixed(0)}%
+								</Box>{" "}
+								of your income. {" " + recommendation}
+							</Typography>
+							{/* <Typography variant="h4" sx={{ fontSize: "0.2 rem" }}>
 						{recommendation}
 					</Typography> */}
-				</Box>
+						</Box>
+					)}
 			</Box>
 		</>
 	);
