@@ -25,7 +25,8 @@ const Dashboard = () => {
 		error: dashboardDataError,
 	} = useGetDasboardQuery();
 
-	if (isDashboardDataError) {
+	if (isDashboardDataError && dashboardDataError.data.status === 500) {
+		console.log(dashboardDataError);
 		return (
 			<Box
 				display="flex"
