@@ -1,5 +1,5 @@
 // src/pages/auth/UserDataForm.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	Container,
 	CssBaseline,
@@ -85,12 +85,16 @@ const UserDataForm = () => {
 	const initialOtp = location.state?.otp || "";
 	const [verifyOtp] = useVerifyOtpMutation();
 
+	useEffect(() => {
+		if (!email) navigate("/login");
+	}, [email]);
+
 	const formSchema = yup.object().shape({
 		firstName: yup.string().required("This is a required field."),
 		lastName: yup.string(),
 		username: yup.string().required("This is a required field."),
 		bio: yup.string(),
-		dateOfBirth: yup.date().nullable(),
+		// dateOfBirth: yup.date().nullable(),
 		phone: yup
 			.string()
 			.matches(
@@ -154,7 +158,7 @@ const UserDataForm = () => {
 						lastName: "",
 						username: "",
 						bio: "",
-						dateOfBirth: currentDate,
+						// dateOfBirth: currentDate,
 						phone: "",
 						otp: initialOtp,
 					}}
@@ -234,7 +238,7 @@ const UserDataForm = () => {
 										helperText={touched.phone && errors.phone}
 									/>
 								</Grid>
-								<Grid item xs={12}>
+								{/* <Grid item xs={12}>
 									<StyledTextField
 										variant="outlined"
 										fullWidth
@@ -250,7 +254,7 @@ const UserDataForm = () => {
 										error={touched.dateOfBirth && !!errors.dateOfBirth}
 										helperText={touched.dateOfBirth && errors.dateOfBirth}
 									/>
-								</Grid>
+								</Grid> */}
 								<Grid item xs={12}>
 									<StyledTextField
 										variant="outlined"
