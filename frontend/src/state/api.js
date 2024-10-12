@@ -57,14 +57,6 @@ export const api = createApi({
 				url: "user/user",
 				method: "GET",
 			}),
-			onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
-				try {
-					const { data } = await queryFulfilled;
-					dispatch(setUserInfo(data)); // Store user details in Redux
-				} catch (error) {
-					// Handle errors if needed
-				}
-			},
 			providesTags: ["User"],
 		}),
 		expenseTest: build.query({

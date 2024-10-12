@@ -15,14 +15,36 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { useDispatch } from "react-redux";
+import { setToken, setUserInfo } from "../../state/authSlice";
 
 const Header = () => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 
+	// Define the guest user information
+	const guestUserInfo = {
+		id: 0,
+		phone: "+911234567890",
+		first_name: "Guest",
+		last_name: "User",
+		username: "guest",
+		email: "guest@test.com",
+		profile_picture_url: null,
+		bio: "This is the official guest user, intended for checking out features.",
+	};
+
 	const handleLoginButtonClick = () => {
 		navigate("/login");
+	};
+
+	const handleGuestLogin = () => {
+		dispatch(setToken("guest"));
+		dispatch(setUserInfo(guestUserInfo));
+		// Optionally, navigate to a dashboard or home page after guest login
+		navigate("/dashboard"); // Replace with your desired route
 	};
 
 	const handleScroll = () => {
@@ -104,30 +126,60 @@ const Header = () => {
 								{item.text}
 							</Button>
 						))}
-						<Button
-							variant="contained"
-							onClick={handleLoginButtonClick}
-							sx={{
-								backgroundColor: "#1E90FF",
-								color: "#FFFFFF",
-								fontWeight: "bold",
-								marginLeft: 2,
-								textTransform: "none",
-								paddingX: 3,
-								paddingY: 1,
-								borderRadius: "8px",
-								// boxShadow: "0px 4px 15px rgba(30, 144, 255, 0.4)",
-								transition: "background-color 0.3s, transform 0.3s",
-								fontSize: "13px",
-								"&:hover": {
-									backgroundColor: "#63B3ED",
-									transform: "scale(1.05)",
-									boxShadow: "0px 6px 20px rgba(30, 144, 255, 0.4)",
-								},
-							}}
-						>
-							Sign In / Register
-						</Button>
+						{/* Buttons Container */}
+						<Box sx={{ display: "flex", alignItems: "center", marginLeft: 2 }}>
+							{/* Sign In / Register Button */}
+							<Button
+								variant="contained"
+								onClick={handleLoginButtonClick}
+								sx={{
+									backgroundColor: "#1E90FF",
+									color: "#FFFFFF",
+									fontWeight: "bold",
+									marginX: 1,
+									textTransform: "none",
+									paddingX: 3,
+									paddingY: 1,
+									borderRadius: "8px",
+									transition: "background-color 0.3s, transform 0.3s",
+									fontSize: "13px",
+									"&:hover": {
+										backgroundColor: "#63B3ED",
+										transform: "scale(1.05)",
+										boxShadow: "0px 6px 20px rgba(30, 144, 255, 0.4)",
+									},
+								}}
+							>
+								Sign In / Register
+							</Button>
+
+							{/* Guest Login Button */}
+							<Button
+								variant="outlined"
+								onClick={handleGuestLogin}
+								sx={{
+									color: "#1E90FF",
+									fontWeight: "bold",
+									marginX: 1,
+									textTransform: "none",
+									paddingX: 3,
+									paddingY: 1,
+									borderRadius: "8px",
+									border: "2px solid #1E90FF",
+									transition:
+										"background-color 0.3s, transform 0.3s, color 0.3s",
+									fontSize: "13px",
+									"&:hover": {
+										backgroundColor: "#1E90FF",
+										color: "#FFFFFF",
+										transform: "scale(1.05)",
+										boxShadow: "0px 6px 20px rgba(30, 144, 255, 0.4)",
+									},
+								}}
+							>
+								Guest Login
+							</Button>
+						</Box>
 					</Box>
 					<Box sx={{ display: { xs: "flex", md: "none" } }}>
 						<IconButton color="inherit" onClick={toggleDrawer(true)}>
@@ -176,6 +228,14 @@ const Header = () => {
 								/>
 							</ListItem>
 						))}
+						{/* Divider (Optional) */}
+						<Box
+							sx={{
+								borderTop: "1px solid #FFFFFF33",
+								my: 1,
+							}}
+						/>
+						{/* Sign In / Register in Drawer */}
 						<ListItem button onClick={handleLoginButtonClick}>
 							<ListItemText
 								primary={
@@ -187,6 +247,22 @@ const Header = () => {
 										}}
 									>
 										Sign In / Register
+									</Typography>
+								}
+							/>
+						</ListItem>
+						{/* Guest Login in Drawer */}
+						<ListItem button onClick={handleGuestLogin}>
+							<ListItemText
+								primary={
+									<Typography
+										sx={{
+											fontWeight: "bold",
+											color: "#1E90FF",
+											textAlign: "center",
+										}}
+									>
+										Guest Login
 									</Typography>
 								}
 							/>
