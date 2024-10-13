@@ -50,7 +50,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { startKafka } from "./config/startKafka.js";
 import { connectOpenai } from "./config/connectOpenai.js";
-import { starterFunctions } from "./utils/starterFunctions.js";
+// import { starterFunctions } from "./utils/starterFunctions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
