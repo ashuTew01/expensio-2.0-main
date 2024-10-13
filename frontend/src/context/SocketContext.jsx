@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext();
+const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
 
 export const useSocket = () => {
 	return useContext(SocketContext);
@@ -28,7 +29,7 @@ export const SocketProvider = ({ children }) => {
 		}
 
 		// Initialize the socket connection
-		socketRef.current = io("http://expensio.com", {
+		socketRef.current = io(reactAppBaseUrl, {
 			path: "/ws/smart-chat",
 			query: {
 				token: `Bearer ${token}`,

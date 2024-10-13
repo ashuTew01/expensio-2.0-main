@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { removeCredentials } from "./authSlice";
 
-const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_BASE_URL;
+const reactAppBaseUrl = import.meta.env.VITE_REACT_APP_API_BASE_URL;
 
 // Create a custom baseQuery that wraps fetchBaseQuery
 const baseQuery = fetchBaseQuery({
