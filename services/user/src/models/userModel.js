@@ -2,6 +2,19 @@ import pool from "../config/db.js";
 import jwt from "jsonwebtoken";
 import { DatabaseError, NotFoundError } from "@expensio/sharedlib";
 
+export const checkUsernameAvailabilityModel = async (username) => {
+	const query = `SELECT username FROM users WHERE username = $1;`;
+	try {
+		const { rows } = await pool.query(query, [username]);
+		if (rows.length === 0) {
+			return true;
+		}
+		return false;
+	} catch (error) {
+		throw new DatabaseError("Failed to check username availability.");
+	}
+};
+
 export const createUserModel = async (userData, client = pool) => {
 	const {
 		phone,

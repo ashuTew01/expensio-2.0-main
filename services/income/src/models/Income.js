@@ -45,6 +45,7 @@ const incomeSchema = new mongoose.Schema(
 			type: String,
 			maxlength: 300,
 		},
+		deletable: { type: Boolean, required: true, default: true },
 	},
 
 	{ timestamps: true }

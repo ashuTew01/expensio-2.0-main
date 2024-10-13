@@ -14,6 +14,30 @@ import cors from "cors";
 
 // Load environment variables from .env file
 dotenv.config();
+
+const requiredEnvVars = [
+	"NODE_ENV",
+	"SERVICE_NAME",
+	"KAFKA_BROKER_URL",
+	"MONGO_URI",
+	"PORT",
+	"JWT_SECRET",
+	"SMART_AI_SERVICE_URL",
+];
+
+const checkEnvVariables = () => {
+	const unsetEnv = requiredEnvVars.filter(
+		(envVar) => typeof process.env[envVar] === "undefined"
+	);
+	if (unsetEnv.length > 0) {
+		console.error(
+			`Required ENV variables are not set: [${unsetEnv.join(", ")}]`
+		);
+		process.exit(1);
+	}
+};
+checkEnvVariables();
+
 import { startKafka } from "./config/startKafka.js";
 
 // log setup

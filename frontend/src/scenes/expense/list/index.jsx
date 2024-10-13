@@ -246,19 +246,23 @@ const ExpenseListScreen = () => {
 			flex: 0.5,
 			sortable: false,
 			filterable: false,
-			renderCell: (params) => (
-				<Tooltip title="Delete Expense">
-					<IconButton
-						color="error"
-						onClick={(e) => {
-							e.stopPropagation(); // Prevent row click
-							handleDelete(params.id);
-						}}
-					>
-						<Delete />
-					</IconButton>
-				</Tooltip>
-			),
+			renderCell: (params) => {
+				// console.log(params.row);
+				if (params.row?.deletable === false) return null;
+				return (
+					<Tooltip title="Delete Expense">
+						<IconButton
+							color="error"
+							onClick={(e) => {
+								e.stopPropagation(); // Prevent row click
+								handleDelete(params.id);
+							}}
+						>
+							<Delete />
+						</IconButton>
+					</Tooltip>
+				);
+			},
 		},
 	];
 
@@ -324,7 +328,7 @@ const ExpenseListScreen = () => {
 	// const moodData = ["Happy", "Neutral", "Regretful"]; // Removed
 
 	return (
-		<Box m="1.5rem 2.5rem">
+		<Box m="1.5rem 2.5rem 4rem 2.5rem">
 			{/* Header Section */}
 			<FlexBetween marginBottom="25px">
 				<Header title="EXPENSE LIST" subtitle="Keep track of your finances." />
@@ -480,7 +484,8 @@ const ExpenseListScreen = () => {
 				// height="80vh"
 				marginTop="35px"
 				marginBottom="80px"
-				height="80vh"
+				height="auto"
+				width="99%"
 				sx={{
 					"& .MuiDataGrid-root": {
 						border: "none",
@@ -521,6 +526,7 @@ const ExpenseListScreen = () => {
 					slots={{
 						toolbar: CustomToolbar,
 					}}
+					// sx={{ mb: "2rem" }}
 					onRowClick={(params) => navigate(`/expense/${params.id}`)} // Row click navigation
 					components={{
 						NoRowsOverlay: () => (

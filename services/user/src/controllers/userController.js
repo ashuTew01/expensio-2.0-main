@@ -33,7 +33,7 @@ const sendOTPController = async (req, res, next) => {
 	}
 };
 
-// POST @ /verify-otp PUBLIC
+// POST @ /verify-otp PUBLIC (also creates users.)
 const verifyOTPController = async (req, res, next) => {
 	try {
 		const { phone, email, otp, userData } = req.body;
@@ -157,6 +157,31 @@ const getUserDetailsController = async (req, res, next) => {
 	}
 };
 
+const checkUsernameAvailabilityController = async (req, res, next) => {
+	try {
+		const { username } = req.body;
+
+		if (!username) {
+			throw new ValidationError("Please provide a valid username.");
+		}
+
+		const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
+		if (!usernameRegex.test(username)) {
+			throw new ValidationError(
+				"Username must contain only alphanumeric characters and underscores."
+			);
+		}
+
+		const isAvailable =
+			await userService.checkUsernameAvailabilityService(username);
+
+		res.status(200).json({ username, isAvailable });
+	} catch (error) {
+		next(error);
+	}
+};
+
 export {
 	sendOTPController,
 	verifyOTPController,
@@ -165,4 +190,5 @@ export {
 	verifyEmailController,
 	updateProfileController,
 	deleteUserController,
+	checkUsernameAvailabilityController,
 };

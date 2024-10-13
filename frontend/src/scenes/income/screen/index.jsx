@@ -127,30 +127,32 @@ const IncomeScreen = () => {
 				>
 					BACK
 				</Button>
-				<Box>
-					<Tooltip title="Delete Income">
-						<Button
-							startIcon={<Delete />}
-							onClick={handleDelete}
-							variant="outlined"
-							color="error"
-							disabled={isDeleting}
-							sx={{
-								textTransform: "none",
-								padding: "0.5rem 1.5rem",
-								borderRadius: "8px",
-								borderColor: theme.palette.error.main,
-								color: theme.palette.error.main,
-								boxShadow: theme.shadows[3],
-								"&:hover": {
-									backgroundColor: "#fff",
-								},
-							}}
-						>
-							{isDeleting ? "Deleting..." : "Delete"}
-						</Button>
-					</Tooltip>
-				</Box>
+				{income?.deletable && (
+					<Box>
+						<Tooltip title="Delete Income">
+							<Button
+								startIcon={<Delete />}
+								onClick={handleDelete}
+								variant="outlined"
+								color="error"
+								disabled={isDeleting}
+								sx={{
+									textTransform: "none",
+									padding: "0.5rem 1.5rem",
+									borderRadius: "8px",
+									borderColor: theme.palette.error.main,
+									color: theme.palette.error.main,
+									boxShadow: theme.shadows[3],
+									"&:hover": {
+										backgroundColor: "#fff",
+									},
+								}}
+							>
+								{isDeleting ? "Deleting..." : "Delete"}
+							</Button>
+						</Tooltip>
+					</Box>
+				)}
 			</FlexBetween>
 
 			{/* Income Details Card */}

@@ -26,7 +26,6 @@ const Dashboard = () => {
 	} = useGetDasboardQuery();
 
 	if (isDashboardDataError && dashboardDataError.data.status === 500) {
-		console.log(dashboardDataError);
 		return (
 			<Box
 				display="flex"
@@ -149,7 +148,6 @@ const Dashboard = () => {
 	// Get the formatted latest expenses
 	const latestExpenses = formatLatestExpensesData();
 	const latestIncomes = formatLatestIncomeData();
-
 	const totalMoneyEarned =
 		dashboardData?.currentMonthIncomeFinancialData?.totalMoneyEarned;
 	const totalMoneySpent =

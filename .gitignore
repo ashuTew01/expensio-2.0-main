@@ -82,8 +82,6 @@ web_modules/
 .env.production.local
 .env.local
 
-# Configuration files that should not be in the repo
-src/config/env/*
 
 # parcel-bundler cache
 .cache

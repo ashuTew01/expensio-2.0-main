@@ -169,7 +169,6 @@ export const buildFinancialSummaryService = async (
 			userId,
 			last3Months
 		);
-		console.log(startDate, endDate);
 		existingSummary.endDate = endDate;
 		existingSummary.startDate = startDate;
 	} else if (timePeriod === "last6months") {

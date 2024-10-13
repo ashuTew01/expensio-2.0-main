@@ -3,13 +3,14 @@ import { openAIGeneralFunctions } from "../utils/openaiFunctions.js";
 import {
 	handleCreateExpenseService,
 	handleCreateIncomeService,
-	handleGetFinancialDataService,
+	// handleGetFinancialDataService,
 	handleUseFinancialDataService,
 } from "../services/smartChatService.js";
 import ConversationHistory from "../models/ConversationHistory.js";
 import { logError } from "@expensio/sharedlib";
+import config from "../config/config.js";
 
-const MAX_CONVERSATION_HISTORY_LIMIT = 75;
+const MAX_CONVERSATION_HISTORY_LIMIT = config.MAX_CONVERSATION_HISTORY_LIMIT;
 
 export const smartChatTestController = async (req, res) => {
 	res

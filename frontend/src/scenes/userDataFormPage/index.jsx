@@ -1,5 +1,5 @@
 // src/pages/auth/UserDataForm.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react"; // Added useState
 import {
 	CssBaseline,
 	Box,
@@ -11,12 +11,15 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useVerifyOtpMutation } from "../../state/api";
+import {
+	useVerifyOtpMutation,
+	useCheckUsernameAvailabilityMutation, // Imported the mutation hook
+} from "../../state/api";
 import { useDispatch } from "react-redux";
 import { setUserInfo, setToken } from "../../state/authSlice";
 import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
-import { Formik, Form } from "formik";
+import { Formik, Form, useFormikContext } from "formik"; // Imported useFormikContext
 import * as yup from "yup";
 import "react-toastify/dist/ReactToastify.css";
 import backgroundImage from "/auth-background.jpg"; // Replace with your image path
@@ -76,6 +79,80 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 	},
 }));
 
+// Define the UsernameField component
+const UsernameField = () => {
+	const { values, handleChange, handleBlur, touched, errors } =
+		useFormikContext();
+	const [usernameAvailability, setUsernameAvailability] = useState("");
+	const [checkUsernameAvailability] = useCheckUsernameAvailabilityMutation();
+
+	useEffect(() => {
+		// Initialize a timer for debouncing
+		const handler = setTimeout(() => {
+			const username = values.username.trim();
+
+			if (username) {
+				// Call the mutation to check availability
+				checkUsernameAvailability({ username })
+					.unwrap()
+					.then((response) => {
+						if (response.isAvailable) {
+							setUsernameAvailability("Username available");
+						} else {
+							setUsernameAvailability("Username not available");
+						}
+					})
+					.catch((error) => {
+						// Display the error message from backend
+						console.log(error);
+						setUsernameAvailability(
+							error?.data?.error?.message || "Error checking username"
+						);
+					});
+			} else {
+				// If username is empty, clear the message
+				setUsernameAvailability("");
+			}
+		}, 1000); // 1 second debounce
+
+		// Cleanup the timer on effect cleanup
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [values.username, checkUsernameAvailability]);
+
+	return (
+		<Grid item xs={12}>
+			<StyledTextField
+				variant="outlined"
+				fullWidth
+				label="Username"
+				name="username"
+				value={values.username}
+				onChange={handleChange}
+				onBlur={handleBlur}
+				error={touched.username && Boolean(errors.username)}
+				helperText={touched.username && errors.username}
+			/>
+			{/* Display username availability message */}
+			{usernameAvailability && (
+				<Typography
+					variant="body2"
+					sx={{
+						color:
+							usernameAvailability === "Username available"
+								? "#79fc3d"
+								: "#f75959",
+						mt: 1,
+					}}
+				>
+					{usernameAvailability}
+				</Typography>
+			)}
+		</Grid>
+	);
+};
+
 const UserDataForm = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -97,8 +174,8 @@ const UserDataForm = () => {
 		phone: yup
 			.string()
 			.matches(
-				/^\+91[789]\d{9}$/,
-				"Invalid phone number. Must start with +91 followed by 10 digits starting with 7, 8, or 9."
+				/^\+91\d{10}$/,
+				"Invalid phone number. Must start with +91 followed by 10 digits."
 			)
 			.required("This is a required field."),
 		otp: yup
@@ -126,8 +203,9 @@ const UserDataForm = () => {
 				toast.error(response.message || "Failed to complete registration");
 			}
 		} catch (err) {
+			const message = err.data?.error?.message || "Error submitting user data.";
 			console.error(err);
-			toast.error("Error submitting user data");
+			toast.error(message);
 		} finally {
 			setSubmitting(false);
 		}
@@ -183,7 +261,7 @@ const UserDataForm = () => {
 										value={values.firstName}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={touched.firstName && !!errors.firstName}
+										error={touched.firstName && Boolean(errors.firstName)}
 										helperText={touched.firstName && errors.firstName}
 									/>
 								</Grid>
@@ -196,23 +274,12 @@ const UserDataForm = () => {
 										value={values.lastName}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={touched.lastName && !!errors.lastName}
+										error={touched.lastName && Boolean(errors.lastName)}
 										helperText={touched.lastName && errors.lastName}
 									/>
 								</Grid>
-								<Grid item xs={12}>
-									<StyledTextField
-										variant="outlined"
-										fullWidth
-										label="Username"
-										name="username"
-										value={values.username}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										error={touched.username && !!errors.username}
-										helperText={touched.username && errors.username}
-									/>
-								</Grid>
+								{/* Replace the existing Username field with UsernameField component */}
+								<UsernameField />
 								<Grid item xs={12}>
 									<StyledTextField
 										variant="outlined"
@@ -233,27 +300,27 @@ const UserDataForm = () => {
 										value={values.phone}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={touched.phone && !!errors.phone}
+										error={touched.phone && Boolean(errors.phone)}
 										helperText={touched.phone && errors.phone}
 									/>
 								</Grid>
 								{/* <Grid item xs={12}>
-									<StyledTextField
-										variant="outlined"
-										fullWidth
-										label="Date of Birth"
-										name="dateOfBirth"
-										type="date"
-										value={values.dateOfBirth}
-										onChange={handleChange}
-										onBlur={handleBlur}
-										InputLabelProps={{
-											shrink: true,
-										}}
-										error={touched.dateOfBirth && !!errors.dateOfBirth}
-										helperText={touched.dateOfBirth && errors.dateOfBirth}
-									/>
-								</Grid> */}
+                                    <StyledTextField
+                                        variant="outlined"
+                                        fullWidth
+                                        label="Date of Birth"
+                                        name="dateOfBirth"
+                                        type="date"
+                                        value={values.dateOfBirth}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        error={touched.dateOfBirth && Boolean(errors.dateOfBirth)}
+                                        helperText={touched.dateOfBirth && errors.dateOfBirth}
+                                    />
+                                </Grid> */}
 								<Grid item xs={12}>
 									<StyledTextField
 										variant="outlined"
@@ -265,7 +332,7 @@ const UserDataForm = () => {
 										value={values.bio}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={touched.bio && !!errors.bio}
+										error={touched.bio && Boolean(errors.bio)}
 										helperText={touched.bio && errors.bio}
 									/>
 								</Grid>
@@ -280,7 +347,7 @@ const UserDataForm = () => {
 										value={values.otp}
 										onChange={handleChange}
 										onBlur={handleBlur}
-										error={touched.otp && !!errors.otp}
+										error={touched.otp && Boolean(errors.otp)}
 										helperText={touched.otp && errors.otp}
 										InputProps={{
 											style: {

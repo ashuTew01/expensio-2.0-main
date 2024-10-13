@@ -228,19 +228,22 @@ const IncomeListScreen = () => {
 			flex: 0.5,
 			sortable: false,
 			filterable: false,
-			renderCell: (params) => (
-				<Tooltip title="Delete Income">
-					<IconButton
-						color="error"
-						onClick={(e) => {
-							e.stopPropagation(); // Prevent row click
-							handleDelete(params.id);
-						}}
-					>
-						<Delete />
-					</IconButton>
-				</Tooltip>
-			),
+			renderCell: (params) => {
+				if (params.row?.deletable === false) return null;
+				return (
+					<Tooltip title="Delete Income">
+						<IconButton
+							color="error"
+							onClick={(e) => {
+								e.stopPropagation(); // Prevent row click
+								handleDelete(params.id);
+							}}
+						>
+							<Delete />
+						</IconButton>
+					</Tooltip>
+				);
+			},
 		},
 	];
 
@@ -248,7 +251,7 @@ const IncomeListScreen = () => {
 
 	return (
 		<Box
-			m="1.5rem 2.5rem"
+			m="1.5rem 2.5rem 5.1rem 2.5rem"
 			sx={{ backgroundColor: theme.palette.background.default }}
 		>
 			<FlexBetween marginBottom="25px">
@@ -414,7 +417,8 @@ const IncomeListScreen = () => {
 			</FilterCard>
 			<Box
 				marginTop="25px"
-				height="80vh"
+				height="auto"
+				width="99%"
 				sx={{
 					"& .MuiDataGrid-root": {
 						border: "none",

@@ -210,6 +210,8 @@ export const addExpensesService = async (expensesData, userId, retries = 3) => {
 							cognitiveTriggerIds.length > 0 ? cognitiveTriggerIds : null,
 						createdAt: createdAt || new Date(),
 						updatedAt: new Date(),
+
+						deletable: true,
 					});
 
 					await newExpense.save({ session });
@@ -290,12 +292,14 @@ export const deleteExpensesByIdsService = async (
 		const expensesToDelete = await Expense.find({
 			_id: { $in: expenseIds },
 			userId: userId,
+			deletable: true,
 		}).session(session); // Use session for transaction
 
 		// Delete the expenses
 		const result = await Expense.deleteMany({
 			_id: { $in: expenseIds },
 			userId: userId,
+			deletable: true,
 		}).session(session); // Use session for transaction
 
 		// If deletion was successful, publish the event

@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import UserTokens from "../models/UserTokens.js";
 import AiSubscription from "../models/AiSubscription.js";
 import { logInfo, ValidationError } from "@expensio/sharedlib";
+import config from "../config/config.js";
+
+const FREE_SUBSCRIPTION_INITIAL_TOKENS =
+	config.FREE_SUBSCRIPTION_INITIAL_TOKENS;
 
 /**
  * Adds a new subscription to the database.
@@ -55,11 +59,11 @@ export const addSubscriptionToDb = async (name, monthlyTokens) => {
  * Uses a MongoDB transaction to ensure data integrity.
  *
  * @param {Number} userId - The ID of the user.
- * @param {String} subscriptionId - The ID of the AiSubscription.
+ * @param {String} subscriptionCode - The code (unique) of the AiSubscription.
  * @returns {Promise<Object>} - The updated UserTokens document.
  * @throws {ValidationError} - Throws an error if validation fails or if the subscription or user is not found.
  */
-export const assignSubscriptionToUser = async (userId, subscriptionId) => {
+export const assignSubscriptionToUser = async (userId, subscriptionCode) => {
 	const session = await mongoose.startSession();
 	session.startTransaction(); // Start the transaction
 
@@ -72,20 +76,27 @@ export const assignSubscriptionToUser = async (userId, subscriptionId) => {
 		}
 
 		// Validate subscriptionId
-		if (!subscriptionId || !mongoose.Types.ObjectId.isValid(subscriptionId)) {
+		if (!subscriptionCode) {
 			throw new ValidationError(
-				`Invalid subscriptionId: ${subscriptionId}. Please provide a valid subscriptionId.`
+				`Invalid subscriptionCode: ${subscriptionCode}. Please provide a valid subscriptionCode.`
 			);
 		}
 
 		// Find the subscription
-		const subscription = await AiSubscription.findById({
-			_id: subscriptionId,
+		const subscription = await AiSubscription.findOne({
+			code: subscriptionCode,
 		}).session(session);
+
 		if (!subscription) {
 			throw new ValidationError(
-				`Subscription with id '${subscriptionId}' not found.`
+				`Subscription with code '${subscriptionCode}' not found.`
 			);
+		}
+
+		let initialTokens = subscription.monthlyTokens;
+
+		if (subscriptionCode === "free") {
+			initialTokens = initialTokens + FREE_SUBSCRIPTION_INITIAL_TOKENS;
 		}
 
 		// Find or create the user's tokens entry
@@ -97,7 +108,7 @@ export const assignSubscriptionToUser = async (userId, subscriptionId) => {
 			userTokens = new UserTokens({
 				userId,
 				aiSubscriptionId: subscription._id,
-				currentTokens: subscription.monthlyTokens, // Start with monthly tokens from the new subscription
+				currentTokens: initialTokens, // Start with monthly tokens from the new subscription
 				lastRefillDate: currentDate,
 			});
 		} else {
@@ -130,14 +141,53 @@ export const assignSubscriptionToUser = async (userId, subscriptionId) => {
  * @returns {Promise<Object>} - The user's AI tokens document.
  * @throws {Error} - If there's an error fetching the user's AI tokens.
  */
+
 export const getUserAiTokensDetailsService = async (userId) => {
+	let session;
 	try {
-		const userTokens = await UserTokens.findOne({ userId }).populate({
+		let userTokens = await UserTokens.findOne({ userId }).populate({
 			path: "aiSubscriptionId",
 			model: "AiSubscription",
 		});
+		if (userTokens) {
+			return userTokens;
+		}
+
+		// start transation if no userTokens are found
+		session = await mongoose.startSession();
+		session.startTransaction();
+
+		// check again that no userTokens created by other request during lookup
+		userTokens = await UserTokens.findOne({ userId })
+			.populate({
+				path: "aiSubscriptionId",
+				model: "AiSubscription",
+			})
+			.session(session);
+
+		if (!userTokens) {
+			await assignSubscriptionToUser(userId, "free", session);
+
+			// Re-fetch
+			userTokens = await UserTokens.findOne({ userId })
+				.populate({
+					path: "aiSubscriptionId",
+					model: "AiSubscription",
+				})
+				.session(session);
+		}
+
+		// Commit the transaction if everything is successful
+		await session.commitTransaction();
+		session.endSession();
+
 		return userTokens;
 	} catch (error) {
+		// Handle the case where an error occurs and abort the transaction if needed
+		if (session && session.inTransaction()) {
+			await session.abortTransaction();
+			session.endSession();
+		}
 		throw new Error(`Failed to get user tokens: ${error.message}`);
 	}
 };

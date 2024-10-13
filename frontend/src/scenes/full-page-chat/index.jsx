@@ -22,6 +22,7 @@ import { useTheme } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion"; // For animations
+import { api } from "../../state/api";
 
 const TypingIndicator = () => (
 	<Box sx={{ display: "flex", alignItems: "center" }}>
@@ -93,6 +94,7 @@ const FullChatPage = () => {
 				);
 				dispatch(setTyping(false));
 			}
+			dispatch(api.util.invalidateTags(["Tokens"]));
 		});
 
 		socket.on("wait", (data) => {

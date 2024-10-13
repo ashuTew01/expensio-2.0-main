@@ -67,6 +67,11 @@ spec:
                 secretKeyRef:
                   name: shared-secret
                   key: GUEST_RESET_TOKEN
+            - name: NODE_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: smart-ai-secret
+                  key: NODE_ENV
 ---
 apiVersion: v1
 kind: Service

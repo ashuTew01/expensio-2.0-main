@@ -13,7 +13,6 @@ const options = {
 
 const OverviewBoxLatestExpense = ({ expense, colSpan, rowSpan }) => {
 	const theme = useTheme();
-	console.log(expense);
 
 	return (
 		<Box

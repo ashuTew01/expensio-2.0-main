@@ -139,9 +139,11 @@ const ExpenseCard = ({
 					{/* Category and Date */}
 					<Box sx={cardStyles.info}>
 						<Typography variant="body2">{categoryName}</Typography>
-						<Typography variant="body2" sx={cardStyles.date}>
-							{new Date(createdAt).toLocaleDateString()}
-						</Typography>
+						{createdAt && (
+							<Typography variant="body2" sx={cardStyles.date}>
+								{createdAt}
+							</Typography>
+						)}
 					</Box>
 				</CardContent>
 

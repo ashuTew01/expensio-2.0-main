@@ -39,7 +39,9 @@ const checkEnvVariables = () => {
 		(envVar) => typeof process.env[envVar] === "undefined"
 	);
 	if (unsetEnv.length > 0) {
-		logError(`Required ENV variables are not set: [${unsetEnv.join(", ")}]`);
+		console.error(
+			`Required ENV variables are not set: [${unsetEnv.join(", ")}]`
+		);
 		process.exit(1);
 	}
 };

@@ -42,6 +42,11 @@ spec:
                 secretKeyRef:
                   name: shared-secret
                   key: JWT_SECRET
+            - name: NODE_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: expense-secret
+                  key: NODE_ENV
 ---
 apiVersion: v1
 kind: Service

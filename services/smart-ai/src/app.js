@@ -18,6 +18,33 @@ import http from "http"; // Required to run WebSocket on the same server
 // Load environment variables from .env file
 dotenv.config();
 
+const requiredEnvVars = [
+	"NODE_ENV",
+	"SERVICE_NAME",
+	"KAFKA_BROKER_URL",
+	"MONGO_URI",
+	"PORT",
+	"JWT_SECRET",
+	"EXPENSE_SERVICE_URL",
+	"INCOME_SERVICE_URL",
+	"FINANCIALDATA_SERVICE_URL",
+	"OPENAI_API_KEY",
+	"GUEST_RESET_TOKEN",
+];
+
+const checkEnvVariables = () => {
+	const unsetEnv = requiredEnvVars.filter(
+		(envVar) => typeof process.env[envVar] === "undefined"
+	);
+	if (unsetEnv.length > 0) {
+		console.error(
+			`Required ENV variables are not set: [${unsetEnv.join(", ")}]`
+		);
+		process.exit(1);
+	}
+};
+checkEnvVariables();
+
 // log setup
 import path from "path";
 import { fileURLToPath } from "url";

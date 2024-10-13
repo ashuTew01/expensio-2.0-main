@@ -46,7 +46,7 @@ const ExpenseScreen = () => {
 
 	// Extract expense data
 	const expense = data?.expenses?.[0];
-	console.log(expense);
+	// console.log(expense);
 
 	// Handle delete action
 	const handleDelete = () => {
@@ -120,33 +120,35 @@ const ExpenseScreen = () => {
 				>
 					BACK
 				</Button>
-				<Box>
-					<Tooltip title="Delete Expense">
-						<Button
-							startIcon={<Delete />}
-							onClick={handleDelete}
-							variant="outlined"
-							disabled={isDeleting}
-							sx={{
-								textTransform: "none",
-								padding: "0.5rem 1.5rem",
-								borderRadius: "8px",
-								borderColor: theme.palette.error.main,
-								color: theme.palette.error.main,
-								boxShadow: theme.shadows[3],
-								transition: "all 0.3s ease",
-								"&:hover": {
-									backgroundColor: theme.palette.error.light,
-									color: theme.palette.error.contrastText,
-									boxShadow: theme.shadows[8],
-									transform: "scale(1.05)",
-								},
-							}}
-						>
-							{isDeleting ? "Deleting..." : "Delete"}
-						</Button>
-					</Tooltip>
-				</Box>
+				{expense?.deletable && (
+					<Box>
+						<Tooltip title="Delete Expense">
+							<Button
+								startIcon={<Delete />}
+								onClick={handleDelete}
+								variant="outlined"
+								disabled={isDeleting}
+								sx={{
+									textTransform: "none",
+									padding: "0.5rem 1.5rem",
+									borderRadius: "8px",
+									borderColor: theme.palette.error.main,
+									color: theme.palette.error.main,
+									boxShadow: theme.shadows[3],
+									transition: "all 0.3s ease",
+									"&:hover": {
+										backgroundColor: theme.palette.error.light,
+										color: theme.palette.error.contrastText,
+										boxShadow: theme.shadows[8],
+										transform: "scale(1.05)",
+									},
+								}}
+							>
+								{isDeleting ? "Deleting..." : "Delete"}
+							</Button>
+						</Tooltip>
+					</Box>
+				)}
 			</FlexBetween>
 
 			{/* Expense Details Card with Hover Animation */}

@@ -73,6 +73,7 @@ const expenseSchema = new mongoose.Schema(
 			default: "neutral",
 		},
 		eventId: { type: mongoose.Schema.Types.ObjectId },
+		deletable: { type: Boolean, required: true, default: true },
 	},
 
 	{ timestamps: true }

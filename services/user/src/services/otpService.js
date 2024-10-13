@@ -19,6 +19,10 @@ import {
 import { sendEmail } from "./emailService.js";
 import { otpMailHtmlTemplate } from "../utils/otpMailHtmlTemplate.js";
 
+import config from "../config/config.js";
+
+const otpLimit = config.MAX_OTP_REQUEST_LIMIT;
+
 const generateOTP = () => {
 	return crypto.randomInt(100000, 999999).toString(); // 6 digit otp
 };
@@ -38,10 +42,7 @@ export const handleSendOTPService = async (phone, email) => {
 				`User is blocked from receiving OTPs. Try again after ${otpRequest.is_blocked_until}`
 			);
 		}
-		if (
-			otpRequest.request_count >=
-			(process.env.NODE_ENV === "development" ? 50 : 3)
-		) {
+		if (otpRequest.request_count >= otpLimit) {
 			// reset request_count to avoid permanent block
 			await otpModel.updateOtpRequestModel(phone, email, {
 				is_blocked_until: new Date(now.getTime() + 60 * 60 * 1000), // Block for 1 hour
@@ -94,7 +95,7 @@ export const handleSendOTPService = async (phone, email) => {
 	return {
 		message: "OTP sent successfully.",
 		userExists: result.user_exists,
-		otp: environment === "development" ? otp : null,
+		otp: environment === "development" ? otp : undefined,
 	};
 };
 
@@ -146,7 +147,6 @@ export const handleVerifyOTPService = async (phone, email, otp, userData) => {
 			// Same goes for vice versa.
 			// SO CURRENTLY, MOBILE NUMBER WONT BE VERIFIED FOR OBVIOUS REASONS.
 			// *******************************************************************************************
-
 			if (
 				!userData ||
 				!userData.firstName ||
@@ -160,6 +160,21 @@ export const handleVerifyOTPService = async (phone, email, otp, userData) => {
 				throw new ValidationError(
 					"Missing/invalid required user data fields: firstName, username, email and phone are required."
 				);
+			}
+			//Check username validity
+			const usernameRegex = /^[a-zA-Z0-9_]+$/;
+			if (!usernameRegex.test(userData.username)) {
+				throw new ValidationError(
+					"Username must contain only alphanumeric characters and underscores."
+				);
+			}
+
+			const isAvailable = await userService.checkUsernameAvailabilityService(
+				userData.username
+			);
+
+			if (!isAvailable) {
+				throw new ValidationError("Username is not available.");
 			}
 
 			if (!otpRequest.phone) {

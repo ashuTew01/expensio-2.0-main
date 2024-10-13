@@ -10,6 +10,14 @@ import { sendVerificationEmailService } from "../services/emailService.js";
 import { NotFoundError, InternalServerError } from "@expensio/sharedlib";
 import { connectKafka } from "../config/connectKafka.js";
 
+export const checkUsernameAvailabilityService = async (username) => {
+	try {
+		return await userModel.checkUsernameAvailabilityModel(username);
+	} catch (error) {
+		throw new InternalServerError("Failed to check username availability.");
+	}
+};
+
 export const createUserService = async (userData) => {
 	let user;
 	try {

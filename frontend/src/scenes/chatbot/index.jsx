@@ -27,6 +27,7 @@ import {
 import { useNavigate } from "react-router-dom"; // For redirecting to full chat page
 import { useSocket } from "../../context/SocketContext";
 import LoadingIndicator from "../../components/LoadingIndicator";
+import { api } from "../../state/api";
 
 const ChatBot = () => {
 	const [isOpen, setIsOpen] = useState(false); // To handle open/close state
@@ -63,6 +64,7 @@ const ChatBot = () => {
 				dispatch(addMessage({ message: data.message, direction: "incoming" }));
 				dispatch(setTyping(false));
 			}
+			dispatch(api.util.invalidateTags(["Tokens"]));
 		});
 
 		socket.on("wait", (data) => {
@@ -154,7 +156,11 @@ const ChatBot = () => {
 	return (
 		<Box
 			className="chatbot-container"
-			style={isOpen ? { display: "flex", flexDirection: "column" } : {}}
+			style={
+				isOpen
+					? { display: "flex", flexDirection: "column" }
+					: { width: "178px" }
+			}
 		>
 			{/* SMART AI Button - Width adjusted */}
 			<Box

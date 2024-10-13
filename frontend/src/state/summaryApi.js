@@ -29,6 +29,7 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
 export const summaryApi = createApi({
 	reducerPath: "summaryApi",
 	baseQuery: baseQueryWithAuth,
+	tagTypes: ["Tokens"],
 	endpoints: (builder) => ({
 		getSummary: builder.query({
 			query: ({ timePeriod, year, month }) => ({
@@ -43,6 +44,7 @@ export const summaryApi = createApi({
 				method: "POST",
 				params: { timePeriod, year, month },
 			}),
+			invalidatesTags: ["Tokens"],
 		}),
 	}),
 });

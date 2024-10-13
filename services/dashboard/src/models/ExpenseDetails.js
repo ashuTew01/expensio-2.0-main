@@ -47,7 +47,7 @@ const expenseDetailsSchema = new mongoose.Schema({
 		required: true,
 	},
 });
+expenseDetailsSchema.index({ userId: 1, createdAt: -1 });
 
 const ExpenseDetails = mongoose.model("ExpenseDetails", expenseDetailsSchema);
-
 export default ExpenseDetails;

@@ -37,7 +37,7 @@ const incomeDetailsSchema = new mongoose.Schema({
 		required: true,
 	},
 });
-
+incomeDetailsSchema.index({ userId: 1, createdAt: -1 });
 const IncomeDetails = mongoose.model("IncomeDetails", incomeDetailsSchema);
 
 export default IncomeDetails;

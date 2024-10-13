@@ -49,7 +49,7 @@ const baseQueryWithAuth = async (args, api, extraOptions) => {
 export const api = createApi({
 	baseQuery: baseQueryWithAuth,
 	reducerPath: "adminApi",
-	tagTypes: ["User", "Dashboard", "Incomes", "Expenses"],
+	tagTypes: ["User", "Dashboard", "Incomes", "Expenses", "Tokens"],
 	endpoints: (build) => ({
 		// getUserDetail query
 		getUserDetails: build.query({
@@ -243,6 +243,13 @@ export const api = createApi({
 				body: data,
 			}),
 		}),
+		checkUsernameAvailability: build.mutation({
+			query: (data) => ({
+				url: `user/username`,
+				method: "POST",
+				body: data,
+			}),
+		}),
 		getDasboard: build.query({
 			query: () => ({
 				url: "dashboard",
@@ -255,6 +262,7 @@ export const api = createApi({
 				url: "smart-ai/user/ai-tokens-detail",
 				method: "GET",
 			}),
+			providesTags: ["Tokens"],
 			refetchOnFocus: true,
 			refetchOnReconnect: true,
 		}),
@@ -281,6 +289,7 @@ export const {
 	useSendOtpMutation,
 	useVerifyOtpMutation,
 	useUpdateUserProfileMutation,
+	useCheckUsernameAvailabilityMutation,
 
 	// INCOME
 	useDeleteIncomesMutation,

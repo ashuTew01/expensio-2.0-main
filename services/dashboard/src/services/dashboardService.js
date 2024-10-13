@@ -12,7 +12,8 @@ import axios from "axios";
 
 /**
  * Adds a newly created expense to the user's dashboard.
- * The expense is added to the top of the list, and if the list exceeds 10 items, the oldest expense is removed.
+ * The expense is added to the list, sorted by createdAt in descending order.
+ * If the list exceeds 10 items, the oldest expense is removed.
  *
  * @param {Object} expenseData - The data of the created expense.
  * @param {mongoose.Types.ObjectId} expenseData._id - The ID of the expense.
@@ -34,7 +35,7 @@ export const addExpenseToDashboardService = async (expenseData) => {
 	try {
 		const { userId, ...expenseDetails } = expenseData;
 
-		// idempotency check.
+		// Idempotency check to prevent duplicate processing
 		const alreadyHasExpense = await ExpenseDetails.findOne({
 			expenseId: expenseData._id,
 		});
@@ -43,18 +44,6 @@ export const addExpenseToDashboardService = async (expenseData) => {
 				`Expense with ID '${expenseData._id}' already in Dashboard of userId: ${userId}. Skipping.`
 			);
 			return;
-		}
-
-		// Check if the user already has 10 expenses stored in ExpenseDetails
-		const expenseCount = await ExpenseDetails.countDocuments({ userId });
-		while (expenseCount >= 10) {
-			// Find and remove the oldest expense for this user
-			const oldestExpense = await ExpenseDetails.findOne({ userId }).sort({
-				createdAt: 1,
-			});
-			if (oldestExpense) {
-				await ExpenseDetails.deleteOne({ _id: oldestExpense._id });
-			}
 		}
 
 		// Create and save the new ExpenseDetails document
@@ -73,6 +62,36 @@ export const addExpenseToDashboardService = async (expenseData) => {
 
 		const savedExpenseDetails = await newExpenseDetails.save();
 
+		// Check if the user already has more than 10 expenses stored in ExpenseDetails
+		const expenseCount = await ExpenseDetails.countDocuments({ userId });
+
+		if (expenseCount > 10) {
+			// Find all expenses sorted by createdAt in ascending order (oldest first)
+			const excessExpenses = await ExpenseDetails.find({ userId })
+				.sort({ createdAt: 1 })
+				.limit(expenseCount - 10)
+				.select("_id");
+
+			// Delete the excess oldest expenses in bulk
+			if (excessExpenses.length > 0) {
+				const excessIds = excessExpenses.map((exp) => exp._id);
+				await ExpenseDetails.deleteMany({ _id: { $in: excessIds } });
+			}
+		}
+
+		// Verify if the newly added expense still exists after trimming
+		const stillExists = await ExpenseDetails.findOne({
+			userId,
+			expenseId: expenseData._id,
+		});
+
+		if (!stillExists) {
+			logInfo(
+				`Expense with ID '${expenseData._id}' no longer exists after trimming. Skipping dashboard update.`
+			);
+			return;
+		}
+
 		let dashboard = await Dashboard.findOne({ userId });
 
 		if (!dashboard) {
@@ -80,19 +99,24 @@ export const addExpenseToDashboardService = async (expenseData) => {
 				userId,
 				latestExpenses: [],
 				latestIncomes: [],
-				currentMonthFinancialData: {},
+				currentMonthExpenseFinancialData: {},
+				currentMonthIncomeFinancialData: {},
 				lastUpdated: new Date(),
 			});
 		}
 
-		// Add the new expenseDetailsId at the top of the list
-		dashboard.latestExpenses.unshift({
+		// Add the new expenseDetailsId along with createdAt to the dashboard's latestExpenses
+		dashboard.latestExpenses.push({
 			expenseDetailsId: savedExpenseDetails._id,
+			createdAt: savedExpenseDetails.createdAt,
 		});
+
+		// Sort latestExpenses by createdAt in descending order (newest first)
+		dashboard.latestExpenses.sort((a, b) => b.createdAt - a.createdAt);
 
 		// Ensure only the latest 10 expenses are kept in the dashboard
 		if (dashboard.latestExpenses.length > 10) {
-			dashboard.latestExpenses.pop();
+			dashboard.latestExpenses = dashboard.latestExpenses.slice(0, 10);
 		}
 
 		// Update the lastUpdated field
@@ -167,7 +191,8 @@ export const removeExpensesFromDashboardService = async (deletedExpenses) => {
 
 /**
  * Adds a newly created income to the user's dashboard.
- * The income is added to the top of the list, and if the list exceeds 10 items, the oldest income is removed.
+ * The income is added to the list, sorted by createdAt in descending order.
+ * If the list exceeds 10 items, the oldest income is removed.
  *
  * @param {Object} incomeData - The data of the created income.
  * @param {mongoose.Types.ObjectId} incomeData._id - The ID of the income.
@@ -187,7 +212,7 @@ export const addIncomeToDashboardService = async (incomeData) => {
 	try {
 		const { userId, ...incomeDetails } = incomeData;
 
-		// idempotency check.
+		// Idempotency check to prevent duplicate processing
 		const alreadyHasIncome = await IncomeDetails.findOne({
 			incomeId: incomeData._id,
 		});
@@ -198,10 +223,10 @@ export const addIncomeToDashboardService = async (incomeData) => {
 			return;
 		}
 
-		// Create a new IncomeDetails document
+		// Create and save the new IncomeDetails document
 		const newIncomeDetails = new IncomeDetails({
 			userId,
-			incomeId: incomeData._id, // Reference to the original income ID
+			incomeId: incomeData._id,
 			title: incomeData.title,
 			amount: incomeData.amount,
 			incomeType: incomeData.incomeType,
@@ -212,6 +237,36 @@ export const addIncomeToDashboardService = async (incomeData) => {
 
 		const savedIncomeDetails = await newIncomeDetails.save();
 
+		// Check if the user already has more than 10 incomes stored in IncomeDetails
+		const incomeCount = await IncomeDetails.countDocuments({ userId });
+
+		if (incomeCount > 10) {
+			// Find all incomes sorted by createdAt in ascending order (oldest first)
+			const excessIncomes = await IncomeDetails.find({ userId })
+				.sort({ createdAt: 1 })
+				.limit(incomeCount - 10)
+				.select("_id");
+
+			// Delete the excess oldest incomes in bulk
+			if (excessIncomes.length > 0) {
+				const excessIds = excessIncomes.map((income) => income._id);
+				await IncomeDetails.deleteMany({ _id: { $in: excessIds } });
+			}
+		}
+
+		// Verify if the newly added income still exists after trimming
+		const stillExists = await IncomeDetails.findOne({
+			userId,
+			incomeId: incomeData._id,
+		});
+
+		if (!stillExists) {
+			logInfo(
+				`Income with ID '${incomeData._id}' no longer exists after trimming. Skipping dashboard update.`
+			);
+			return;
+		}
+
 		let dashboard = await Dashboard.findOne({ userId });
 
 		if (!dashboard) {
@@ -219,23 +274,24 @@ export const addIncomeToDashboardService = async (incomeData) => {
 				userId,
 				latestExpenses: [],
 				latestIncomes: [],
-				currentMonthFinancialData: {},
+				currentMonthExpenseFinancialData: {},
+				currentMonthIncomeFinancialData: {},
 				lastUpdated: new Date(),
 			});
 		}
 
-		// Add the new incomeDetailsId at the top of the list
-		dashboard.latestIncomes.unshift({
+		// Add the new incomeDetailsId along with createdAt to the dashboard's latestIncomes
+		dashboard.latestIncomes.push({
 			incomeDetailsId: savedIncomeDetails._id,
+			createdAt: savedIncomeDetails.createdAt,
 		});
 
-		// Ensure only the latest 10 incomes are kept
-		if (dashboard.latestIncomes.length > 10) {
-			// Remove the oldest income from the dashboard
-			const oldestIncome = dashboard.latestIncomes.pop();
+		// Sort latestIncomes by createdAt in descending order (newest first)
+		dashboard.latestIncomes.sort((a, b) => b.createdAt - a.createdAt);
 
-			// Also remove the corresponding IncomeDetails document from the collection
-			await IncomeDetails.findByIdAndDelete(oldestIncome.incomeDetailsId);
+		// Ensure only the latest 10 incomes are kept in the dashboard
+		if (dashboard.latestIncomes.length > 10) {
+			dashboard.latestIncomes = dashboard.latestIncomes.slice(0, 10);
 		}
 
 		// Update the lastUpdated field

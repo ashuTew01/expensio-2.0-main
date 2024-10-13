@@ -5,11 +5,16 @@ import mongoose from "mongoose"; // For transactions
 import { validModels } from "../utils/openaiApiModels.js";
 import { calculateAiTokens } from "../utils/calculateAiTokens.js";
 
+import config from "../config/config.js";
+
 //****************************** WARNING:: DONT REMOVE ********************************************************************* */
 import AiSubscription from "../models/AiSubscription.js"; //DONT REMOVE, POPULATE WILL BREAK! Code will not immediately break, but will break next month.
+import { assignSubscriptionToUser } from "./aiSubscriptionService.js";
 //***************************************************************************************************** */
 
 const validRoles = ["user"];
+
+const MIN_TOKENS_REQUIRED = config.MIN_TOKENS_REQUIRED_FOR_AI_API_CALL;
 
 /**
  * Resets tokens for the new month by adding the subscription's monthly tokens to the user's current tokens.
@@ -37,13 +42,12 @@ const resetTokensIfNewMonth = async (userTokens, session) => {
 /**
  * Checks if the user has enough tokens to make the API call.
  * @param {Object} userTokens - The user's token document.
- * @param {Number} minTokensRequired - The minimum number of tokens required to proceed.
  * @throws {Error} - If the user doesn't have enough tokens.
  */
-const checkTokenAvailability = (userTokens, minTokensRequired = 5) => {
-	if (userTokens.currentTokens < minTokensRequired) {
+const checkTokenAvailability = (userTokens) => {
+	if (userTokens.currentTokens < MIN_TOKENS_REQUIRED) {
 		throw new Error(
-			`Your AI tokens are insufficient. You have ${userTokens.currentTokens.toFixed(2)} AI tokens, which is less than the required minimum of ${minTokensRequired}. Please contact the developers or buy some AI tokens to continue.`
+			`Your AI tokens are insufficient. You have ${userTokens.currentTokens.toFixed(2)} AI tokens, which is less than the required minimum of ${MIN_TOKENS_REQUIRED}. Please contact the developers or buy some AI tokens to continue.`
 		);
 	}
 };
@@ -111,9 +115,13 @@ export const callOpenaiService = async (
 			"aiSubscriptionId"
 		);
 		if (!userTokens) {
-			throw new Error(
-				`Please buy a subscription. No token data found for user: ${userId}`
+			await assignSubscriptionToUser(userId, "free");
+			userTokens = await UserTokens.findOne({ userId }).populate(
+				"aiSubscriptionId"
 			);
+		}
+		if (!userTokens) {
+			throw new Error(`Could not find user tokens for userId: ${userId}.`);
 		}
 
 		// Reset tokens if it's a new month

@@ -151,6 +151,8 @@ export const addIncomesService = async (incomesData, userId, retries = 3) => {
 				image,
 				createdAt: createdAt || new Date(),
 				updatedAt: new Date(),
+
+				deletable: true,
 			});
 
 			await newIncome.save({ session });
@@ -236,12 +238,14 @@ export const deleteIncomesByIdsService = async (
 		const incomesToDelete = await Income.find({
 			_id: { $in: incomeIds },
 			userId: userId,
+			deletable: true,
 		}).session(session); // Use session for transaction
 
 		// Delete the incomes
 		const result = await Income.deleteMany({
 			_id: { $in: incomeIds },
 			userId: userId,
+			deletable: true,
 		}).session(session); // Use session for transaction
 
 		// If deletion was successful, publish the event

@@ -1,3 +1,4 @@
+// models/Dashboard.js
 import mongoose from "mongoose";
 
 const dashboardSchema = new mongoose.Schema({
@@ -11,6 +12,11 @@ const dashboardSchema = new mongoose.Schema({
 			expenseDetailsId: {
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "ExpenseDetails",
+				// required: true,
+			},
+			createdAt: {
+				type: Date,
+				required: true,
 			},
 		},
 	],
@@ -19,6 +25,11 @@ const dashboardSchema = new mongoose.Schema({
 			incomeDetailsId: {
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "IncomeDetails",
+				// required: true,
+			},
+			createdAt: {
+				type: Date,
+				required: true,
 			},
 		},
 	],
@@ -77,6 +88,11 @@ const dashboardSchema = new mongoose.Schema({
 		default: Date.now,
 	},
 });
+
+// **Indexing for Performance Optimization**
+dashboardSchema.index({ userId: 1 });
+dashboardSchema.index({ "latestExpenses.expenseDetailsId": 1 });
+dashboardSchema.index({ "latestIncomes.incomeDetailsId": 1 });
 
 const Dashboard = mongoose.model("Dashboard", dashboardSchema);
 

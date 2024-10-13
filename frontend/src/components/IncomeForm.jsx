@@ -85,8 +85,6 @@ const IncomeForm = ({}) => {
 				)
 			);
 
-			console.log(filteredIncomeData);
-
 			const response = await saveIncome([filteredIncomeData]);
 
 			if (response.data) {

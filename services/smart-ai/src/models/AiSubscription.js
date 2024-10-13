@@ -10,6 +10,11 @@ const aiSubscriptionSchema = new mongoose.Schema({
 		type: Number,
 		required: true,
 	},
+	code: {
+		type: String,
+		required: true,
+		unique: true,
+	},
 });
 
 const AiSubscription = mongoose.model("AiSubscription", aiSubscriptionSchema);

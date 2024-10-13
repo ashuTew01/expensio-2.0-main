@@ -43,7 +43,6 @@ const UpdateProfileForm = () => {
 	const handleSubmit = async (values, { setSubmitting, resetForm }) => {
 		try {
 			const response = await updateUserProfile(values).unwrap();
-			console.log(response);
 
 			if (response) {
 				toast.success("Profile updated successfully!");

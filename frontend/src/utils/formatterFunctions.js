@@ -12,6 +12,10 @@ export const formatExpenseListData = (expensesData) => {
 			? expense.cognitiveTriggerIds.map((trigger) => trigger.name).join(", ") // Join all cognitive trigger names
 			: "No Triggers", // Handle if no triggers are available
 		mood: expense.mood || "No Mood", // Handle if no mood is available
+		deletable:
+			expense.deletable === undefined || expense.deletable === null
+				? true
+				: expense.deletable,
 	}));
 };
 
@@ -23,5 +27,9 @@ export const formatIncomeListData = (incomes) => {
 		categoryName: income.categoryId.name, // Using the nested category name
 		amount: Number(income.amount),
 		dateNtime: dayjs(income.createdAt).format("DD/MM/YYYY HH:mm:ss"), // Formatting date and time
+		deletable:
+			income.deletable === undefined || income.deletable === null
+				? true
+				: income.deletable,
 	}));
 };

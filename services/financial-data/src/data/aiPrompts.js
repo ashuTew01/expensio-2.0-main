@@ -25,13 +25,14 @@ export const financialSummaryPrompt = `As an expert with PhDs in finance, psycho
    - Implications of these deviations on their long-term financial health.
 
 **Important Notes**:
-
+- DONT BE OVERCRITICAL and Keep a positive tone.
+- Don't send the headings with the data, just the data itself. Headings are already there in my frontend.
 - Avoid mentioning observations that can be very easily computed or are obvious from the data.
 - Focus on all the attributes like cognitive triggers, categories, moods and all within it.
 - Focus on providing insights and assessments that require expert-level analysis.
 - Use an empathetic and professional tone suitable for delivering complex information.
 - Ensure all conclusions are logically derived from the data provided.
-- Keep the response concise to manage token usage without sacrificing depth.
+- Keep the response not too big, but not too small to manage token usage without sacrificing depth.
 - Keep the data in each argument as Markdown code.
 
 **User's Financial Data**:
