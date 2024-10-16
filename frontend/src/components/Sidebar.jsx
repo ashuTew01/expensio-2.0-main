@@ -133,11 +133,22 @@ const Sidebar = ({
 						{/* box for the logo START */}
 						<Box m="1.5rem 2rem 2rem 3rem">
 							<FlexBetween color={theme.palette.secondary.main}>
-								<Box display="flex" alignItems="center" gap="0.5rem">
-									<Typography variant="h4" fontWeight="bold">
-										EXPENSIO
-									</Typography>
-								</Box>
+								<Typography
+									variant="h4"
+									to="/"
+									sx={{
+										flexGrow: 1,
+										fontWeight: "bold",
+										letterSpacing: "2px",
+										color: "#FFFFFF",
+										textDecoration: "none",
+									}}
+								>
+									EXPENSIO{" "}
+									<span style={{ color: "#1E90FF", letterSpacing: "0.25px" }}>
+										(BETA)
+									</span>
+								</Typography>
 								{/* if mobile, display a close button */}
 								{!isNonMobile && (
 									<IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>

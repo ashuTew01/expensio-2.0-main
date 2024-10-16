@@ -314,7 +314,9 @@ const ChatBot = () => {
 											Welcome to SMART AI! <br />
 											Ask me anything about your finances. <br />I can help you
 											track expenses, add income, and provide financial insights
-											on the go. Let's get started!
+											on the go. Let's get started! <br />
+											(1 Message ~ 0.5 AI Tokens) <br />
+											🚀Contact Devs for more AI Tokens!
 										</Typography>
 									</Box>
 								) : (

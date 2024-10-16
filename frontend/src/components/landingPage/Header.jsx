@@ -64,6 +64,7 @@ const Header = () => {
 
 	const menuItems = [
 		{ text: "Home", to: "/#hero-section" },
+		{ text: "⚠️ Beta Notes", to: "/#notes-section" },
 		{ text: "Features", to: "/#features-section" },
 		{ text: "Technical Achievements", to: "/#technical-achievements-section" },
 		{ text: "Team", to: "/#team-section" },
@@ -98,7 +99,10 @@ const Header = () => {
 							},
 						}}
 					>
-						EXPENSIO
+						EXPENSIO{" "}
+						<span style={{ color: "#1E90FF", letterSpacing: "0.25px" }}>
+							(BETA)
+						</span>
 					</Typography>
 					<Box
 						sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}

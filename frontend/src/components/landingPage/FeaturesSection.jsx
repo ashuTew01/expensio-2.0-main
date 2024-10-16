@@ -24,7 +24,7 @@ const features = [
 	{
 		title: "Your Personal AI Financial Guru",
 		description:
-			"Meet your AI-powered financial assistant—an always-on, super-intelligent guide that helps you manage your money effortlessly. Add expenses, get instant advice, and gain deep insights just by chatting. It’s like having your own financial advisor 24/7!",
+			"Meet your AI-powered financial assistant—an always-on, super-intelligent guide that helps you manage your money effortlessly. Add expenses, get instant advice, and gain deep insights just by chatting. It’s like having your own financial advisor 24/7! AI features, utilize AI Tokens. New Users get certain amount of free tokens. For more AI Tokens, contact Devs.",
 		icon: <SmartToyIcon sx={{ fontSize: 50, color: "#DC3545" }} />, // Changed to SmartToyIcon
 	},
 	{

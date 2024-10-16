@@ -132,11 +132,12 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 						}}
 					>
 						<Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-							Don't want to fill a form?
+							Don't want to fill so much details?
 						</Typography>
 						<Typography variant="body2" sx={{ mb: 2 }}>
 							Try using our Smart AI. It can help you add expenses/income,
 							provide financial insights, and do much more on the go.
+							<br /> Give it a try now.
 						</Typography>
 						<Divider sx={{ mb: 2 }} />
 						<Box display="flex" flexDirection="row" gap={1}>
@@ -176,7 +177,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen, isFixed }) => {
 					</Popover>
 
 					{/* AI Tokens Button */}
-					<Tooltip title="AI Tokens" placement="bottom">
+					<Tooltip
+						title="AI Tokens (For Utilizing AI Features)"
+						placement="bottom"
+					>
 						<Box>
 							<Button
 								variant="contained"

@@ -7,12 +7,14 @@ import TechnicalAchievements from "../../components/landingPage/TechnicalAchieve
 import CallToActionSection from "../../components/landingPage/CallToActionSection";
 import TeamSection from "../../components/landingPage/TeamSection";
 import Footer from "../../components/landingPage/Footer";
+import NotesSection from "../../components/landingPage/NotesSection";
 
 const LandingPage = () => {
 	return (
 		<>
 			<Header />
 			<HeroSection />
+			<NotesSection />
 			<FeaturesSection />
 			<TechnicalAchievements />
 			<TeamSection />

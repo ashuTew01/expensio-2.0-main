@@ -43,10 +43,26 @@ const SummaryScreen = () => {
 	const [lastFetchedParams, setLastFetchedParams] = useState({});
 
 	const randomFacts = [
-		"Did you know that saving just $5 a day can accumulate to $1,825 a year?",
-		"Budgeting can help you save up to 20% more each month.",
-		"Investing early can significantly increase your wealth over time.",
-		// Add more facts as needed
+		"Only 24% of Indians are financially literate, according to a Standard & Poor's survey.",
+		"In India, around 90% of retail transactions are still cash-based, despite rapid growth in digital payments.",
+		"Investing in mutual funds for at least 5 years reduces the risk of losses and increases potential returns.",
+		"Public Provident Fund (PPF) is one of the safest long-term investment options, offering a tax-free interest rate.",
+		"Sukanya Samriddhi Yojana (SSY) is a government-backed savings scheme that offers high interest rates for the girl child.",
+		"The Indian government insures bank deposits up to ₹5 lakh per depositor through DICGC (Deposit Insurance and Credit Guarantee Corporation).",
+		"A good credit score in India ranges from 750 to 900 and helps secure better interest rates on loans.",
+		"Systematic Investment Plans (SIPs) allow you to invest in mutual funds starting from as low as ₹500 per month.",
+		"The Indian stock market, represented by indices like BSE Sensex and NSE Nifty, is one of the oldest in Asia.",
+		"Gold has historically been a hedge against inflation in India, and Gold ETFs (Exchange-Traded Funds) allow you to invest in gold digitally.",
+		"India’s fiscal year runs from April 1st to March 31st, a system that helps align tax filings with the agricultural cycle.",
+		"India has a robust real estate investment market, with REITs (Real Estate Investment Trusts) allowing people to invest in property indirectly.",
+		"The Pradhan Mantri Jan Dhan Yojana (PMJDY) is the world’s largest financial inclusion scheme, with over 480 million accounts opened.",
+		"ULIPs (Unit Linked Insurance Plans) combine both insurance and investment, offering tax benefits under Section 80C.",
+		"In India, EPF (Employee Provident Fund) contributions are compulsory for salaried employees, and the current interest rate is around 8.5%.",
+		"SEBI (Securities and Exchange Board of India) regulates the stock market and mutual funds to protect investors from fraud.",
+		"India’s tax regime allows for deductions up to ₹1.5 lakh per annum under Section 80C for investments like ELSS, PPF, and NPS.",
+		"The Reserve Bank of India (RBI) is the central bank, which manages inflation, monetary policy, and currency circulation.",
+		"Credit card interest rates in India are among the highest in the world, sometimes exceeding 40% annually, making timely payments crucial.",
+		"Rupee cost averaging, which occurs in SIP investments, helps lower the average cost per unit over time by spreading investments.",
 	];
 
 	// Lazy query for manual fetching of summary
@@ -153,7 +169,12 @@ const SummaryScreen = () => {
 				>
 					<Header
 						title="FINANCIAL SUMMARY"
-						subtitle="See your detailed relationship with money here."
+						subtitle={
+							<span>
+								See your detailed relationship with money here. <br />
+								(1 Summary Build ~ 0.7 - 1 AI Tokens){" "}
+							</span>
+						}
 						variant="h1"
 					/>
 				</Box>

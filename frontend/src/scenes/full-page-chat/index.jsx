@@ -257,8 +257,8 @@ const FullChatPage = () => {
 								Ask me anything about your finances.
 							</Typography>
 							<Typography variant="body1" sx={{ marginLeft: "75px" }}>
-								I can help you track expenses, add income, provide financial
-								insights, and do much more on the go.
+								I can help you track expenses, add income, provide personalized
+								financial insights, and do much more on the go.
 							</Typography>
 							<Typography
 								variant="h6"
@@ -269,6 +269,19 @@ const FullChatPage = () => {
 								}}
 							>
 								Let's get started!
+							</Typography>
+							<Typography
+								variant="h6"
+								sx={{
+									marginLeft: "75px",
+									marginTop: "10px",
+									// fontWeight: "bold",
+								}}
+							>
+								<br />
+								<br />
+								(1 Message ~ 0.5 AI Tokens) <br />
+								🚀 Contact Devs for more AI Tokens! 🚀
 							</Typography>
 						</Box>
 					)}
